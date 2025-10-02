@@ -37,7 +37,7 @@ fun LoginScreen(
     val context = LocalContext.current
     val authState by viewModel.authState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
-    var showSignInButton by remember { mutableStateOf(false) }
+    var showSignInButton by remember { mutableStateOf(true) }
 
     val webClientId = context.getString(R.string.default_web_client_id)
 
