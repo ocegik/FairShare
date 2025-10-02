@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.fairshare.navigation.NavHost
+import com.example.fairshare.ui.screens.MainScreen
 import com.example.fairshare.ui.theme.FairShareTheme
 import com.example.fairshare.viewmodel.AuthViewModel
 
@@ -11,11 +12,8 @@ import com.example.fairshare.viewmodel.AuthViewModel
 fun MyApp() {
     val navController = rememberNavController()
     val viewModel: AuthViewModel = viewModel()
-    
+
     FairShareTheme {
-        NavHost(
-            navController = navController,
-            authViewModel = viewModel
-        )
+        MainScreen(navController = navController, authViewModel = viewModel)
     }
 }

@@ -32,6 +32,7 @@ fun HomeScreen(
             Button(onClick = { viewModel.signOut(context) }) {
                 Text("Sign Out")
             }
+
         }
     }
 }
