@@ -20,5 +20,4 @@ fun ProfileScreen(navController: NavController) {
             style = MaterialTheme.typography.headlineMedium
         )
     }
-
 }
