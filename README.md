@@ -18,7 +18,7 @@
 
 * Android Studio
 * Kotlin
-* Minimum SDK: 24
+* Minimum SDK: 31
 
 ### Installation
 
