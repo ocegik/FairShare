@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.fairshare.ui.screens.ExpenseScreen
 import com.example.fairshare.ui.screens.HomeScreen
+import com.example.fairshare.ui.screens.ProfileScreen
 import com.example.fairshare.ui.screens.StatsScreen
 
 @Composable
@@ -81,14 +82,7 @@ fun AppNavigation(
             }
 
             composable(Screen.Home.route) {
-                HomeScreen(
-                    viewModel = authViewModel,
-                    onSignOut = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
-                )
+                HomeScreen(navController)
             }
 
             composable(Screen.Expense.route) {
@@ -97,6 +91,17 @@ fun AppNavigation(
 
             composable(Screen.Stats.route) {
                 StatsScreen(navController)
+            }
+            composable(Screen.Profile.route) {
+                ProfileScreen(
+                    viewModel = authViewModel,
+                    onSignOut = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    navController
+                )
             }
         }
     }

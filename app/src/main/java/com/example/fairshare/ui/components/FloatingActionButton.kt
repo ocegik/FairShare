@@ -9,11 +9,13 @@ import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import com.example.fairshare.navigation.Screen
 
-@Preview
+
 @Composable
-fun LargeFloatingActionButtonSample() {
-    LargeFloatingActionButton(onClick = { /* do something */ }) {
+fun LargeFloatingActionButtonSample(navController: NavHostController) {
+    LargeFloatingActionButton(onClick = { navController.navigate(Screen.Expense.route)  }) {
         Icon(
             Icons.Filled.Add,
             contentDescription = "Localized description",

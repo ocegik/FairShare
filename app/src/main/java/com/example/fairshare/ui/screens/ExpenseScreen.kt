@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import com.example.fairshare.ui.components.LargeFloatingActionButtonSample
 
 @Composable
 fun ExpenseScreen(
@@ -22,6 +21,6 @@ fun ExpenseScreen(
             text = "Expense Screen",
             style = MaterialTheme.typography.headlineMedium
         )
-        LargeFloatingActionButtonSample()
+
     }
 }

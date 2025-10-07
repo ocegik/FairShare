@@ -1,23 +1,46 @@
 package com.example.fairshare.ui.screens
 
-import androidx.navigation.NavController
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.example.fairshare.viewmodel.AuthViewModel
 
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun ProfileScreen(viewModel: AuthViewModel = viewModel(),
+                  onSignOut: () -> Unit,
+                  navController: NavHostController) {
+
+    val context = LocalContext.current
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "Profile Screen",
-            style = MaterialTheme.typography.headlineMedium
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Profile Screen",
+                style = MaterialTheme.typography.headlineMedium
+            )
+
+            Button(onClick = { viewModel.signOut(context) }) {
+                Text("Sign Out")
+            }
+
+        }
+
     }
 }
