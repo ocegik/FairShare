@@ -21,5 +21,6 @@ fun ExpenseScreen(
             text = "Expense Screen",
             style = MaterialTheme.typography.headlineMedium
         )
+
     }
 }
