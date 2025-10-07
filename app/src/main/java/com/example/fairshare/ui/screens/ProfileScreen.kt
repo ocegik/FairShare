@@ -12,8 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.fairshare.data.models.AuthState
 import com.example.fairshare.viewmodel.AuthViewModel
 
 @Composable
@@ -22,6 +24,8 @@ fun ProfileScreen(viewModel: AuthViewModel = viewModel(),
                   navController: NavHostController) {
 
     val context = LocalContext.current
+    val user = (viewModel.authState.collectAsStateWithLifecycle().value as? AuthState.Success)?.user
+
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -35,12 +39,12 @@ fun ProfileScreen(viewModel: AuthViewModel = viewModel(),
                 text = "Profile Screen",
                 style = MaterialTheme.typography.headlineMedium
             )
+            Text(text = "Name: ${user?.displayName}")
+            Text(text = "Email: ${user?.email}")
 
             Button(onClick = { viewModel.signOut(context) }) {
                 Text("Sign Out")
             }
-
         }
-
     }
 }

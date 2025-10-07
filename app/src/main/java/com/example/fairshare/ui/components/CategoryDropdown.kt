@@ -25,7 +25,8 @@ fun CategoryDropdown(
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.fillMaxWidth()
     ) {
         OutlinedTextField(
             value = selectedCategory,
@@ -33,7 +34,8 @@ fun CategoryDropdown(
             readOnly = true,
             label = { Text("Category") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
         )
 
         ExposedDropdownMenu(
