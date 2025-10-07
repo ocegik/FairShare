@@ -11,26 +11,26 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 @Composable
 fun BottomNavBar(
     navController: NavHostController,
-    destinations: List<Destination>
+    destinations: List<BottomNavDestination>
 ) {
-    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    if (destinations.any { it.route == currentDestination }) {
-        NavigationBar {
-            destinations.forEach { destination ->
-                NavigationBarItem(
-                    selected = currentDestination == destination.route,
-                    onClick = {
-                        navController.navigate(destination.route) {
-                            popUpTo(navController.graph.startDestinationId) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+    NavigationBar {
+        destinations.forEach { dest ->
+            NavigationBarItem(
+                selected = currentRoute == dest.screen.route,
+                onClick = {
+                    navController.navigate(dest.screen.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
                         }
-                    },
-                    icon = { Icon(destination.icon, contentDescription = destination.contentDescription) },
-                    label = { Text(destination.label) }
-                )
-            }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                icon = { Icon(dest.icon, contentDescription = dest.contentDescription) },
+                label = { Text(dest.label) }
+            )
         }
     }
 }

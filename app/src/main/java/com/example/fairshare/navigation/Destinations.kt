@@ -6,17 +6,15 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 
-sealed class Destination(
-    val route: String,
+data class BottomNavDestination(
+    val screen: Screen,
     val label: String,
     val icon: ImageVector,
     val contentDescription: String
-) {
-    object Home : Destination("home", "Home", Icons.Default.Home, "Home Screen")
-    object Expense : Destination("expense", "Expense", Icons.Default.Add, "Add Screen")
-    object Stats : Destination("stats", "Stats", Icons.Default.Star, "Stats Screen")
+)
 
-    companion object {
-        val entries = listOf(Home, Expense, Stats)
-    }
-}
+val bottomNavDestinations = listOf(
+    BottomNavDestination(Screen.Home, "Home", Icons.Default.Home, "Home Screen"),
+    BottomNavDestination(Screen.Expense, "Expense", Icons.Default.Add, "Expense Screen"),
+    BottomNavDestination(Screen.Stats, "Stats", Icons.Default.Star, "Stats Screen")
+)
