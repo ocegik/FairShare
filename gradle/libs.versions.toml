@@ -2,6 +2,7 @@
 accompanistNavigationAnimation = "0.36.0"
 activityKtx = "1.11.0"
 agp = "8.11.2"
+coilCompose = "2.4.0"
 credentials = "1.5.0"
 credentialsPlayServicesAuth = "1.5.0"
 credentialsPlayServicesAuthVersion = "1.6.0-beta01"
@@ -40,6 +41,7 @@ androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
