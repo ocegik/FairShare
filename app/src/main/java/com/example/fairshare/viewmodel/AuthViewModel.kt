@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.credentials.ClearCredentialStateRequest
+import com.example.fairshare.data.models.User
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 
 class AuthViewModel(
@@ -58,4 +62,32 @@ class AuthViewModel(
     fun resetState() {
         _authState.value = AuthState.Idle
     }
+
+    val userName: StateFlow<String?> = _authState
+        .map { state ->
+            when (state) {
+                is AuthState.Success -> state.user.displayName
+                else -> null
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    val userEmail: StateFlow<String?> = _authState
+        .map { state ->
+            when (state) {
+                is AuthState.Success -> state.user.email
+                else -> null
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    val userPhotoUrl: StateFlow<String?> = _authState
+        .map { state ->
+            when (state) {
+                is AuthState.Success -> state.user.photoUrl
+                else -> null
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
 }
