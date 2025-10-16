@@ -9,7 +9,6 @@ import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-
 @Composable
 fun LargeFloatingActionButton(onClick: () -> Unit) {
     LargeFloatingActionButton(onClick = onClick) {

@@ -1,13 +1,22 @@
 package com.example.fairshare.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,10 +43,13 @@ fun ExpenseEntryForm(
     val allPeople = listOf("Tarun", "Mohit", "Pramod", "Pandu", "Ankit")
     var selectedPeople by remember { mutableStateOf(allPeople) }
 
+    var showAdvanced by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -51,8 +63,34 @@ fun ExpenseEntryForm(
         TitleField(title) { title = it }
         AmountField(amount) { amount = it }
         CategoryDropdown(selectedCategory = category, onCategorySelected = { category = it })
-        ExpensePeopleSelector(people = allPeople, onSelectionChange = { selectedPeople = it })
-        NoteField(note) { note = it }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showAdvanced = !showAdvanced },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Advanced Options",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Icon(
+                imageVector = if (showAdvanced) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = null
+            )
+        }
+
+        AnimatedVisibility(visible = showAdvanced) {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                ExpensePeopleSelector(
+                    people = allPeople,
+                    onSelectionChange = { selectedPeople = it }
+                )
+                NoteField(note) { note = it }
+            }
+        }
 
         // Submit Button
         Button(
