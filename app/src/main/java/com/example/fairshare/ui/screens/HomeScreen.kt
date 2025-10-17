@@ -12,7 +12,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -28,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.fairshare.ui.components.ExpenseEntryForm
+import com.example.fairshare.navigation.Screen
 import com.example.fairshare.ui.components.LargeFloatingActionButton
 import com.example.fairshare.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
@@ -44,7 +43,7 @@ fun HomeScreen(navController: NavHostController, viewModel: AuthViewModel = view
     Scaffold(
         floatingActionButton = {
             LargeFloatingActionButton(
-                onClick = { showSheet = true }
+                onClick = { navController.navigate(Screen.Expense.route) }
             )
         }
     ) { padding ->
@@ -96,21 +95,6 @@ fun HomeScreen(navController: NavHostController, viewModel: AuthViewModel = view
                     text = "Track your daily expenses easily.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
-                )
-            }
-        }
-
-        if (showSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showSheet = false },
-                sheetState = sheetState
-            ) {
-                ExpenseEntryForm(
-                    onSubmit = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            showSheet = false
-                        }
-                    }
                 )
             }
         }
