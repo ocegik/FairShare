@@ -33,12 +33,12 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.traversalIndex
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import com.example.fairshare.navigation.Screen
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Preview
 @Composable
-fun FloatingActionButtonMenuSample() {
+fun FloatingActionButtonMenuSample(navController: NavHostController) {
     val listState = rememberLazyListState()
     val fabVisible by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
 
@@ -102,7 +102,14 @@ fun FloatingActionButtonMenuSample() {
                                     )
                             }
                         },
-                    onClick = { fabMenuExpanded = false },
+                    onClick = { fabMenuExpanded = false
+
+                        when (item.second) {
+                            "Personal Entry" -> navController.navigate(Screen.PersonalExpense.route)
+                            "Group Entry" -> navController.navigate(Screen.GroupExpense.route)
+                            else -> {}
+                        }
+                    },
                     icon = { Icon(item.first, contentDescription = null) },
                     text = { Text(text = item.second) },
                 )

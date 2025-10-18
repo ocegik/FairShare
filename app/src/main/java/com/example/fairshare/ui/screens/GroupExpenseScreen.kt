@@ -39,7 +39,7 @@ import com.example.fairshare.ui.components.TitleField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpenseScreen(
+fun GroupExpenseScreen(
     navController: NavHostController
 ) {
     var title by remember { mutableStateOf("") }
@@ -105,8 +105,7 @@ fun ExpenseScreen(
                     val expense = ExpenseData(title = title,
                         amount = amount.toDouble(),
                         category = category,
-                        note = note,
-                        sharedWith = selectedPeople)
+                        note = note)
                     navController.popBackStack()
                 }
             },

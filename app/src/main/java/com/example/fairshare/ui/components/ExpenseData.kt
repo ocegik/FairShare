@@ -5,5 +5,4 @@ data class ExpenseData(
     val amount: Double,
     val category: String,
     val note: String,
-    val sharedWith: List<String>
 )

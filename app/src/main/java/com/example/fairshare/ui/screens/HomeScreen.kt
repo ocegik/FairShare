@@ -32,7 +32,7 @@ fun HomeScreen(navController: NavHostController, viewModel: AuthViewModel = view
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButtonMenuSample()
+            FloatingActionButtonMenuSample(navController)
         }
     ) { padding ->
         Box(

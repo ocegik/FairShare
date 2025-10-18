@@ -15,7 +15,8 @@ import com.example.fairshare.ui.screens.LoginScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.fairshare.ui.screens.ExpenseScreen
+import com.example.fairshare.ui.screens.GroupExpenseScreen
+import com.example.fairshare.ui.screens.PersonalExpenseScreen
 import com.example.fairshare.ui.screens.HomeScreen
 import com.example.fairshare.ui.screens.ProfileScreen
 import com.example.fairshare.ui.screens.StatsScreen
@@ -85,8 +86,11 @@ fun AppNavigation(
                 HomeScreen(navController)
             }
 
-            composable(Screen.Expense.route) {
-                ExpenseScreen(navController)
+            composable(Screen.PersonalExpense.route) {
+                PersonalExpenseScreen(navController)
+            }
+            composable(Screen.GroupExpense.route) {
+                GroupExpenseScreen(navController)
             }
 
             composable(Screen.Stats.route) {
