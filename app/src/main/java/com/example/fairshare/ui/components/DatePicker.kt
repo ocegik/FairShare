@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import java.time.DayOfWeek
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
 import java.util.TimeZone
@@ -40,7 +41,23 @@ fun CustomDatePickerDialog(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
+            // Initialize with current date
+            val currentDateMillis = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                LocalDate.now()
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli()
+            } else {
+                Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.timeInMillis
+            }
+
             val datePickerState = rememberDatePickerState(
+                initialSelectedDateMillis = currentDateMillis,
                 selectableDates = object : SelectableDates {
                     override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -83,7 +100,8 @@ fun CustomDatePickerDialog(
                         Text("Cancel")
                     }
                     TextButton(onClick = {
-                        onDateSelected(datePickerState.selectedDateMillis)
+                        // Use selected date or fall back to current date
+                        onDateSelected(datePickerState.selectedDateMillis ?: currentDateMillis)
                         onDismiss()
                     }) {
                         Text("OK")

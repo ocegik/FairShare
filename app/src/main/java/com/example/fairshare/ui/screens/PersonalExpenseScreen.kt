@@ -1,5 +1,6 @@
 package com.example.fairshare.ui.screens
 
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,8 +35,10 @@ import com.example.fairshare.ui.components.NoteField
 import com.example.fairshare.ui.components.TitleField
 import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,14 +85,23 @@ fun PersonalExpenseScreen(
             onClick = { showDatePicker = true },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
-        ) {
+        )  {
             Text(
                 text = if (selectedDateMillis != null) {
                     val date = Instant.ofEpochMilli(selectedDateMillis!!)
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate()
                     "Selected: $date"
-                } else "Select Date"
+                } else {
+                    // Show current date when nothing is selected
+                    val currentDate = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        LocalDate.now().toString()
+                    } else {
+                        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        sdf.format(Date())
+                    }
+                    "Selected: $currentDate"
+                }
             )
         }
 
@@ -105,7 +117,12 @@ fun PersonalExpenseScreen(
                     cal.set(Calendar.HOUR_OF_DAY, selectedHour!!)
                     cal.set(Calendar.MINUTE, selectedMinute!!)
                     "Selected: ${formatter.format(cal.time)}"
-                } else "Select Time"
+                } else {
+                    // Show current time when nothing is selected
+                    val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                    val currentTime = Calendar.getInstance().time
+                    "Selected: ${formatter.format(currentTime)}"
+                }
             )
         }
 
@@ -119,10 +136,9 @@ fun PersonalExpenseScreen(
         }
         if (showTimePicker) {
             CustomTimePickerDialog(
-                state = timePickerState,
-                onTimeSelected = {
-                    selectedHour = timePickerState.hour
-                    selectedMinute = timePickerState.minute
+                onTimeSelected = { hour, minute ->
+                    selectedHour = hour
+                    selectedMinute = minute
                 },
                 onDismiss = { showTimePicker = false }
             )
