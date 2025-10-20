@@ -33,6 +33,7 @@ import com.example.fairshare.ui.components.EntryTypeSelectorRadio
 import com.example.fairshare.ui.components.ExpenseData
 import com.example.fairshare.ui.components.NoteField
 import com.example.fairshare.ui.components.TitleField
+import com.example.fairshare.ui.components.mergeDateAndTime
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -56,7 +57,6 @@ fun PersonalExpenseScreen(
     var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
     var selectedHour by remember { mutableStateOf<Int?>(null) }
     var selectedMinute by remember { mutableStateOf<Int?>(null) }
-    val timePickerState = rememberTimePickerState()
 
 
     Column(
@@ -148,12 +148,19 @@ fun PersonalExpenseScreen(
         Button(
             onClick = {
                 if (title.isNotBlank() && amount.isNotBlank() && category.isNotBlank() ) {
+                    val mergedDateTime = mergeDateAndTime(
+                        selectedDateMillis,
+                        selectedHour,
+                        selectedMinute
+                    )
+
+
                     val expense = ExpenseData(title = title,
                         entryType = entryType,
                         amount = amount.toDouble(),
                         category = category,
                         note = note,
-                        dateTime = selectedDateMillis ?: System.currentTimeMillis())
+                        dateTime = mergedDateTime)
                     navController.popBackStack()
                 }
             },
@@ -166,3 +173,6 @@ fun PersonalExpenseScreen(
         }
     }
 }
+
+
+

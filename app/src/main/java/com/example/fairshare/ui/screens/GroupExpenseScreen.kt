@@ -1,5 +1,6 @@
 package com.example.fairshare.ui.screens
 
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,11 +26,21 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.fairshare.ui.components.AmountField
 import com.example.fairshare.ui.components.CategoryDropdown
+import com.example.fairshare.ui.components.CustomDatePickerDialog
+import com.example.fairshare.ui.components.CustomTimePickerDialog
 import com.example.fairshare.ui.components.EntryTypeSelectorRadio
 import com.example.fairshare.ui.components.ExpenseData
 import com.example.fairshare.ui.components.ExpensePeopleSelector
 import com.example.fairshare.ui.components.NoteField
 import com.example.fairshare.ui.components.TitleField
+import com.example.fairshare.ui.components.mergeDateAndTime
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +55,11 @@ fun GroupExpenseScreen(
     val allPeople = listOf("Tarun", "Mohit", "Pramod", "Pandu", "Ankit")
     var selectedPeople by remember { mutableStateOf(allPeople) }
     var entryType by remember { mutableStateOf("Expense")}
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
+    var selectedHour by remember { mutableStateOf<Int?>(null) }
+    var selectedMinute by remember { mutableStateOf<Int?>(null) }
 
     Column(
         modifier = Modifier
@@ -70,15 +86,86 @@ fun GroupExpenseScreen(
         )
         NoteField(note) { note = it }
 
+        Button(
+            onClick = { showDatePicker = true },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        )  {
+            Text(
+                text = if (selectedDateMillis != null) {
+                    val date = Instant.ofEpochMilli(selectedDateMillis!!)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                    "Selected: $date"
+                } else {
+                    // Show current date when nothing is selected
+                    val currentDate = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        LocalDate.now().toString()
+                    } else {
+                        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        sdf.format(Date())
+                    }
+                    "Selected: $currentDate"
+                }
+            )
+        }
+
+        Button(
+            onClick = { showTimePicker = true },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                text = if (selectedHour != null && selectedMinute != null) {
+                    val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                    val cal = Calendar.getInstance()
+                    cal.set(Calendar.HOUR_OF_DAY, selectedHour!!)
+                    cal.set(Calendar.MINUTE, selectedMinute!!)
+                    "Selected: ${formatter.format(cal.time)}"
+                } else {
+                    // Show current time when nothing is selected
+                    val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                    val currentTime = Calendar.getInstance().time
+                    "Selected: ${formatter.format(currentTime)}"
+                }
+            )
+        }
+
+
+        // 🗓️ Show your custom dialog
+        if (showDatePicker) {
+            CustomDatePickerDialog(
+                onDateSelected = { millis -> selectedDateMillis = millis },
+                onDismiss = { showDatePicker = false }
+            )
+        }
+        if (showTimePicker) {
+            CustomTimePickerDialog(
+                onTimeSelected = { hour, minute ->
+                    selectedHour = hour
+                    selectedMinute = minute
+                },
+                onDismiss = { showTimePicker = false }
+            )
+        }
+
         // Submit Button
         Button(
             onClick = {
                 if (title.isNotBlank() && amount.isNotBlank() && category.isNotBlank() && selectedPeople.isNotEmpty()) {
+
+                    val mergedDateTime = mergeDateAndTime(
+                        selectedDateMillis,
+                        selectedHour,
+                        selectedMinute
+                    )
+
                     val expense = ExpenseData(title = title,
                         amount = amount.toDouble(),
                         category = category,
                         note = note,
-                        entryType = entryType)
+                        entryType = entryType,
+                        dateTime = mergedDateTime)
                     navController.popBackStack()
                 }
             },
