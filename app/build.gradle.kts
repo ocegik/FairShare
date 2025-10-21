@@ -7,6 +7,7 @@ plugins {
     id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -125,7 +126,6 @@ dependencies {
     implementation(libs.androidx.material3.window.size.class1)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
     implementation(libs.firebase.firestore.ktx)
-
-
-
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
 }
