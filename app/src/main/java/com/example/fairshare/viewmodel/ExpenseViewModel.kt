@@ -3,11 +3,14 @@ package com.example.fairshare.viewmodel
 import androidx.lifecycle.ViewModel
 import com.example.fairshare.data.firebase.FirestoreRepository
 import com.example.fairshare.ui.components.ExpenseData
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class ExpenseViewModel(private val repository: FirestoreRepository) : ViewModel() {
+@HiltViewModel
+class ExpenseViewModel @Inject constructor(private val repository: FirestoreRepository) : ViewModel() {
 
     private val _expenses = MutableStateFlow<List<ExpenseData>>(emptyList())
     val expenses: StateFlow<List<ExpenseData>> = _expenses.asStateFlow()

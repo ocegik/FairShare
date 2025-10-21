@@ -2,11 +2,14 @@ package com.example.fairshare.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.example.fairshare.data.firebase.FirestoreRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class GroupViewModel(
+@HiltViewModel
+class GroupViewModel @Inject constructor(
     private val repository: FirestoreRepository
 ) : ViewModel() {
 

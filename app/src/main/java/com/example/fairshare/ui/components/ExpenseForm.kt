@@ -1,6 +1,5 @@
 package com.example.fairshare.ui.components
 
-import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.fairshare.viewmodel.ExpenseViewModel
 import com.example.fairshare.viewmodel.UserViewModel
@@ -35,10 +34,11 @@ import java.util.UUID
 @Composable
 fun ExpenseFormScreen(
     navController: NavHostController,
-    isGroupExpense: Boolean = false
+    isGroupExpense: Boolean = false,
+    expenseViewModel: ExpenseViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = hiltViewModel()
 ) {
-    val expenseViewModel: ExpenseViewModel = viewModel()
-    val userViewModel: UserViewModel = viewModel()
+
     val user by userViewModel.user.collectAsState()
 
 

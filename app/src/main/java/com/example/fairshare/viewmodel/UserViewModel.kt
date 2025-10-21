@@ -3,11 +3,14 @@ package com.example.fairshare.viewmodel
 import androidx.lifecycle.ViewModel
 import com.example.fairshare.data.firebase.FirestoreRepository
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class UserViewModel(
+@HiltViewModel
+class UserViewModel @Inject constructor(
     private val repository: FirestoreRepository
 ) : ViewModel() {
 

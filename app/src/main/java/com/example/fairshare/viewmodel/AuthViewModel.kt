@@ -12,12 +12,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.credentials.ClearCredentialStateRequest
 import com.example.fairshare.data.models.User
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-
-class AuthViewModel(
+@HiltViewModel
+class AuthViewModel @Inject constructor(
     private val repository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
