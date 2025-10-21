@@ -1,5 +1,6 @@
 package com.example.fairshare.data.firebase
 
+import com.example.fairshare.ui.components.ExpenseData
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -8,6 +9,7 @@ class FirestoreRepository {
     private val db = Firebase.firestore
     private val groupsCollection = db.collection("groups")
     private val usersCollection = db.collection("users")
+    private val expenseCollection = db.collection("expenses")
 
 
     fun addGroup(groupId: String, groupData: Map<String, Any>, onResult: (Boolean) -> Unit) {
@@ -79,6 +81,56 @@ class FirestoreRepository {
     // Optional: delete user
     fun deleteUser(userId: String, onResult: (Boolean) -> Unit) {
         usersCollection.document(userId)
+            .delete()
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+    fun addExpense(expense: ExpenseData, onResult: (Boolean) -> Unit) {
+        val docId = expense.id.ifEmpty { expenseCollection.document().id }
+        expenseCollection.document(docId)
+            .set(expense)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
+    fun getExpense(expenseId: String, onResult: (ExpenseData?) -> Unit) {
+        expenseCollection.document(expenseId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                onResult(snapshot.toObject(ExpenseData::class.java))
+            }
+            .addOnFailureListener { onResult(null) }
+    }
+
+    fun getExpensesByUser(userId: String, onResult: (List<ExpenseData>) -> Unit) {
+        expenseCollection.whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { query ->
+                val list = query.documents.mapNotNull { it.toObject(ExpenseData::class.java) }
+                onResult(list)
+            }
+            .addOnFailureListener { onResult(emptyList()) }
+    }
+
+    fun getExpensesByGroup(groupId: String, onResult: (List<ExpenseData>) -> Unit) {
+        expenseCollection.whereEqualTo("groupId", groupId)
+            .get()
+            .addOnSuccessListener { query ->
+                val list = query.documents.mapNotNull { it.toObject(ExpenseData::class.java) }
+                onResult(list)
+            }
+            .addOnFailureListener { onResult(emptyList()) }
+    }
+
+    fun updateExpense(expenseId: String, updates: Map<String, Any>, onResult: (Boolean) -> Unit) {
+        expenseCollection.document(expenseId)
+            .update(updates)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
+    fun deleteExpense(expenseId: String, onResult: (Boolean) -> Unit) {
+        expenseCollection.document(expenseId)
             .delete()
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
