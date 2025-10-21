@@ -2,6 +2,7 @@ package com.example.fairshare.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.example.fairshare.data.firebase.FirestoreRepository
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,4 +41,11 @@ class UserViewModel(
             if (success) _user.value = null
         }
     }
+    fun loadCurrentUser() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid != null) {
+            getUser(uid)
+        }
+    }
+
 }

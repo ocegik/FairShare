@@ -13,8 +13,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,7 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.fairshare.viewmodel.ExpenseViewModel
+import com.example.fairshare.viewmodel.UserViewModel
+import java.util.UUID
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +37,11 @@ fun ExpenseFormScreen(
     navController: NavHostController,
     isGroupExpense: Boolean = false
 ) {
+    val expenseViewModel: ExpenseViewModel = viewModel()
+    val userViewModel: UserViewModel = viewModel()
+    val user by userViewModel.user.collectAsState()
+
+
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
@@ -129,13 +138,20 @@ fun ExpenseFormScreen(
                     )
 
                     val expense = ExpenseData(
+                        id = UUID.randomUUID().toString(),
                         title = title,
                         amount = amount.toDouble(),
                         category = category,
                         note = note,
                         entryType = entryType,
-                        dateTime = mergedDateTime
+                        dateTime = mergedDateTime,
+                        userId = user?.get("id") as? String ?: "", // replace with logged-in user id
+                        groupId = if (isGroupExpense) "groupIdHere" else null,
+                        participants = if (isGroupExpense) selectedPeople else null,
+                        paidBy = if (isGroupExpense) "currentUserIdHere" else null
                     )
+
+                    expenseViewModel.addExpense(expense)
                     navController.popBackStack()
                 }
             },
@@ -146,5 +162,6 @@ fun ExpenseFormScreen(
         ) {
             Text("Save Expense", fontSize = 16.sp)
         }
+
     }
 }
