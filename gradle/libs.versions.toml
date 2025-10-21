@@ -2,13 +2,13 @@
 accompanistNavigationAnimation = "0.36.0"
 activityKtx = "1.11.0"
 agp = "8.11.2"
-coilCompose = "2.4.0"
+coilCompose = "2.7.0"
 composeCharts = "latest_version"
 credentials = "1.5.0"
 credentialsPlayServicesAuth = "1.5.0"
-credentialsPlayServicesAuthVersion = "1.6.0-beta01"
-credentialsVersion = "1.6.0-beta01"
-firebaseBom = "34.3.0"
+credentialsPlayServicesAuthVersion = "1.6.0-beta02"
+credentialsVersion = "1.6.0-beta02"
+firebaseBom = "34.4.0"
 googleid = "1.1.1"
 kotlin = "2.2.20"
 coreKtx = "1.17.0"
@@ -20,16 +20,19 @@ kotlinxCoroutinesPlayServices = "1.10.2"
 lifecycleLivedataKtx = "2.9.4"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
-composeBom = "2025.09.01"
+composeBom = "2025.10.00"
 lifecycleViewmodelCompose = "2.9.4"
 lifecycleViewmodelKtx = "2.9.4"
+material3 = "1.4.0"
+material3AdaptiveNavigationSuite = "1.5.0-alpha06"
+material3WindowSizeClass = "1.4.0"
 navigationCompose = "2.9.5"
 adaptive = "1.1.0"
 ksp = "2.2.20-2.0.3"
 materialKolor = "3.0.1"
-navigation3 = "1.0.0-alpha10"
-room = "2.8.1"
-vico = "2.2.0"
+navigation3 = "1.0.0-alpha11"
+room = "2.8.2"
+vico = "2.2.1"
 
 [libraries]
 accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
@@ -41,6 +44,8 @@ androidx-credentials-v160beta01 = { module = "androidx.credentials:credentials",
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+androidx-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
+androidx-material3-window-size-class1 = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material3WindowSizeClass" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 compose-charts = { module = "io.github.ehsannarmani:compose-charts", version.ref = "composeCharts" }
@@ -73,6 +78,7 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
+material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 
 [plugins]

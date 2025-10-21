@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -9,13 +7,6 @@ plugins {
     id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
-}
-tasks.withType(Test::class) {
-    testLogging {
-        exceptionFormat = TestExceptionFormat.FULL
-        events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
-        showStandardStreams = true
-    }
 }
 
 android {
@@ -46,12 +37,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlin {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17) // Use the enum for target JVM version
+            jvmTarget.set(JvmTarget.JVM_1_8) // Use the enum for target JVM version
         }
     }
     ksp {
@@ -130,5 +121,9 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.accompanist.navigation.animation)
     implementation(libs.coil.compose)
+    implementation(libs.material3)
+    implementation(libs.androidx.material3.window.size.class1)
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
+
 
 }
