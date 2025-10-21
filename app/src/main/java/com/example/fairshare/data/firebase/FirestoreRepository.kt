@@ -6,7 +6,8 @@ import com.google.firebase.firestore.firestore
 class FirestoreRepository {
 
     private val db = Firebase.firestore
-    private val groupsCollection = db.collection("room").document("groups").collection("groups")
+    private val groupsCollection = db.collection("groups")
+    private val usersCollection = db.collection("users")
 
 
     fun addGroup(groupId: String, groupData: Map<String, Any>, onResult: (Boolean) -> Unit) {
@@ -48,6 +49,36 @@ class FirestoreRepository {
     // Delete group
     fun deleteGroup(groupId: String, onResult: (Boolean) -> Unit) {
         groupsCollection.document(groupId)
+            .delete()
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
+    fun saveUser(
+        userId: String,
+        userData: Map<String, Any>,
+        onResult: (Boolean) -> Unit
+    ) {
+        usersCollection.document(userId)
+            .set(userData)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
+    // Get single user
+    fun getUser(userId: String, onResult: (Map<String, Any>?) -> Unit) {
+        usersCollection.document(userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) onResult(snapshot.data)
+                else onResult(null)
+            }
+            .addOnFailureListener { onResult(null) }
+    }
+
+    // Optional: delete user
+    fun deleteUser(userId: String, onResult: (Boolean) -> Unit) {
+        usersCollection.document(userId)
             .delete()
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
