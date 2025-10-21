@@ -8,7 +8,9 @@ credentials = "1.5.0"
 credentialsPlayServicesAuth = "1.5.0"
 credentialsPlayServicesAuthVersion = "1.6.0-beta02"
 credentialsVersion = "1.6.0-beta02"
+firebaseAuthKtx = "22.2.0"
 firebaseBom = "34.4.0"
+firebaseFirestoreKtx = "24.5.0"
 googleid = "1.1.1"
 kotlin = "2.2.20"
 coreKtx = "1.17.0"
@@ -52,7 +54,9 @@ compose-charts = { module = "io.github.ehsannarmani:compose-charts", version.ref
 credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
