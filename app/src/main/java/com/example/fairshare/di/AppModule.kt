@@ -1,5 +1,6 @@
 package com.example.fairshare.di
 
+import com.example.fairshare.data.firebase.AuthRepository
 import com.example.fairshare.data.firebase.FirestoreRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -7,7 +8,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import jakarta.inject.Singleton
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -25,11 +26,4 @@ object AppModule {
     fun provideFirebaseAuth(): FirebaseAuth =
         FirebaseAuth.getInstance()
 
-    // Provide your repository
-    @Provides
-    @Singleton
-    fun provideFirestoreRepository(
-        firestore: FirebaseFirestore,
-        auth: FirebaseAuth
-    ): FirestoreRepository = FirestoreRepository(firestore, auth)
 }

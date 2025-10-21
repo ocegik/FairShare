@@ -3,7 +3,7 @@ package com.example.fairshare.data.firebase
 import com.example.fairshare.ui.components.ExpenseData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import jakarta.inject.Inject
+import javax.inject.Inject
 
 class FirestoreRepository @Inject constructor(
     private val firestore: FirebaseFirestore,

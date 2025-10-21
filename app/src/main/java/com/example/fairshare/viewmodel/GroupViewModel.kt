@@ -3,7 +3,7 @@ package com.example.fairshare.viewmodel
 import androidx.lifecycle.ViewModel
 import com.example.fairshare.data.firebase.FirestoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

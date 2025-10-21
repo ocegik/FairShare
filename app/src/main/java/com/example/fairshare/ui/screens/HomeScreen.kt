@@ -32,7 +32,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.fairshare.navigation.Screen
@@ -41,9 +40,12 @@ import com.example.fairshare.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController, viewModel: AuthViewModel = viewModel()) {
-    val userName by viewModel.userName.collectAsState()
-    val userPhotoUrl by viewModel.userPhotoUrl.collectAsState()
+fun HomeScreen(
+    navController: NavHostController,
+    authViewModel: AuthViewModel)
+{
+    val userName by authViewModel.userName.collectAsState()
+    val userPhotoUrl by authViewModel.userPhotoUrl.collectAsState()
 
     Scaffold(
         topBar = {

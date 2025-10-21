@@ -40,6 +40,8 @@ fun ExpenseFormScreen(
 ) {
 
     val user by userViewModel.user.collectAsState()
+    val currentUserId = user?.get("id") as? String ?: ""
+    val currentUserName = user?.get("name") as? String ?: ""
 
 
     var title by remember { mutableStateOf("") }
@@ -127,9 +129,9 @@ fun ExpenseFormScreen(
                     title.isNotBlank() && amount.isNotBlank() &&
                             category.isNotBlank() && selectedPeople.isNotEmpty()
                 } else {
-                    title.isNotBlank() && amount.isNotBlank() && category.isNotBlank()
+                    title.isNotBlank() && amount.isNotBlank()
                 }
-
+                                                                //&& category.isNotBlank()
                 if (isValid) {
                     val mergedDateTime = mergeDateAndTime(
                         selectedDateMillis,
@@ -145,7 +147,7 @@ fun ExpenseFormScreen(
                         note = note,
                         entryType = entryType,
                         dateTime = mergedDateTime,
-                        userId = user?.get("id") as? String ?: "", // replace with logged-in user id
+                        userId = currentUserId,
                         groupId = if (isGroupExpense) "groupIdHere" else null,
                         participants = if (isGroupExpense) selectedPeople else null,
                         paidBy = if (isGroupExpense) "currentUserIdHere" else null

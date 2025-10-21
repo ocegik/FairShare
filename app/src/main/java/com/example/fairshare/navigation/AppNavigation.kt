@@ -14,7 +14,6 @@ import com.example.fairshare.data.models.AuthState
 import com.example.fairshare.ui.screens.LoginScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.fairshare.ui.screens.GroupExpenseScreen
 import com.example.fairshare.ui.screens.GroupScreen
 import com.example.fairshare.ui.screens.HistoryScreen
@@ -25,7 +24,7 @@ import com.example.fairshare.ui.screens.StatsScreen
 
 @Composable
 fun AppNavigation(
-    navController: NavHostController = rememberNavController(),
+    navController: NavHostController,
     authViewModel: AuthViewModel
 ) {
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
@@ -75,7 +74,7 @@ fun AppNavigation(
         ) {
             composable(Screen.Login.route) {
                 LoginScreen(
-                    viewModel = authViewModel,
+                    authViewModel,
                     onLoginSuccess = {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
@@ -85,7 +84,7 @@ fun AppNavigation(
             }
 
             composable(Screen.Home.route) {
-                HomeScreen(navController)
+                HomeScreen(navController, authViewModel)
             }
 
             composable(Screen.PersonalExpense.route) {
@@ -106,7 +105,7 @@ fun AppNavigation(
             }
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    viewModel = authViewModel,
+                    authViewModel,
                     onSignOut = {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
