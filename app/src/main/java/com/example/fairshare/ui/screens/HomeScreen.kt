@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,7 +50,7 @@ fun HomeScreen(navController: NavHostController, viewModel: AuthViewModel = view
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
                 horizontalArrangement = Arrangement.End // Pushes content to the right
             ) {
                 // The profile image section, made clickable
@@ -65,7 +66,7 @@ fun HomeScreen(navController: NavHostController, viewModel: AuthViewModel = view
                             model = userPhotoUrl,
                             contentDescription = "Profile photo",
                             modifier = Modifier
-                                .size(60.dp)
+                                .size(40.dp)
                                 .clip(CircleShape)
                         )
                     } else {
@@ -139,6 +140,19 @@ fun HomeScreen(navController: NavHostController, viewModel: AuthViewModel = view
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                 )
+                Spacer(modifier = Modifier.height(24.dp))
+                Row{
+                    Text(
+                        text = "View Your Details Stats Here",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+                    )
+                    Button(onClick = {
+                        navController.navigate(Screen.Stats.route)
+                    }){
+                        Text("Stats")
+                    }
+                }
             }
         }
     }

@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun RoomScreen(navController: NavController) {
+fun GroupScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
