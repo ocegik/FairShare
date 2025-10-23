@@ -36,6 +36,8 @@
 
 * Kotlin
 * Jetpack Compose
+* Firebase
+* Hilt Dagger
 
 ---
 
