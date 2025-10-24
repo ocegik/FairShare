@@ -3,11 +3,12 @@ package com.example.fairshare.data.firebase
 import com.example.fairshare.data.models.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import javax.inject.Inject
 import kotlinx.coroutines.tasks.await
 
-class AuthRepository {
-    private val auth = FirebaseAuth.getInstance()
-
+class AuthRepository @Inject constructor(
+    private val auth: FirebaseAuth)
+{
     fun getCurrentUser(): User? {
         val firebaseUser = auth.currentUser ?: return null
         return User(
