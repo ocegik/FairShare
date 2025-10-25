@@ -1,7 +1,7 @@
 package com.example.fairshare.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.fairshare.data.firebase.FirestoreRepository
+import com.example.fairshare.repository.ExpenseRepository
 import com.example.fairshare.ui.components.ExpenseData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class ExpenseViewModel @Inject constructor(
-    private val repository: FirestoreRepository
+    private val expenseRepository: ExpenseRepository
 ) : ViewModel() {
 
     private val _expenses = MutableStateFlow<List<ExpenseData>>(emptyList())
     val expenses: StateFlow<List<ExpenseData>> = _expenses.asStateFlow()
 
     fun addExpense(expense: ExpenseData) {
-        repository.addExpense(expense) { success ->
+        expenseRepository.addExpense(expense) { success ->
             if (success) {
                 if (expense.groupId != null) loadExpensesByGroup(expense.groupId)
                 else loadExpensesByUser(expense.userId)
@@ -27,19 +27,24 @@ class ExpenseViewModel @Inject constructor(
     }
 
     fun loadExpensesByUser(userId: String) {
-        repository.getExpensesByUser(userId) { list ->
+        expenseRepository.getExpensesByUser(userId) { list ->
             _expenses.value = list
         }
     }
 
     fun loadExpensesByGroup(groupId: String) {
-        repository.getExpensesByGroup(groupId) { list ->
+        expenseRepository.getExpensesByGroup(groupId) { list ->
             _expenses.value = list
         }
     }
 
-    fun updateExpense(expenseId: String, updates: Map<String, Any>, userId: String? = null, groupId: String? = null) {
-        repository.updateExpense(expenseId, updates) { success ->
+    fun updateExpense(
+        expenseId: String,
+        updates: Map<String, Any>,
+        userId: String? = null,
+        groupId: String? = null
+    ) {
+        expenseRepository.updateExpense(expenseId, updates) { success ->
             if (!success) return@updateExpense
             // Reload depending on context
             when {
@@ -49,9 +54,8 @@ class ExpenseViewModel @Inject constructor(
         }
     }
 
-
     fun deleteExpense(expenseId: String, userId: String? = null, groupId: String? = null) {
-        repository.deleteExpense(expenseId) { success ->
+        expenseRepository.deleteExpense(expenseId) { success ->
             if (success) {
                 if (groupId != null) loadExpensesByGroup(groupId)
                 else if (userId != null) loadExpensesByUser(userId)
