@@ -1,31 +1,50 @@
 package com.example.fairshare.data.firebase
 
-import android.util.Log
-import com.example.fairshare.ui.components.ExpenseData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
 
-class FirestoreRepository @Inject constructor(
+class FirestoreService @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth
 ) {
 
-    private val groupsCollection = firestore.collection("groups")
-    private val usersCollection = firestore.collection("users")
-    private val expenseCollection = firestore.collection("expenses")
-
-
-    fun addGroup(groupId: String, groupData: Map<String, Any>, onResult: (Boolean) -> Unit) {
-        groupsCollection.document(groupId)
-            .set(groupData)
+    // Generic CRUD operations
+    fun <T : Any> addDocument(
+        collectionPath: String,
+        documentId: String,
+        data: T,
+        onResult: (Boolean) -> Unit
+    ) {
+        firestore.collection(collectionPath)
+            .document(documentId)
+            .set(data)
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
     }
 
-    // Get a single group
-    fun getGroup(groupId: String, onResult: (Map<String, Any>?) -> Unit) {
-        groupsCollection.document(groupId)
+    fun <T> getDocument(
+        collectionPath: String,
+        documentId: String,
+        clazz: Class<T>,
+        onResult: (T?) -> Unit
+    ) {
+        firestore.collection(collectionPath)
+            .document(documentId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                onResult(snapshot.toObject(clazz))
+            }
+            .addOnFailureListener { onResult(null) }
+    }
+
+    fun getDocumentAsMap(
+        collectionPath: String,
+        documentId: String,
+        onResult: (Map<String, Any>?) -> Unit
+    ) {
+        firestore.collection(collectionPath)
+            .document(documentId)
             .get()
             .addOnSuccessListener { snapshot ->
                 if (snapshot.exists()) onResult(snapshot.data)
@@ -34,9 +53,26 @@ class FirestoreRepository @Inject constructor(
             .addOnFailureListener { onResult(null) }
     }
 
-    // Get all groups
-    fun getAllGroups(onResult: (List<Map<String, Any>>) -> Unit) {
-        groupsCollection.get()
+    fun <T> getAllDocuments(
+        collectionPath: String,
+        clazz: Class<T>,
+        onResult: (List<T>) -> Unit
+    ) {
+        firestore.collection(collectionPath)
+            .get()
+            .addOnSuccessListener { query ->
+                val list = query.documents.mapNotNull { it.toObject(clazz) }
+                onResult(list)
+            }
+            .addOnFailureListener { onResult(emptyList()) }
+    }
+
+    fun getAllDocumentsAsMap(
+        collectionPath: String,
+        onResult: (List<Map<String, Any>>) -> Unit
+    ) {
+        firestore.collection(collectionPath)
+            .get()
             .addOnSuccessListener { query ->
                 val list = query.documents.mapNotNull { it.data }
                 onResult(list)
@@ -44,105 +80,49 @@ class FirestoreRepository @Inject constructor(
             .addOnFailureListener { onResult(emptyList()) }
     }
 
-    // Update group
-    fun updateGroup(groupId: String, updates: Map<String, Any>, onResult: (Boolean) -> Unit) {
-        groupsCollection.document(groupId)
-            .update(updates)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
+    fun <T> queryDocuments(
+        collectionPath: String,
+        field: String,
+        value: Any,
+        clazz: Class<T>,
+        onResult: (List<T>) -> Unit
+    ) {
+        firestore.collection(collectionPath)
+            .whereEqualTo(field, value)
+            .get()
+            .addOnSuccessListener { query ->
+                val list = query.documents.mapNotNull { it.toObject(clazz) }
+                onResult(list)
+            }
+            .addOnFailureListener { onResult(emptyList()) }
     }
 
-    // Delete group
-    fun deleteGroup(groupId: String, onResult: (Boolean) -> Unit) {
-        groupsCollection.document(groupId)
-            .delete()
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
-    }
-
-    fun saveUser(
-        userId: String,
-        userData: Map<String, Any>,
+    fun updateDocument(
+        collectionPath: String,
+        documentId: String,
+        updates: Map<String, Any>,
         onResult: (Boolean) -> Unit
     ) {
-        usersCollection.document(userId)
-            .set(userData)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
-    }
-
-    // Get single user
-    fun getUser(userId: String, onResult: (Map<String, Any>?) -> Unit) {
-        usersCollection.document(userId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                if (snapshot.exists()) onResult(snapshot.data)
-                else onResult(null)
-            }
-            .addOnFailureListener { onResult(null) }
-    }
-
-    // Optional: delete user
-    fun deleteUser(userId: String, onResult: (Boolean) -> Unit) {
-        usersCollection.document(userId)
-            .delete()
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
-    }
-    fun addExpense(expense: ExpenseData, onResult: (Boolean) -> Unit) {
-        val docId = expense.id.ifEmpty { expenseCollection.document().id }
-        Log.d("FirestoreDebug", "Attempting to save expense with ID: $docId")
-
-        expenseCollection.document(docId)
-            .set(expense)
-            .addOnSuccessListener {
-                Log.d("FirestoreDebug", "Expense successfully added: $expense")
-                onResult(true) }
-            .addOnFailureListener {e ->
-                Log.e("FirestoreDebug", "Error adding expense", e)
-                onResult(false) }
-    }
-
-    fun getExpense(expenseId: String, onResult: (ExpenseData?) -> Unit) {
-        expenseCollection.document(expenseId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                onResult(snapshot.toObject(ExpenseData::class.java))
-            }
-            .addOnFailureListener { onResult(null) }
-    }
-
-    fun getExpensesByUser(userId: String, onResult: (List<ExpenseData>) -> Unit) {
-        expenseCollection.whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { query ->
-                val list = query.documents.mapNotNull { it.toObject(ExpenseData::class.java) }
-                onResult(list)
-            }
-            .addOnFailureListener { onResult(emptyList()) }
-    }
-
-    fun getExpensesByGroup(groupId: String, onResult: (List<ExpenseData>) -> Unit) {
-        expenseCollection.whereEqualTo("groupId", groupId)
-            .get()
-            .addOnSuccessListener { query ->
-                val list = query.documents.mapNotNull { it.toObject(ExpenseData::class.java) }
-                onResult(list)
-            }
-            .addOnFailureListener { onResult(emptyList()) }
-    }
-
-    fun updateExpense(expenseId: String, updates: Map<String, Any>, onResult: (Boolean) -> Unit) {
-        expenseCollection.document(expenseId)
+        firestore.collection(collectionPath)
+            .document(documentId)
             .update(updates)
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
     }
 
-    fun deleteExpense(expenseId: String, onResult: (Boolean) -> Unit) {
-        expenseCollection.document(expenseId)
+    fun deleteDocument(
+        collectionPath: String,
+        documentId: String,
+        onResult: (Boolean) -> Unit
+    ) {
+        firestore.collection(collectionPath)
+            .document(documentId)
             .delete()
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
+    }
+
+    fun generateDocumentId(collectionPath: String): String {
+        return firestore.collection(collectionPath).document().id
     }
 }
