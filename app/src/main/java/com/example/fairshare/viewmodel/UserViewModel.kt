@@ -1,7 +1,7 @@
 package com.example.fairshare.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.fairshare.data.firebase.FirestoreRepository
+import com.example.fairshare.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -11,7 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val repository: FirestoreRepository
+    private val userRepository: UserRepository,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
 
     private val _user = MutableStateFlow<Map<String, Any>?>(null)
@@ -26,29 +27,28 @@ class UserViewModel @Inject constructor(
         )
         profilePicUrl?.let { data["profilePicUrl"] = it }
 
-        repository.saveUser(userId, data) { success ->
+        userRepository.saveUser(userId, data) { success ->
             if (success) getUser(userId)
         }
     }
 
     // Load user data
     fun getUser(userId: String) {
-        repository.getUser(userId) { data ->
+        userRepository.getUser(userId) { data ->
             _user.value = data
         }
     }
 
-
     fun deleteUser(userId: String) {
-        repository.deleteUser(userId) { success ->
+        userRepository.deleteUser(userId) { success ->
             if (success) _user.value = null
         }
     }
+
     fun loadCurrentUser() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val uid = auth.currentUser?.uid
         if (uid != null) {
             getUser(uid)
         }
     }
-
 }
