@@ -1,7 +1,5 @@
 package com.example.fairshare.di
 
-import com.example.fairshare.data.firebase.AuthRepository
-import com.example.fairshare.data.firebase.FirestoreRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module

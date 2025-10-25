@@ -1,5 +1,6 @@
 package com.example.fairshare.data.firebase
 
+import android.util.Log
 import com.example.fairshare.ui.components.ExpenseData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -90,10 +91,16 @@ class FirestoreRepository @Inject constructor(
     }
     fun addExpense(expense: ExpenseData, onResult: (Boolean) -> Unit) {
         val docId = expense.id.ifEmpty { expenseCollection.document().id }
+        Log.d("FirestoreDebug", "Attempting to save expense with ID: $docId")
+
         expenseCollection.document(docId)
             .set(expense)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
+            .addOnSuccessListener {
+                Log.d("FirestoreDebug", "Expense successfully added: $expense")
+                onResult(true) }
+            .addOnFailureListener {e ->
+                Log.e("FirestoreDebug", "Error adding expense", e)
+                onResult(false) }
     }
 
     fun getExpense(expenseId: String, onResult: (ExpenseData?) -> Unit) {

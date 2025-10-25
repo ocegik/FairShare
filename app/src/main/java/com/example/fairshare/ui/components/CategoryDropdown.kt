@@ -23,6 +23,7 @@ fun CategoryDropdown(
     val categories = listOf("Food", "Travel", "Shopping", "Bills", "Other")
     var expanded by remember { mutableStateOf(false) }
 
+
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
@@ -34,8 +35,7 @@ fun CategoryDropdown(
             readOnly = true,
             label = { Text("Category") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
 
         ExposedDropdownMenu(
