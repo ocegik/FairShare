@@ -1,5 +1,9 @@
 package com.example.fairshare.di
 
+import com.example.fairshare.data.firebase.FirestoreService
+import com.example.fairshare.repository.ExpenseRepository
+import com.example.fairshare.repository.GroupRepository
+import com.example.fairshare.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
@@ -12,16 +16,29 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    // Provide Firestore instance
     @Provides
     @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore =
-        FirebaseFirestore.getInstance()
+    fun provideFirestoreService(
+        firestore: FirebaseFirestore,
+        auth: FirebaseAuth
+    ): FirestoreService = FirestoreService(firestore, auth)
 
-    // Provide FirebaseAuth instance
     @Provides
     @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth =
-        FirebaseAuth.getInstance()
+    fun provideExpenseRepository(
+        firestoreService: FirestoreService
+    ): ExpenseRepository = ExpenseRepository(firestoreService)
+
+    @Provides
+    @Singleton
+    fun provideGroupRepository(
+        firestoreService: FirestoreService
+    ): GroupRepository = GroupRepository(firestoreService)
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        firestoreService: FirestoreService
+    ): UserRepository = UserRepository(firestoreService)
 
 }
