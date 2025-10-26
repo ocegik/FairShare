@@ -16,6 +16,19 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    // Provide Firebase Firestore instance
+    @Provides
+    @Singleton
+    fun provideFirebaseFirestore(): FirebaseFirestore =
+        FirebaseFirestore.getInstance()
+
+    // Provide Firebase Auth instance
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth =
+        FirebaseAuth.getInstance()
+
+    // Provide FirestoreService
     @Provides
     @Singleton
     fun provideFirestoreService(
@@ -23,22 +36,24 @@ object AppModule {
         auth: FirebaseAuth
     ): FirestoreService = FirestoreService(firestore, auth)
 
+    // Provide ExpenseRepository
     @Provides
     @Singleton
     fun provideExpenseRepository(
         firestoreService: FirestoreService
     ): ExpenseRepository = ExpenseRepository(firestoreService)
 
+    // Provide GroupRepository
     @Provides
     @Singleton
     fun provideGroupRepository(
         firestoreService: FirestoreService
     ): GroupRepository = GroupRepository(firestoreService)
 
+    // Provide UserRepository
     @Provides
     @Singleton
     fun provideUserRepository(
         firestoreService: FirestoreService
     ): UserRepository = UserRepository(firestoreService)
-
 }
