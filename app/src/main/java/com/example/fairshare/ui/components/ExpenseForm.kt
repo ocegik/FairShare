@@ -22,6 +22,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,6 +71,11 @@ fun ExpenseFormScreen(
     // Group-specific state
     val allPeople = listOf("Tarun", "Mohit", "Pramod", "Pandu", "Ankit")
     var selectedPeople by remember { mutableStateOf(allPeople) }
+
+    LaunchedEffect(entryType) {
+        category = ""
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -89,16 +95,7 @@ fun ExpenseFormScreen(
             AmountField(amount) { amount = it }
 
 
-            // Show CategoryDropdown first for personal, after EntryType for group
             if (!isGroupExpense) {
-                EntryTypeSelectorRadio { selected -> entryType = selected }
-                CategoryDropdown(
-                    selectedCategory = category,
-                    onCategorySelected = { category = it })
-            } else {
-                CategoryDropdown(
-                    selectedCategory = category,
-                    onCategorySelected = { category = it })
                 EntryTypeSelectorRadio { selected -> entryType = selected }
             }
 
@@ -204,6 +201,7 @@ fun ExpenseFormScreen(
             sheetState = sheetState
         ) {
             CategoryBottomSheet(
+                entryType = entryType,
                 onCategorySelected = { selectedCategory ->
                     category = selectedCategory
                     showBottomSheet = false

@@ -8,7 +8,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -31,12 +37,34 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CategoryBottomSheet(
+    entryType: String,
     onCategorySelected: (String) -> Unit
 ) {
-    val categories = listOf(
-        "Food", "Transport", "Shopping", "Entertainment",
-        "Bills", "Health", "Education", "Other"
-    )
+    val categories = if (entryType == "Income") {
+        listOf(
+            "Salary",
+            "Business",
+            "Investment",
+            "Freelance",
+            "Gift",
+            "Rental Income",
+            "Bonus",
+            "Other Income"
+        )
+    } else {
+        listOf(
+            "Food & Dining",
+            "Transport",
+            "Shopping",
+            "Entertainment",
+            "Bills & Utilities",
+            "Health & Fitness",
+            "Education",
+            "Travel",
+            "Groceries",
+            "Other Expense"
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -48,6 +76,17 @@ fun CategoryBottomSheet(
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
+        )
+        Icon(
+            imageVector = if (entryType == "Income")
+                Icons.Default.ArrowUpward
+            else
+                Icons.Default.ArrowDownward,
+            contentDescription = entryType,
+            tint = if (entryType == "Income")
+                Color(0xFF4CAF50)
+            else
+                Color(0xFFF44336)
         )
 
         categories.forEach { category ->
