@@ -1,15 +1,21 @@
 package com.example.fairshare.ui.components
 
+import android.util.Log
+
 data class ExpenseData(
-    val id: String = "",
-    val title: String,
-    val entryType: String = "",
-    val userId: String = "",
-    val amount: Double,
-    val category: String,
-    val note: String,
-    val dateTime: Long = System.currentTimeMillis(),
-    val groupId: String? = null,
-    val paidBy: String? = null,
-    val participants: List<String>? = null
-)
+    var id: String = "",
+    var title: String = "",
+    var amount: Double = 0.0,
+    var category: String = "",
+    var note: String = "",
+    var entryType: String = "",
+    var dateTime: Long = 0L,
+    var userId: String = "",
+    var groupId: String? = null,
+    var participants: List<String>? = null,
+    var paidBy: String? = null
+){
+    init {
+        Log.d("ExpenseData", "ExpenseData created: id=$id, title=$title, userId=$userId")
+    }
+}

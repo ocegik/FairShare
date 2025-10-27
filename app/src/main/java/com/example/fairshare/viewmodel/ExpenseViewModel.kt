@@ -1,5 +1,6 @@
 package com.example.fairshare.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.fairshare.repository.ExpenseRepository
 import com.example.fairshare.ui.components.ExpenseData
@@ -14,14 +15,35 @@ class ExpenseViewModel @Inject constructor(
     private val expenseRepository: ExpenseRepository
 ) : ViewModel() {
 
+    companion object {
+        private const val TAG = "ExpenseViewModel"
+    }
+
     private val _expenses = MutableStateFlow<List<ExpenseData>>(emptyList())
     val expenses: StateFlow<List<ExpenseData>> = _expenses.asStateFlow()
 
     fun addExpense(expense: ExpenseData) {
+        Log.d(TAG, "=== ADD EXPENSE CALLED ===")
+        Log.d(TAG, "Expense: $expense")
+
         expenseRepository.addExpense(expense) { success ->
+            Log.d(TAG, "Repository callback - Success: $success")
+
             if (success) {
-                if (expense.groupId != null) loadExpensesByGroup(expense.groupId)
-                else loadExpensesByUser(expense.userId)
+                val groupId = expense.groupId
+                val userId = expense.userId
+
+                Log.d(TAG, "GroupId: $groupId, UserId: $userId")
+
+                if (groupId != null) {
+                    Log.d(TAG, "Loading expenses by group: $groupId")
+                    loadExpensesByGroup(groupId)
+                } else {
+                    Log.d(TAG, "Loading expenses by user: $userId")
+                    loadExpensesByUser(userId)
+                }
+            } else {
+                Log.e(TAG, "❌ Failed to add expense")
             }
         }
     }

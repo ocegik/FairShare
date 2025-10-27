@@ -38,6 +38,7 @@ materialKolor = "3.0.1"
 navigation3 = "1.0.0-alpha11"
 room = "2.8.2"
 vico = "2.2.1"
+firebaseFirestore = "26.0.2"
 
 [libraries]
 accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
@@ -90,6 +91,7 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
