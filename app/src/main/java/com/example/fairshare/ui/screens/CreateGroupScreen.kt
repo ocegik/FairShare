@@ -1,6 +1,8 @@
 package com.example.fairshare.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.fairshare.ui.components.BackButton
 import com.example.fairshare.ui.components.PasswordField
 import com.example.fairshare.ui.components.TitleField
 
@@ -36,51 +39,68 @@ fun CreateGroupScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()), // allows scrolling if needed
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 24.dp) // more balanced padding
     ) {
-        Text(
-            text = "Create Room",
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        TitleField(title){title = it}
-        Spacer(modifier = Modifier.height(24.dp))
-
-        PasswordField(
-            value = password,
-            onValueChange = {
-                password = it
-                showError = it.length < 6
-            },
-            isError = showError,
-            errorMessage = if (showError) "Password must be at least 6 characters" else null
-        )
-
-        Button(
-            onClick = {
-                Log.d("ExpenseForm", "=== SUBMIT BUTTON CLICKED ===")
-
-                val isValid = title.isNotBlank() && password.isNotBlank()
-
-
-                if (isValid) {
-
-                    //groupViewModel
-                    navController.popBackStack()
-                }
-                else {
-                    Log.e("GroupForm", "Validation failed - group not created")
-                }
-            },
+        // Header
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(12.dp)
+                .padding(bottom = 16.dp)
         ) {
-            Text("Save Expense", fontSize = 16.sp)
+            BackButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.align(Alignment.CenterStart)
+            )
+
+            Text(
+                text = "Create Group",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+
+        // Profile info section
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            TitleField(title) { title = it }
+            Spacer(modifier = Modifier.height(24.dp))
+
+            PasswordField(
+                value = password,
+                onValueChange = {
+                    password = it
+                    showError = it.length < 6
+                },
+                isError = showError,
+                errorMessage = if (showError) "Password must be at least 6 characters" else null
+            )
+
+            Button(
+                onClick = {
+                    Log.d("ExpenseForm", "=== SUBMIT BUTTON CLICKED ===")
+
+                    val isValid = title.isNotBlank() && password.isNotBlank()
+
+
+                    if (isValid) {
+
+                        //groupViewModel
+                        navController.popBackStack()
+                    } else {
+                        Log.e("GroupForm", "Validation failed - group not created")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Save Expense", fontSize = 16.sp)
+            }
         }
     }
-
 }

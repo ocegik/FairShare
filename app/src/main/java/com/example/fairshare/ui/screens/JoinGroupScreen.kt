@@ -1,12 +1,16 @@
 package com.example.fairshare.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.fairshare.ui.components.BackButton
 import com.example.fairshare.ui.components.PasswordField
 import com.example.fairshare.ui.components.TitleField
 
@@ -36,49 +41,65 @@ fun JoinGroupScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()), // allows scrolling if needed
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 24.dp) // more balanced padding
     ) {
-        Text(
-            text = "Join Room",
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        TitleField(groupId){groupId = it}
-        Spacer(modifier = Modifier.height(24.dp))
-
-        PasswordField(
-            value = password,
-            onValueChange = {
-                password = it
-                showError = it.length < 6
-            },
-            isError = showError,
-            errorMessage = if (showError) "Password must be at least 6 characters" else null
-        )
-
-        Button(
-            onClick = {
-
-                val isValid = groupId.isNotBlank() && password.isNotBlank()
-
-
-                if (isValid) {
-                    //groupViewModel
-                    navController.popBackStack()
-                }
-                else {
-                    Log.e("GroupForm", "Validation failed - group not created")
-                }
-            },
+        // Header
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(12.dp)
+                .padding(bottom = 16.dp)
         ) {
-            Text("Save Expense", fontSize = 16.sp)
+            BackButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier.align(Alignment.CenterStart)
+            )
+
+            Text(
+                text = "Join Group",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+
+        // Profile info section
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+
+            TitleField(groupId) { groupId = it }
+            Spacer(modifier = Modifier.height(24.dp))
+
+            PasswordField(
+                value = password,
+                onValueChange = {
+                    password = it
+                    showError = it.length < 6
+                },
+                isError = showError,
+                errorMessage = if (showError) "Password must be at least 6 characters" else null
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    val isValid = groupId.isNotBlank() && password.isNotBlank()
+                    if (isValid) {
+                        navController.popBackStack()
+                    } else {
+                        Log.e("GroupForm", "Validation failed - group not created")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Save Expense", fontSize = 16.sp)
+            }
         }
     }
-
 }
