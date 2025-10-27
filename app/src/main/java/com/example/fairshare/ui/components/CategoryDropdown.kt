@@ -1,10 +1,15 @@
 package com.example.fairshare.ui.components
 
+import android.util.Log
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDropdown(
     selectedCategory: String,
@@ -23,29 +27,40 @@ fun CategoryDropdown(
     val categories = listOf("Food", "Travel", "Shopping", "Bills", "Other")
     var expanded by remember { mutableStateOf(false) }
 
+    Log.d("CategoryDropdown", "Expanded state: $expanded")
+    Log.d("CategoryDropdown", "Selected category: $selectedCategory")
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Box(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = selectedCategory,
             onValueChange = {},
             readOnly = true,
             label = { Text("Category") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.fillMaxWidth()
+            trailingIcon = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                    contentDescription = "Dropdown"
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    Log.d("CategoryDropdown", "TextField clicked!")
+                    expanded = true
+                }
         )
 
-        ExposedDropdownMenu(
+        DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
         ) {
+            Log.d("CategoryDropdown", "DropdownMenu is composing with ${categories.size} items")
             categories.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(option) },
                     onClick = {
+                        Log.d("CategoryDropdown", "Item clicked: $option")
                         onCategorySelected(option)
                         expanded = false
                     }
