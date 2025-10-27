@@ -26,19 +26,22 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.fairshare.viewmodel.AuthViewModel
 import coil.compose.AsyncImage
+import com.example.fairshare.data.models.User
 import com.example.fairshare.ui.components.BackButton
+import com.example.fairshare.viewmodel.UserViewModel
 
 
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
     onSignOut: () -> Unit,
+    userViewModel: UserViewModel,
     navController: NavHostController
 ) {
     val context = LocalContext.current
-    val userName by authViewModel.userName.collectAsState()
-    val userEmail by authViewModel.userEmail.collectAsState()
-    val userPhotoUrl by authViewModel.userPhotoUrl.collectAsState()
+    val displayName by userViewModel.displayName.collectAsState()
+    val photoUrl by userViewModel.photoUrl.collectAsState()
+    val email by userViewModel.email.collectAsState()
 
     Column(
         modifier = Modifier
@@ -70,9 +73,9 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (userPhotoUrl != null) {
+            if (photoUrl != null) {
                 AsyncImage(
-                    model = userPhotoUrl,
+                    model = photoUrl,
                     contentDescription = "Profile photo",
                     modifier = Modifier
                         .size(80.dp)
@@ -87,11 +90,11 @@ fun ProfileScreen(
             }
 
             Text(
-                text = "Hello, ${userName ?: "Guest"}!",
+                text = "Hello, ${displayName ?: "Guest"}!",
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "Email: ${userEmail ?: "N/A"}",
+                text = "Email: ${email ?: "N/A"}",
                 style = MaterialTheme.typography.bodyMedium
             )
 

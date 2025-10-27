@@ -36,16 +36,16 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.fairshare.navigation.Screen
 import com.example.fairshare.ui.components.FloatingActionButtonMenuSample
-import com.example.fairshare.viewmodel.AuthViewModel
+import com.example.fairshare.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController,
-    authViewModel: AuthViewModel)
+    userViewModel: UserViewModel)
 {
-    val userName by authViewModel.userName.collectAsState()
-    val userPhotoUrl by authViewModel.userPhotoUrl.collectAsState()
+    val displayName by userViewModel.displayName.collectAsState()
+    val photoUrl by userViewModel.photoUrl.collectAsState()
 
     Scaffold(
         topBar = {
@@ -63,9 +63,9 @@ fun HomeScreen(
                     }
                 ) {
                     // Start of the provided code block
-                    if (userPhotoUrl != null) {
+                    if (photoUrl != null) {
                         AsyncImage(
-                            model = userPhotoUrl,
+                            model = photoUrl,
                             contentDescription = "Profile photo",
                             modifier = Modifier
                                 .size(40.dp)
@@ -109,7 +109,7 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = userName ?: "Guest",
+                    text = displayName ?: "Guest",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

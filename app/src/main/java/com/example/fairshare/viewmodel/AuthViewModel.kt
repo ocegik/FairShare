@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.credentials.ClearCredentialStateRequest
-import com.example.fairshare.data.models.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -65,31 +64,17 @@ class AuthViewModel @Inject constructor(
         _authState.value = AuthState.Idle
     }
 
-    val userName: StateFlow<String?> = _authState
+    // Only expose whether user is authenticated, not their profile data
+    val isAuthenticated: StateFlow<Boolean> = _authState
+        .map { state -> state is AuthState.Success }
+        .stateIn(viewModelScope, SharingStarted.Lazily, false)
+
+    val currentUserId: StateFlow<String?> = _authState
         .map { state ->
             when (state) {
-                is AuthState.Success -> state.user.displayName
+                is AuthState.Success -> state.user.uid
                 else -> null
             }
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
-
-    val userEmail: StateFlow<String?> = _authState
-        .map { state ->
-            when (state) {
-                is AuthState.Success -> state.user.email
-                else -> null
-            }
-        }
-        .stateIn(viewModelScope, SharingStarted.Lazily, null)
-
-    val userPhotoUrl: StateFlow<String?> = _authState
-        .map { state ->
-            when (state) {
-                is AuthState.Success -> state.user.photoUrl
-                else -> null
-            }
-        }
-        .stateIn(viewModelScope, SharingStarted.Lazily, null)
-
 }

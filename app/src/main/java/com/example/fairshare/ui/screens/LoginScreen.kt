@@ -43,10 +43,12 @@ import com.example.fairshare.data.models.AuthState
 import com.example.fairshare.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 import com.example.fairshare.R
+import com.example.fairshare.viewmodel.UserViewModel
 
 @Composable
 fun LoginScreen(
     authViewModel: AuthViewModel,
+    userViewModel: UserViewModel,
     onLoginSuccess: () -> Unit
 ) {
     val context = LocalContext.current
@@ -59,6 +61,7 @@ fun LoginScreen(
     // Try silent auto-login for returning users
     LaunchedEffect(Unit) {
         coroutineScope.launch {
+
             val helper = GoogleSignInHelper(context)
             helper.signInAuthorized(webClientId)
                 .onSuccess { idToken ->
@@ -83,6 +86,8 @@ fun LoginScreen(
     LaunchedEffect(authState) {
         when (val state = authState) {
             is AuthState.Success -> {
+                userViewModel.loadCurrentUser()
+
                 Toast.makeText(
                     context,
                     "Welcome ${state.user.displayName}!",
