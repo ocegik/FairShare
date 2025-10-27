@@ -1,5 +1,9 @@
 package com.example.fairshare.navigation
 
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -23,7 +27,9 @@ import com.example.fairshare.ui.screens.HomeScreen
 import com.example.fairshare.ui.screens.JoinGroupScreen
 import com.example.fairshare.ui.screens.ProfileScreen
 import com.example.fairshare.ui.screens.StatsScreen
+import com.google.accompanist.navigation.animation.AnimatedNavHost
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController,
@@ -72,7 +78,13 @@ fun AppNavigation(
             } else {
                 Screen.Login.route
             },
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
+
+            // 👇 These work natively now (no accompanist needed)
+            enterTransition = { fadeIn(animationSpec = tween(0)) },
+            exitTransition = { fadeOut(animationSpec = tween(0)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(0)) },
+            popExitTransition = { fadeOut(animationSpec = tween(0)) }
         ) {
             composable(Screen.Login.route) {
                 LoginScreen(
@@ -92,12 +104,15 @@ fun AppNavigation(
             composable(Screen.PersonalExpense.route) {
                 PersonalExpenseScreen(navController)
             }
+
             composable(Screen.GroupExpense.route) {
                 GroupExpenseScreen(navController)
             }
+
             composable(Screen.History.route) {
                 HistoryScreen(navController)
             }
+
             composable(Screen.Group.route) {
                 GroupScreen(navController)
             }
@@ -105,6 +120,7 @@ fun AppNavigation(
             composable(Screen.Stats.route) {
                 StatsScreen(navController)
             }
+
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     authViewModel,
@@ -116,9 +132,11 @@ fun AppNavigation(
                     navController
                 )
             }
+
             composable(Screen.CreateGroup.route) {
                 CreateGroupScreen(navController)
             }
+
             composable(Screen.JoinGroup.route) {
                 JoinGroupScreen(navController)
             }
