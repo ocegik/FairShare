@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.fairshare.ui.components.ExCategoryDropdown
 
 @Composable
 fun HistoryScreen(navController: NavController) {
@@ -29,15 +28,11 @@ fun HistoryScreen(navController: NavController) {
             .verticalScroll(rememberScrollState()), // allows scrolling if needed
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var category by remember { mutableStateOf("") }
+
         Text(
-            text = "Room Screen",
+            text = "History Screen",
             style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.height(40.dp))
-        ExCategoryDropdown(
-            selectedCategory = category,
-            onCategorySelected = { category = it }
-        )
     }
 }
