@@ -14,8 +14,4 @@ data class ExpenseData(
     var groupId: String? = null,
     var participants: List<String>? = null,
     var paidBy: String? = null
-){
-    init {
-        Log.d("ExpenseData", "ExpenseData created: id=$id, title=$title, userId=$userId")
-    }
-}
+)

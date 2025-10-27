@@ -164,20 +164,12 @@ fun ExpenseFormScreen(
                                 category.isNotBlank()
                     }
 
-                    Log.d("ExpenseForm", "Validation result: $isValid")
-                    Log.d("ExpenseForm", "Title: '$title' (blank: ${title.isBlank()})")
-                    Log.d("ExpenseForm", "Amount: '$amount' (blank: ${amount.isBlank()})")
-                    Log.d("ExpenseForm", "Category: '$category'")
-                    Log.d("ExpenseForm", "Current User ID: '$currentUserId'")
-                    Log.d("ExpenseForm", "User authenticated: ${currentUserId.isNotEmpty()}")
-
                     if (isValid) {
                         val mergedDateTime = mergeDateAndTime(
                             selectedDateMillis,
                             selectedHour,
                             selectedMinute
                         )
-                        Log.d("ExpenseForm", "Merged DateTime: $mergedDateTime")
 
                         val expense = ExpenseData(
                             id = UUID.randomUUID().toString(),
@@ -192,14 +184,12 @@ fun ExpenseFormScreen(
                             participants = if (isGroupExpense) selectedPeople else null,
                             paidBy = if (isGroupExpense) "currentUserIdHere" else null
                         )
-                        Log.d("ExpenseForm", "Expense object created: $expense")
-                        Log.d("ExpenseForm", "Calling viewModel.addExpense()")
 
                         expenseViewModel.addExpense(expense)
                         navController.popBackStack()
                     }
                     else {
-                        Log.e("ExpenseForm", "❌ Validation failed - expense not created")
+                        Log.e("ExpenseForm", "Validation failed - expense not created")
                     }
                 },
                 modifier = Modifier
