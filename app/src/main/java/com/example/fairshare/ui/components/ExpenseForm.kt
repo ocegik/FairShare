@@ -2,16 +2,12 @@ package com.example.fairshare.ui.components
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
@@ -36,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.fairshare.viewmodel.AuthViewModel
 import com.example.fairshare.viewmodel.ExpenseViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 import java.util.UUID
@@ -46,13 +43,11 @@ import java.util.UUID
 fun ExpenseFormScreen(
     navController: NavHostController,
     isGroupExpense: Boolean = false,
-    expenseViewModel: ExpenseViewModel = hiltViewModel(),
-    userViewModel: UserViewModel = hiltViewModel()
+    expenseViewModel: ExpenseViewModel,
+    authViewModel: AuthViewModel
 ) {
 
-    val user by userViewModel.user.collectAsState()
-    val currentUserId = user?.get("id") as? String ?: ""
-    val currentUserName = user?.get("name") as? String ?: ""
+    val userId by authViewModel.currentUserId.collectAsState()
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -152,6 +147,11 @@ fun ExpenseFormScreen(
         Button(
             onClick = {
                 Log.d("ExpenseForm", "=== SUBMIT BUTTON CLICKED ===")
+
+                val currentUserId = userId ?: run {
+                    Log.e("ExpenseForm", "User not logged in")
+                    return@Button
+                }
 
                 val isValid = if (isGroupExpense) {
                     title.isNotBlank() && amount.isNotBlank() &&

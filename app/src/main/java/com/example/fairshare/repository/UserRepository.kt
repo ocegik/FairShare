@@ -7,7 +7,6 @@ import javax.inject.Inject
 class UserRepository @Inject constructor(
     private val firestoreService: FirestoreService
 ) {
-
     companion object {
         private const val COLLECTION_PATH = "users"
         private const val TAG = "UserRepository"

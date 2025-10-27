@@ -1,5 +1,9 @@
 package com.example.fairshare.navigation
 
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -23,18 +27,23 @@ import com.example.fairshare.ui.screens.HomeScreen
 import com.example.fairshare.ui.screens.JoinGroupScreen
 import com.example.fairshare.ui.screens.ProfileScreen
 import com.example.fairshare.ui.screens.StatsScreen
+import com.example.fairshare.viewmodel.ExpenseViewModel
+import com.example.fairshare.viewmodel.UserViewModel
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    userViewModel: UserViewModel,
+    expenseViewModel: ExpenseViewModel
 ) {
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
 
     LaunchedEffect(authState) {
         when (authState) {
             is AuthState.Success -> {
-                // User logged in - navigate to home if not already there
+
                 if (navController.currentDestination?.route == Screen.Login.route) {
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
@@ -42,7 +51,7 @@ fun AppNavigation(
                 }
             }
             is AuthState.Error -> {
-                // Auth failed - ensure on login screen
+
                 if (navController.currentDestination?.route != Screen.Login.route) {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
@@ -72,11 +81,17 @@ fun AppNavigation(
             } else {
                 Screen.Login.route
             },
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
+
+            enterTransition = { fadeIn(animationSpec = tween(0)) },
+            exitTransition = { fadeOut(animationSpec = tween(0)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(0)) },
+            popExitTransition = { fadeOut(animationSpec = tween(0)) }
         ) {
             composable(Screen.Login.route) {
                 LoginScreen(
                     authViewModel,
+                    userViewModel,
                     onLoginSuccess = {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
@@ -86,18 +101,21 @@ fun AppNavigation(
             }
 
             composable(Screen.Home.route) {
-                HomeScreen(navController, authViewModel)
+                HomeScreen(navController, userViewModel)
             }
 
             composable(Screen.PersonalExpense.route) {
-                PersonalExpenseScreen(navController)
+                PersonalExpenseScreen(navController, expenseViewModel, authViewModel)
             }
+
             composable(Screen.GroupExpense.route) {
-                GroupExpenseScreen(navController)
+                GroupExpenseScreen(navController, expenseViewModel, authViewModel)
             }
+
             composable(Screen.History.route) {
                 HistoryScreen(navController)
             }
+
             composable(Screen.Group.route) {
                 GroupScreen(navController)
             }
@@ -105,6 +123,7 @@ fun AppNavigation(
             composable(Screen.Stats.route) {
                 StatsScreen(navController)
             }
+
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     authViewModel,
@@ -113,12 +132,15 @@ fun AppNavigation(
                             popUpTo(0) { inclusive = true }
                         }
                     },
+                    userViewModel,
                     navController
                 )
             }
+
             composable(Screen.CreateGroup.route) {
                 CreateGroupScreen(navController)
             }
+
             composable(Screen.JoinGroup.route) {
                 JoinGroupScreen(navController)
             }

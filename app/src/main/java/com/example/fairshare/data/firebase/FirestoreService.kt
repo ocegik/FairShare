@@ -1,12 +1,10 @@
 package com.example.fairshare.data.firebase
 
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
 
 class FirestoreService @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val auth: FirebaseAuth
 ) {
 
     // Generic CRUD operations
