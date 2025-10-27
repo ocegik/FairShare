@@ -46,11 +46,11 @@ import com.example.fairshare.R
 
 @Composable
 fun LoginScreen(
-    AuthviewModel: AuthViewModel,
+    authViewModel: AuthViewModel,
     onLoginSuccess: () -> Unit
 ) {
     val context = LocalContext.current
-    val authState by AuthviewModel.authState.collectAsStateWithLifecycle()
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     var showSignInButton by remember { mutableStateOf(true) }
 
@@ -62,7 +62,7 @@ fun LoginScreen(
             val helper = GoogleSignInHelper(context)
             helper.signInAuthorized(webClientId)
                 .onSuccess { idToken ->
-                    AuthviewModel.signInWithGoogle(idToken)
+                    authViewModel.signInWithGoogle(idToken)
                 }
                 .onFailure { e ->
                     if (e is NoCredentialException) {
@@ -96,7 +96,7 @@ fun LoginScreen(
                     "Error: ${state.message}",
                     Toast.LENGTH_LONG
                 ).show()
-                AuthviewModel.resetState()
+                authViewModel.resetState()
             }
             else -> {}
         }
@@ -156,7 +156,7 @@ fun LoginScreen(
                                 val helper = GoogleSignInHelper(context)
                                 helper.signInFallback(webClientId)
                                     .onSuccess { idToken ->
-                                        AuthviewModel.signInWithGoogle(idToken)
+                                        authViewModel.signInWithGoogle(idToken)
                                     }
                                     .onFailure { exception ->
                                         Toast.makeText(
