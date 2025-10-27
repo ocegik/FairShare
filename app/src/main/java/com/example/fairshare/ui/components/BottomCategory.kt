@@ -3,10 +3,13 @@ package com.example.fairshare.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
@@ -96,14 +99,23 @@ fun CategoryBottomSheet(
                     .clickable { onCategorySelected(category) },
                 color = Color.Transparent
             ) {
-                Text(
-                    text = category,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp)
-                )
-            }
-            if (category != categories.last()) {
-                HorizontalDivider()
+                Row(
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Optional: Add category icons
+                    Icon(
+                        imageVector = getCategoryIcon(category),
+                        contentDescription = category,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = category,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
         }
 
