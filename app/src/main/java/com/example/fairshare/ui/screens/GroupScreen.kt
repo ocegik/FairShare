@@ -46,6 +46,20 @@ fun GroupScreen(navController: NavController) {
                 Text("Create", color = MaterialTheme.colorScheme.primary)
             }
         }
+        Spacer(Modifier.width(20.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Join a group?", style = MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.width(8.dp))
+            TextButton(onClick = { navController.navigate(Screen.JoinGroup.route) }) {
+                Text("Create", color = MaterialTheme.colorScheme.primary)
+            }
+        }
 
     }
 

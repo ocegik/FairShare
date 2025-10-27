@@ -20,6 +20,7 @@ import com.example.fairshare.ui.screens.GroupScreen
 import com.example.fairshare.ui.screens.HistoryScreen
 import com.example.fairshare.ui.screens.PersonalExpenseScreen
 import com.example.fairshare.ui.screens.HomeScreen
+import com.example.fairshare.ui.screens.JoinGroupScreen
 import com.example.fairshare.ui.screens.ProfileScreen
 import com.example.fairshare.ui.screens.StatsScreen
 
@@ -117,6 +118,9 @@ fun AppNavigation(
             }
             composable(Screen.CreateGroup.route) {
                 CreateGroupScreen(navController)
+            }
+            composable(Screen.JoinGroup.route) {
+                JoinGroupScreen(navController)
             }
         }
     }
