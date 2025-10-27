@@ -1,5 +1,6 @@
 package com.example.fairshare.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fairshare.repository.UserRepository
@@ -25,6 +26,11 @@ class UserViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    init {
+        Log.d("UserViewModel", "=== UserViewModel CREATED ===")
+        Log.d("UserViewModel", "Firebase currentUser: ${auth.currentUser?.uid}")
+    }
+
     // Derived state for UI
     val displayName: StateFlow<String?> = _userProfile
         .map { it?.get("displayName") as? String }
@@ -41,12 +47,31 @@ class UserViewModel @Inject constructor(
     // Load current user's profile from Firestore
     fun loadCurrentUser() {
         val uid = auth.currentUser?.uid
+        Log.d("UserViewModel", "=== loadCurrentUser() called ===")
+        Log.d("UserViewModel", "Current UID: $uid")
+
         if (uid != null) {
             _isLoading.value = true
+            Log.d("UserViewModel", "Fetching user from Firestore: $uid")
+
             userRepository.getUser(uid) { data ->
+                Log.d("UserViewModel", "Firestore callback received")
+                Log.d("UserViewModel", "Data from Firestore: $data")
+
+                if (data != null) {
+                    Log.d("UserViewModel", "✅ User data loaded successfully")
+                    Log.d("UserViewModel", "  - displayName: ${data["displayName"]}")
+                    Log.d("UserViewModel", "  - email: ${data["email"]}")
+                    Log.d("UserViewModel", "  - photoUrl: ${data["photoUrl"]}")
+                } else {
+                    Log.e("UserViewModel", "❌ User data is NULL - User not found in Firestore!")
+                }
+
                 _userProfile.value = data
                 _isLoading.value = false
             }
+        } else {
+            Log.e("UserViewModel", "❌ Cannot load user - UID is NULL!")
         }
     }
 

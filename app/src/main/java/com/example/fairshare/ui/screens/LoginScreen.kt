@@ -1,5 +1,6 @@
 package com.example.fairshare.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +45,7 @@ import com.example.fairshare.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 import com.example.fairshare.R
 import com.example.fairshare.viewmodel.UserViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun LoginScreen(
@@ -86,6 +88,10 @@ fun LoginScreen(
     LaunchedEffect(authState) {
         when (val state = authState) {
             is AuthState.Success -> {
+                Log.d("LoginScreen", "=== Auth SUCCESS ===")
+                Log.d("LoginScreen", "User: ${state.user.uid}")
+                delay(500)
+                Log.d("LoginScreen", "Calling loadCurrentUser()...")
                 userViewModel.loadCurrentUser()
 
                 Toast.makeText(

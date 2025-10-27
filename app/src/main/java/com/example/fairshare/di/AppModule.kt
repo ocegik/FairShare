@@ -1,6 +1,8 @@
 package com.example.fairshare.di
 
+import com.example.fairshare.data.firebase.FirebaseAuthService
 import com.example.fairshare.data.firebase.FirestoreService
+import com.example.fairshare.repository.AuthRepository
 import com.example.fairshare.repository.ExpenseRepository
 import com.example.fairshare.repository.GroupRepository
 import com.example.fairshare.repository.UserRepository
@@ -32,9 +34,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFirestoreService(
-        firestore: FirebaseFirestore,
-        auth: FirebaseAuth
-    ): FirestoreService = FirestoreService(firestore, auth)
+        firestore: FirebaseFirestore
+    ): FirestoreService = FirestoreService(firestore)
 
     // Provide ExpenseRepository
     @Provides
@@ -56,4 +57,11 @@ object AppModule {
     fun provideUserRepository(
         firestoreService: FirestoreService
     ): UserRepository = UserRepository(firestoreService)
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        firebaseAuthService: FirebaseAuthService,
+        userRepository: UserRepository
+    ): AuthRepository = AuthRepository(firebaseAuthService, userRepository)
 }

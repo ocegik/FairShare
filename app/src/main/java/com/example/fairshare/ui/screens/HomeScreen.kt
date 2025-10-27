@@ -1,5 +1,6 @@
 package com.example.fairshare.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -46,6 +48,16 @@ fun HomeScreen(
 {
     val displayName by userViewModel.displayName.collectAsState()
     val photoUrl by userViewModel.photoUrl.collectAsState()
+
+    LaunchedEffect(Unit) {
+        Log.d("HomeScreen", "=== HomeScreen mounted ===")
+        userViewModel.loadCurrentUser()
+    }
+
+    // Debug what we're displaying
+    LaunchedEffect(displayName) {
+        Log.d("HomeScreen", "Displaying - Name: $displayName")
+    }
 
     Scaffold(
         topBar = {

@@ -1,16 +1,17 @@
 package com.example.fairshare.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fairshare.data.firebase.AuthRepository
 import com.example.fairshare.data.models.AuthState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.credentials.ClearCredentialStateRequest
+import com.example.fairshare.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,13 +27,17 @@ class AuthViewModel @Inject constructor(
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     init {
+        Log.d("AuthViewModel", "=== AuthViewModel CREATED ===")
         checkCurrentUser()
     }
 
     private fun checkCurrentUser() {
-        repository.getCurrentUser()?.let { user ->
-            _authState.value = AuthState.Success(user)
-        }
+        val user = repository.getCurrentUser()
+        Log.d("AuthViewModel", "checkCurrentUser: user = $user")
+        user?.let {
+            Log.d("AuthViewModel", "User found - uid: ${it.uid}, name: ${it.displayName}")
+            _authState.value = AuthState.Success(it)
+        } ?: Log.d("AuthViewModel", "No current user")
     }
 
     fun signInWithGoogle(idToken: String) {
@@ -41,9 +46,11 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             repository.signInWithGoogle(idToken)
                 .onSuccess { user ->
+                    Log.d("AuthViewModel", "✅ Sign-in SUCCESS - uid: ${user.uid}, name: ${user.displayName}")
                     _authState.value = AuthState.Success(user)
                 }
                 .onFailure { exception ->
+                    Log.e("AuthViewModel", "❌ Sign-in FAILED: ${exception.message}")
                     _authState.value = AuthState.Error(
                         exception.message ?: "Sign in failed"
                     )
@@ -57,6 +64,7 @@ class AuthViewModel @Inject constructor(
             val cm = CredentialManager.create(context)
             cm.clearCredentialState(ClearCredentialStateRequest())
             _authState.value = AuthState.Idle
+            Log.d("AuthViewModel", "User signed out")
         }
     }
 
@@ -66,14 +74,24 @@ class AuthViewModel @Inject constructor(
 
     // Only expose whether user is authenticated, not their profile data
     val isAuthenticated: StateFlow<Boolean> = _authState
-        .map { state -> state is AuthState.Success }
+        .map { state ->
+            val isAuth = state is AuthState.Success
+            Log.d("AuthViewModel", "isAuthenticated: $isAuth")
+            isAuth
+        }
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     val currentUserId: StateFlow<String?> = _authState
         .map { state ->
             when (state) {
-                is AuthState.Success -> state.user.uid
-                else -> null
+                is AuthState.Success -> {
+                    Log.d("AuthViewModel", "currentUserId: ${state.user.uid}")
+                    state.user.uid
+                }
+                else -> {
+                    Log.d("AuthViewModel", "currentUserId: null (state: ${state::class.simpleName})")
+                    null
+                }
             }
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
