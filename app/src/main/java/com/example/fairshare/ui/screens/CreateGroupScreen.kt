@@ -1,7 +1,7 @@
 package com.example.fairshare.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.navigation.NavController
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,23 +10,32 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.fairshare.ui.components.BackButton
-import com.example.fairshare.ui.graphs.DailyExpense
-import com.example.fairshare.ui.graphs.MonthlyComparisonChart
-import com.example.fairshare.ui.graphs.MonthlyExpenseData
-import com.example.fairshare.ui.graphs.PieChart
-import com.example.fairshare.ui.graphs.PieChartData
+import com.example.fairshare.ui.components.PasswordField
+import com.example.fairshare.ui.components.TitleField
 
 @Composable
-fun StatsScreen(navController: NavController) {
+fun CreateGroupScreen(navController: NavController) {
+
+    var title by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var showError by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -45,7 +54,7 @@ fun StatsScreen(navController: NavController) {
             )
 
             Text(
-                text = "Stats",
+                text = "Create Group",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -57,32 +66,41 @@ fun StatsScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
+            TitleField(title) { title = it }
             Spacer(modifier = Modifier.height(24.dp))
 
-            val data = listOf(
-                PieChartData(30f, Color(0xFF2196F3)),
-                PieChartData(20f, Color(0xFF4CAF50)),
-                PieChartData(50f, Color(0xFF4CAF50))
+            PasswordField(
+                value = password,
+                onValueChange = {
+                    password = it
+                    showError = it.length < 6
+                },
+                isError = showError,
+                errorMessage = if (showError) "Password must be at least 6 characters" else null
             )
 
-            PieChart(data = data)
+            Button(
+                onClick = {
+                    Log.d("ExpenseForm", "=== SUBMIT BUTTON CLICKED ===")
 
-            Spacer(modifier = Modifier.height(32.dp))
+                    val isValid = title.isNotBlank() && password.isNotBlank()
 
-            val july = (1..30).map { DailyExpense(it, (50..300).random().toFloat()) }
-            val august = (1..30).map { DailyExpense(it, (80..350).random().toFloat()) }
-            val september = (1..30).map { DailyExpense(it, (100..400).random().toFloat()) }
 
-            val months = listOf(
-                MonthlyExpenseData("July", Color(0xFF2196F3), july),
-                MonthlyExpenseData("August", Color(0xFF4CAF50), august),
-                MonthlyExpenseData("September", Color(0xFFFF9800), september)
-            )
+                    if (isValid) {
 
-            MonthlyComparisonChart(monthsData = months)
-
+                        //groupViewModel
+                        navController.popBackStack()
+                    } else {
+                        Log.e("GroupForm", "Validation failed - group not created")
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Save Expense", fontSize = 16.sp)
+            }
         }
     }
-
 }

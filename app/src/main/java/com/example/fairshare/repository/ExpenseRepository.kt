@@ -1,6 +1,5 @@
 package com.example.fairshare.repository
 
-import android.util.Log
 import com.example.fairshare.data.firebase.FirestoreService
 import com.example.fairshare.ui.components.ExpenseData
 import javax.inject.Inject
@@ -11,15 +10,12 @@ class ExpenseRepository @Inject constructor(
 
     companion object {
         private const val COLLECTION_PATH = "expenses"
-        private const val TAG = "ExpenseRepository"
     }
 
     fun addExpense(expense: ExpenseData, onResult: (Boolean) -> Unit) {
         val docId = expense.id.ifEmpty {
             firestoreService.generateDocumentId(COLLECTION_PATH)
         }
-
-        Log.d(TAG, "Attempting to save expense with ID: $docId")
 
         val expenseToSave = if (expense.id.isEmpty()) {
             expense.copy(id = docId)
@@ -32,11 +28,6 @@ class ExpenseRepository @Inject constructor(
             documentId = docId,
             data = expenseToSave,
             onResult = { success ->
-                if (success) {
-                    Log.d(TAG, "Expense successfully added: $expenseToSave")
-                } else {
-                    Log.e(TAG, "Error adding expense")
-                }
                 onResult(success)
             }
         )

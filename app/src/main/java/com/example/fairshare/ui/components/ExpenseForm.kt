@@ -1,5 +1,6 @@
 package com.example.fairshare.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,125 +77,128 @@ fun ExpenseFormScreen(
         category = ""
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Add Expense",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        TitleField(title) { title = it }
+        AmountField(amount) { amount = it }
+
+
+        if (!isGroupExpense) {
+            EntryTypeSelectorRadio { selected -> entryType = selected }
+        }
+
+        OutlinedButton(
+            onClick = { showBottomSheet = true },
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "Add Expense",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                text = category.ifBlank { "Select Category" },
+                modifier = Modifier.weight(1f)
             )
-
-            TitleField(title) { title = it }
-            AmountField(amount) { amount = it }
-
-
-            if (!isGroupExpense) {
-                EntryTypeSelectorRadio { selected -> entryType = selected }
-            }
-
-            OutlinedButton(
-                onClick = { showBottomSheet = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = category.ifBlank { "Select Category" },
-                    modifier = Modifier.weight(1f)
-                )
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Select category"
-                )
-            }
-
-            // Group-specific people selector
-            if (isGroupExpense) {
-                ExpensePeopleSelector(
-                    people = allPeople,
-                    onSelectionChange = { selectedPeople = it }
-                )
-            }
-
-            NoteField(note) { note = it }
-
-            // Date Picker Button
-            DatePickerButton(selectedDateMillis)
-            { showDatePicker = true }
-
-            // Time Picker Button
-            TimePickerButton(selectedHour, selectedMinute)
-            { showTimePicker = true }
-
-            // Date Picker Dialog
-            if (showDatePicker) {
-                CustomDatePickerDialog(
-                    onDateSelected = { millis -> selectedDateMillis = millis },
-                    onDismiss = { showDatePicker = false }
-                )
-            }
-
-            // Time Picker Dialog
-            if (showTimePicker) {
-                CustomTimePickerDialog(
-                    onTimeSelected = { hour, minute ->
-                        selectedHour = hour
-                        selectedMinute = minute
-                    },
-                    onDismiss = { showTimePicker = false }
-                )
-            }
-
-            // Submit Button
-            Button(
-                onClick = {
-                    val isValid = if (isGroupExpense) {
-                        title.isNotBlank() && amount.isNotBlank() &&
-                                category.isNotBlank() && selectedPeople.isNotEmpty()
-                    } else {
-                        title.isNotBlank() && amount.isNotBlank()
-                    }
-                    //&& category.isNotBlank()
-                    if (isValid) {
-                        val mergedDateTime = mergeDateAndTime(
-                            selectedDateMillis,
-                            selectedHour,
-                            selectedMinute
-                        )
-
-                        val expense = ExpenseData(
-                            id = UUID.randomUUID().toString(),
-                            title = title,
-                            amount = amount.toDouble(),
-                            category = category,
-                            note = note,
-                            entryType = entryType,
-                            dateTime = mergedDateTime,
-                            userId = currentUserId,
-                            groupId = if (isGroupExpense) "groupIdHere" else null,
-                            participants = if (isGroupExpense) selectedPeople else null,
-                            paidBy = if (isGroupExpense) "currentUserIdHere" else null
-                        )
-
-                        expenseViewModel.addExpense(expense)
-                        navController.popBackStack()
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Save Expense", fontSize = 16.sp)
-            }
-            Spacer(modifier = Modifier.height(16.dp))
+            Icon(
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = "Select category"
+            )
         }
+
+        // Group-specific people selector
+        if (isGroupExpense) {
+            ExpensePeopleSelector(
+                people = allPeople,
+                onSelectionChange = { selectedPeople = it }
+            )
+        }
+
+        NoteField(note) { note = it }
+
+        // Date Picker Button
+        DatePickerButton(selectedDateMillis)
+        { showDatePicker = true }
+
+        // Time Picker Button
+        TimePickerButton(selectedHour, selectedMinute)
+        { showTimePicker = true }
+
+        // Date Picker Dialog
+        if (showDatePicker) {
+            CustomDatePickerDialog(
+                onDateSelected = { millis -> selectedDateMillis = millis },
+                onDismiss = { showDatePicker = false }
+            )
+        }
+
+        // Time Picker Dialog
+        if (showTimePicker) {
+            CustomTimePickerDialog(
+                onTimeSelected = { hour, minute ->
+                    selectedHour = hour
+                    selectedMinute = minute
+                },
+                onDismiss = { showTimePicker = false }
+            )
+        }
+
+        // Submit Button
+        Button(
+            onClick = {
+                Log.d("ExpenseForm", "=== SUBMIT BUTTON CLICKED ===")
+
+                val isValid = if (isGroupExpense) {
+                    title.isNotBlank() && amount.isNotBlank() &&
+                            category.isNotBlank() && selectedPeople.isNotEmpty()
+                } else {
+                    title.isNotBlank() && amount.isNotBlank() &&
+                            category.isNotBlank()
+                }
+
+                if (isValid) {
+                    val mergedDateTime = mergeDateAndTime(
+                        selectedDateMillis,
+                        selectedHour,
+                        selectedMinute
+                    )
+
+                    val expense = ExpenseData(
+                        id = UUID.randomUUID().toString(),
+                        title = title,
+                        amount = amount.toDouble(),
+                        category = category,
+                        note = note,
+                        entryType = entryType,
+                        dateTime = mergedDateTime,
+                        userId = currentUserId,
+                        groupId = if (isGroupExpense) "groupIdHere" else null,
+                        participants = if (isGroupExpense) selectedPeople else null,
+                        paidBy = if (isGroupExpense) "currentUserIdHere" else null
+                    )
+
+                    expenseViewModel.addExpense(expense)
+                    navController.popBackStack()
+                }
+                else {
+                    Log.e("ExpenseForm", "Validation failed - expense not created")
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("Save Expense", fontSize = 16.sp)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
     }
+
     if (showBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = { showBottomSheet = false },

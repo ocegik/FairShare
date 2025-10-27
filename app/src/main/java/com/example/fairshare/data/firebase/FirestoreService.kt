@@ -16,11 +16,14 @@ class FirestoreService @Inject constructor(
         data: T,
         onResult: (Boolean) -> Unit
     ) {
+
         firestore.collection(collectionPath)
             .document(documentId)
             .set(data)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
+            .addOnSuccessListener {
+                onResult(true) }
+            .addOnFailureListener {
+                onResult(false) }
     }
 
     fun <T> getDocument(
