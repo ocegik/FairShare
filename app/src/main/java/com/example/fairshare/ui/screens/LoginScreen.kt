@@ -38,7 +38,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fairshare.core.GoogleSignInHelper
 import com.example.fairshare.data.models.AuthState
 import com.example.fairshare.viewmodel.AuthViewModel
@@ -47,11 +46,11 @@ import com.example.fairshare.R
 
 @Composable
 fun LoginScreen(
-    viewModel: AuthViewModel = viewModel(),
+    authViewModel: AuthViewModel,
     onLoginSuccess: () -> Unit
 ) {
     val context = LocalContext.current
-    val authState by viewModel.authState.collectAsStateWithLifecycle()
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     var showSignInButton by remember { mutableStateOf(true) }
 
@@ -63,7 +62,7 @@ fun LoginScreen(
             val helper = GoogleSignInHelper(context)
             helper.signInAuthorized(webClientId)
                 .onSuccess { idToken ->
-                    viewModel.signInWithGoogle(idToken)
+                    authViewModel.signInWithGoogle(idToken)
                 }
                 .onFailure { e ->
                     if (e is NoCredentialException) {
@@ -97,7 +96,7 @@ fun LoginScreen(
                     "Error: ${state.message}",
                     Toast.LENGTH_LONG
                 ).show()
-                viewModel.resetState()
+                authViewModel.resetState()
             }
             else -> {}
         }
@@ -157,7 +156,7 @@ fun LoginScreen(
                                 val helper = GoogleSignInHelper(context)
                                 helper.signInFallback(webClientId)
                                     .onSuccess { idToken ->
-                                        viewModel.signInWithGoogle(idToken)
+                                        authViewModel.signInWithGoogle(idToken)
                                     }
                                     .onFailure { exception ->
                                         Toast.makeText(

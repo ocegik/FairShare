@@ -19,21 +19,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.fairshare.viewmodel.AuthViewModel
 import coil.compose.AsyncImage
 
 
 @Composable
-fun ProfileScreen(viewModel: AuthViewModel = viewModel(),
+fun ProfileScreen(authViewModel: AuthViewModel,
                   onSignOut: () -> Unit,
                   navController: NavHostController) {
 
     val context = LocalContext.current
-    val userName by viewModel.userName.collectAsState()
-    val userEmail by viewModel.userEmail.collectAsState()
-    val userPhotoUrl by viewModel.userPhotoUrl.collectAsState()
+    val userName by authViewModel.userName.collectAsState()
+    val userEmail by authViewModel.userEmail.collectAsState()
+    val userPhotoUrl by authViewModel.userPhotoUrl.collectAsState()
 
 
     Box(
@@ -66,7 +65,7 @@ fun ProfileScreen(viewModel: AuthViewModel = viewModel(),
             Text(text = "Hello, ${userName ?: "Guest"}!")
             Text(text = "Email: ${userEmail ?: "N/A"}")
 
-            Button(onClick = { viewModel.signOut(context) }) {
+            Button(onClick = { authViewModel.signOut(context) }) {
                 Text("Sign Out")
             }
         }
