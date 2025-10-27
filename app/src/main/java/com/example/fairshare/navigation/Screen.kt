@@ -9,4 +9,5 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
     object History : Screen("history")
     object Group : Screen("group")
+    object CreateGroup : Screen("createGroup")
 }

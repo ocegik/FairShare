@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.fairshare.navigation.Screen
 
 @Composable
 fun GroupScreen(navController: NavController) {
@@ -41,7 +42,7 @@ fun GroupScreen(navController: NavController) {
         ) {
             Text("Need a new group?", style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.width(8.dp))
-            TextButton(onClick = { /* navigate to CreateRoomScreen() */ }) {
+            TextButton(onClick = { navController.navigate(Screen.CreateGroup.route) }) {
                 Text("Create", color = MaterialTheme.colorScheme.primary)
             }
         }

@@ -14,6 +14,7 @@ import com.example.fairshare.data.models.AuthState
 import com.example.fairshare.ui.screens.LoginScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.fairshare.ui.screens.CreateGroupScreen
 import com.example.fairshare.ui.screens.GroupExpenseScreen
 import com.example.fairshare.ui.screens.GroupScreen
 import com.example.fairshare.ui.screens.HistoryScreen
@@ -113,6 +114,9 @@ fun AppNavigation(
                     },
                     navController
                 )
+            }
+            composable(Screen.CreateGroup.route) {
+                CreateGroupScreen(navController)
             }
         }
     }
