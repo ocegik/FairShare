@@ -3,7 +3,7 @@ package com.example.fairshare.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.fairshare.repository.ExpenseRepository
-import com.example.fairshare.ui.components.ExpenseData
+import com.example.fairshare.data.models.ExpenseData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

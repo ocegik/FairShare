@@ -1,7 +1,7 @@
 package com.example.fairshare.repository
 
 import com.example.fairshare.data.firebase.FirestoreService
-import com.example.fairshare.ui.components.ExpenseData
+import com.example.fairshare.data.models.ExpenseData
 import javax.inject.Inject
 
 class ExpenseRepository @Inject constructor(
