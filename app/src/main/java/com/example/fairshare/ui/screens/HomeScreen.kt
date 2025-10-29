@@ -1,7 +1,5 @@
 package com.example.fairshare.ui.screens
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
@@ -49,15 +47,6 @@ fun HomeScreen(
     val displayName by userViewModel.displayName.collectAsState()
     val photoUrl by userViewModel.photoUrl.collectAsState()
 
-    LaunchedEffect(Unit) {
-        Log.d("HomeScreen", "=== HomeScreen mounted ===")
-        userViewModel.loadCurrentUser()
-    }
-
-    // Debug what we're displaying
-    LaunchedEffect(displayName) {
-        Log.d("HomeScreen", "Displaying - Name: $displayName")
-    }
 
     Scaffold(
         topBar = {
@@ -65,38 +54,30 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.End // Pushes content to the right
+                horizontalArrangement = Arrangement.End
             ) {
-                // The profile image section, made clickable
                 Box(
-                    modifier = Modifier.clickable {
-                        // Navigate to the profile screen when clicked
-                        navController.navigate(Screen.Profile.route) // Replace "profile_route" with your actual profile screen route
-                    }
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            navController.navigate(Screen.Profile.route)
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    // Start of the provided code block
-                    if (photoUrl != null) {
+                    if (photoUrl.isNotEmpty()) {
                         AsyncImage(
                             model = photoUrl,
                             contentDescription = "Profile photo",
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
+                            modifier = Modifier.matchParentSize() // fills the Box
                         )
                     } else {
-                        Box(
-                            modifier = Modifier
-                                .size(60.dp)
-                                .background(Color.Gray, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Default Profile Icon",
-                                tint = Color.White,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Default Profile Icon",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             }
@@ -120,13 +101,13 @@ fun HomeScreen(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
+
                 Text(
-                    text = displayName ?: "Guest",
+                    text = displayName,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
-
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Simple summary card
