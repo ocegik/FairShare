@@ -9,19 +9,16 @@ class FirestoreService @Inject constructor(
 
     // Generic CRUD operations
     fun <T : Any> addDocument(
-        collectionPath: String,
+        collectionPath: String,  // Can be "users" OR "users/$uid/expenses"
         documentId: String,
         data: T,
         onResult: (Boolean) -> Unit
     ) {
-
         firestore.collection(collectionPath)
             .document(documentId)
             .set(data)
-            .addOnSuccessListener {
-                onResult(true) }
-            .addOnFailureListener {
-                onResult(false) }
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
     }
 
     fun <T> getDocument(
@@ -39,19 +36,29 @@ class FirestoreService @Inject constructor(
             .addOnFailureListener { onResult(null) }
     }
 
-    fun getDocumentAsMap(
+    fun updateDocument(
         collectionPath: String,
         documentId: String,
-        onResult: (Map<String, Any>?) -> Unit
+        updates: Map<String, Any>,
+        onResult: (Boolean) -> Unit
     ) {
         firestore.collection(collectionPath)
             .document(documentId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                if (snapshot.exists()) onResult(snapshot.data)
-                else onResult(null)
-            }
-            .addOnFailureListener { onResult(null) }
+            .update(updates)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
+    fun deleteDocument(
+        collectionPath: String,
+        documentId: String,
+        onResult: (Boolean) -> Unit
+    ) {
+        firestore.collection(collectionPath)
+            .document(documentId)
+            .delete()
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
     }
 
     fun <T> getAllDocuments(
@@ -66,6 +73,21 @@ class FirestoreService @Inject constructor(
                 onResult(list)
             }
             .addOnFailureListener { onResult(emptyList()) }
+    }
+
+    fun getDocumentAsMap(
+        collectionPath: String,
+        documentId: String,
+        onResult: (Map<String, Any>?) -> Unit
+    ) {
+        firestore.collection(collectionPath)
+            .document(documentId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) onResult(snapshot.data)
+                else onResult(null)
+            }
+            .addOnFailureListener { onResult(null) }
     }
 
     fun getAllDocumentsAsMap(
@@ -96,31 +118,6 @@ class FirestoreService @Inject constructor(
                 onResult(list)
             }
             .addOnFailureListener { onResult(emptyList()) }
-    }
-
-    fun updateDocument(
-        collectionPath: String,
-        documentId: String,
-        updates: Map<String, Any>,
-        onResult: (Boolean) -> Unit
-    ) {
-        firestore.collection(collectionPath)
-            .document(documentId)
-            .update(updates)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
-    }
-
-    fun deleteDocument(
-        collectionPath: String,
-        documentId: String,
-        onResult: (Boolean) -> Unit
-    ) {
-        firestore.collection(collectionPath)
-            .document(documentId)
-            .delete()
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
     }
 
     fun generateDocumentId(collectionPath: String): String {
