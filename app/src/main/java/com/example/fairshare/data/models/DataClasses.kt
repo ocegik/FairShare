@@ -32,3 +32,10 @@ data class DebtData(
     var createdAt: Long = System.currentTimeMillis(),
     var settledAt: Long? = null
 )
+
+data class UserStats(
+    val receivables: Double = 0.0,
+    val debt: Double = 0.0,
+    val income: Double = 0.0,
+    val expense: Double = 0.0
+)

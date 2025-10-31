@@ -45,7 +45,8 @@ fun ExpenseFormScreen(
     navController: NavHostController,
     isGroupExpense: Boolean = false,
     expenseViewModel: ExpenseViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    userViewModel: UserViewModel
 ) {
 
     val userId by authViewModel.currentUserId.collectAsState()
@@ -184,6 +185,7 @@ fun ExpenseFormScreen(
                     )
 
                     expenseViewModel.addExpense(expense)
+                    userViewModel.updateStatsForExpense(expense)
                     navController.popBackStack()
                 }
                 else {
