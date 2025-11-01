@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fairshare.data.models.DebtData
 import com.example.fairshare.data.models.ExpenseData
+import com.example.fairshare.data.models.User
 import com.example.fairshare.data.models.UserPreferences
 import com.example.fairshare.data.models.UserStats
 import com.example.fairshare.repository.UserRepository
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.collections.emptyList
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
@@ -35,15 +37,20 @@ class UserViewModel @Inject constructor(
 
     private val userPrefs = UserPreferences(appContext)
 
-    private val _userProfile = MutableStateFlow<Map<String, Any>?>(null)
-    val displayName = _userProfile.map { it?.get("displayName") as? String ?: "" }
+    private val _userProfile = MutableStateFlow<User?>(null)
+    val userProfile: StateFlow<User?> = _userProfile
+    val displayName: StateFlow<String> = _userProfile.map { it?.displayName ?: "" }
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    val email = _userProfile.map { it?.get("email") as? String ?: "" }
+    val email: StateFlow<String> = _userProfile.map { it?.email ?: "" }
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    val photoUrl = _userProfile.map { it?.get("photoUrl") as? String ?: "" }
+    val photoUrl: StateFlow<String> = _userProfile.map { it?.photoUrl ?: "" }
         .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+
+    val userGroups: StateFlow<List<String>> = _userProfile.map { it?.groups ?: emptyList() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -60,27 +67,44 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             userPrefs.userData.firstOrNull()?.let { localData ->
                 if (localData["displayName"].isNullOrEmpty()) return@let
-                _userProfile.value = localData
+
+                // Convert cached map to User object
+                val cachedUser = User(
+                    auth.currentUser?.uid ?: "",
+                    localData["displayName"],
+                    localData["email"],
+                    localData["photoUrl"],
+                    emptyList()
+                )
+                _userProfile.value = cachedUser
             }
 
-            // Keep collecting for changes (optional)
+            // Keep collecting for changes
             userPrefs.userData.collect { localData ->
                 if (localData["displayName"].isNullOrEmpty()) return@collect
-                _userProfile.value = localData
+
+                val cachedUser = User(
+                    uid = auth.currentUser?.uid ?: "",
+                    displayName = localData["displayName"],
+                    email = localData["email"],
+                    photoUrl = localData["photoUrl"],
+                    groups = _userProfile.value?.groups ?: emptyList()
+                )
+                _userProfile.value = cachedUser
             }
         }
     }
 
     fun refreshUserFromFirestore() {
         val uid = auth.currentUser?.uid ?: return
-        userRepository.getUser(uid) { data ->
-            if (data != null) {
-                _userProfile.value = data
+        userRepository.getUser(uid) { user ->
+            if (user != null) {
+                _userProfile.value = user
                 viewModelScope.launch {
                     userPrefs.saveUser(
-                        displayName = data["displayName"] as? String ?: "",
-                        email = data["email"] as? String ?: "",
-                        photoUrl = data["photoUrl"] as? String ?: ""
+                        displayName = user.displayName ?: "",
+                        email = user.email ?: "",
+                        photoUrl = user.photoUrl ?: "",
                     )
                 }
             }
@@ -101,15 +125,15 @@ class UserViewModel @Inject constructor(
             return
         }
         _isLoading.value = true
-        userRepository.getUser(uid) { data ->
-            _userProfile.value = data
+        userRepository.getUser(uid) { user ->
+            _userProfile.value = user
             _isLoading.value = false
         }
     }
 
 
     // Update user profile (bio, displayName, etc.)
-    fun updateProfile(updates: Map<String, Any>, onComplete: (Boolean) -> Unit = {}) {
+    fun updateProfile(updatedUser: User, onComplete: (Boolean) -> Unit = {}) {
         val uid = auth.currentUser?.uid ?: run {
             Log.e(TAG, "Cannot update profile - UID is NULL")
             onComplete(false)
@@ -117,7 +141,7 @@ class UserViewModel @Inject constructor(
         }
 
         _isLoading.value = true
-        userRepository.updateUser(uid, updates) { success ->
+        userRepository.updateUser(uid, updatedUser) { success ->
             _isLoading.value = false
             if (success) {
                 loadCurrentUser()
@@ -131,15 +155,21 @@ class UserViewModel @Inject constructor(
 
     // Update specific fields
     fun updateDisplayName(newName: String, onComplete: (Boolean) -> Unit = {}) {
-        updateProfile(mapOf("displayName" to newName), onComplete)
-    }
-
-    fun updateBio(newBio: String, onComplete: (Boolean) -> Unit = {}) {
-        updateProfile(mapOf("bio" to newBio), onComplete)
+        val currentUser = _userProfile.value ?: run {
+            Log.e(TAG, "Cannot update display name - user profile is null")
+            onComplete(false)
+            return
+        }
+        updateProfile(currentUser.copy(displayName = newName), onComplete)
     }
 
     fun updatePhotoUrl(newPhotoUrl: String, onComplete: (Boolean) -> Unit = {}) {
-        updateProfile(mapOf("photoUrl" to newPhotoUrl), onComplete)
+        val currentUser = _userProfile.value ?: run {
+            Log.e(TAG, "Cannot update photo URL - user profile is null")
+            onComplete(false)
+            return
+        }
+        updateProfile(currentUser.copy(photoUrl = newPhotoUrl), onComplete)
     }
 
     // Delete user account (removes Firestore data)

@@ -2,6 +2,7 @@ package com.example.fairshare.repository
 
 import android.util.Log
 import com.example.fairshare.data.firebase.FirestoreService
+import com.example.fairshare.data.models.User
 import javax.inject.Inject
 
 class UserRepository @Inject constructor(
@@ -12,33 +13,40 @@ class UserRepository @Inject constructor(
         private const val TAG = "UserRepository"
     }
 
-    fun saveUser(
-        userId: String,
-        userData: Map<String, Any>,
-        onResult: (Boolean) -> Unit
-    ) {
-        Log.d(TAG, "Attempting to save user with ID: $userId")
+    fun saveUser(user: User, onResult: (Boolean) -> Unit) {
+        Log.d(TAG, "Attempting to save user with ID: ${user.uid}")
+
+        val userData = buildMap {
+            put("uid", user.uid)
+            user.displayName?.let { put("displayName", it) }
+            user.email?.let { put("email", it) }
+            user.photoUrl?.let { put("photoUrl", it) }
+            put("groups", user.groups)
+        }
 
         firestoreService.addDocument(
             collectionPath = COLLECTION_PATH,
-            documentId = userId,
+            documentId = user.uid,
             data = userData,
             onResult = { success ->
                 if (success) {
-                    Log.d(TAG, "User successfully saved: $userId")
+                    Log.d(TAG, "User successfully saved: ${user.uid}")
                 } else {
-                    Log.e(TAG, "Error saving user: $userId")
+                    Log.e(TAG, "Error saving user: ${user.uid}")
                 }
                 onResult(success)
             }
         )
     }
 
-    fun getUser(userId: String, onResult: (Map<String, Any>?) -> Unit) {
+    fun getUser(userId: String, onResult: (User?) -> Unit) {
         firestoreService.getDocumentAsMap(
             collectionPath = COLLECTION_PATH,
             documentId = userId,
-            onResult = onResult
+            onResult = { map ->
+                val user = map?.let { mapToUser(it) }
+                onResult(user)
+            }
         )
     }
 
@@ -61,10 +69,17 @@ class UserRepository @Inject constructor(
 
     fun updateUser(
         userId: String,
-        updates: Map<String, Any>,
+        user: User,
         onResult: (Boolean) -> Unit
     ) {
         Log.d(TAG, "Attempting to update user: $userId")
+
+        val updates = buildMap{
+            user.displayName?.let { put("displayName", it) }
+            user.email?.let { put("email", it) }
+            user.photoUrl?.let { put("photoUrl", it) }
+            put("groups", user.groups)
+        }
 
         firestoreService.updateDocument(
             collectionPath = COLLECTION_PATH,
@@ -81,8 +96,95 @@ class UserRepository @Inject constructor(
         )
     }
 
+    // Add a group to user's groups list
+    fun addGroupToUser(userId: String, groupId: String, onResult: (Boolean) -> Unit = {}) {
+        getUser(userId) { user ->
+            user?.let {
+                val currentGroups = it.groups.toMutableList()
+                if (!currentGroups.contains(groupId)) {
+                    currentGroups.add(groupId)
+                    val updates = mapOf("groups" to currentGroups)
+
+                    firestoreService.updateDocument(
+                        collectionPath = COLLECTION_PATH,
+                        documentId = userId,
+                        updates = updates,
+                        onResult = { success ->
+                            if (success) {
+                                Log.d(TAG, "Group $groupId added to user $userId")
+                            } else {
+                                Log.e(TAG, "Failed to add group $groupId to user $userId")
+                            }
+                            onResult(success)
+                        }
+                    )
+                } else {
+                    Log.d(TAG, "User $userId already in group $groupId")
+                    onResult(true)
+                }
+            } ?: run {
+                Log.e(TAG, "User $userId not found")
+                onResult(false)
+            }
+        }
+    }
+
+    // Remove a group from user's groups list
+    fun removeGroupFromUser(userId: String, groupId: String, onResult: (Boolean) -> Unit = {}) {
+        getUser(userId) { user ->
+            user?.let {
+                val currentGroups = it.groups.toMutableList()
+                if (currentGroups.remove(groupId)) {
+                    val updates = mapOf("groups" to currentGroups)
+
+                    firestoreService.updateDocument(
+                        collectionPath = COLLECTION_PATH,
+                        documentId = userId,
+                        updates = updates,
+                        onResult = { success ->
+                            if (success) {
+                                Log.d(TAG, "Group $groupId removed from user $userId")
+                            } else {
+                                Log.e(TAG, "Failed to remove group $groupId from user $userId")
+                            }
+                            onResult(success)
+                        }
+                    )
+                } else {
+                    Log.d(TAG, "User $userId not in group $groupId")
+                    onResult(true)
+                }
+            } ?: run {
+                Log.e(TAG, "User $userId not found")
+                onResult(false)
+            }
+        }
+    }
+
+    // Get all groups for a user
+    fun getUserGroups(userId: String, onResult: (List<String>) -> Unit) {
+        getUser(userId) { user ->
+            onResult(user?.groups ?: emptyList())
+        }
+    }
+
     fun generateUserId(): String {
         return firestoreService.generateDocumentId(COLLECTION_PATH)
+    }
+
+    private fun mapToUser(map: Map<String, Any>): User? {
+        return try {
+            User(
+                uid = map["userId"] as? String ?: "",
+                displayName = map["name"] as? String ?: "",
+                email = map["email"] as? String ?: "",
+                photoUrl = map["profilePhoto"] as? String ?: "",
+                groups = (map["groups"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error converting map to User: ${e.message}")
+            null
+        }
     }
 
     // Subcollection operations

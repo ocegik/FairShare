@@ -1,7 +1,9 @@
 package com.example.fairshare.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.example.fairshare.data.models.Group
 import com.example.fairshare.repository.GroupRepository
+import com.example.fairshare.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,29 +12,19 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class GroupViewModel @Inject constructor(
-    private val groupRepository: GroupRepository
+    private val groupRepository: GroupRepository,
+    private val userRepository: UserRepository // Assuming you have this
 ) : ViewModel() {
 
-    private val _groups = MutableStateFlow<List<Map<String, Any>>>(emptyList())
-    val groups: StateFlow<List<Map<String, Any>>> = _groups.asStateFlow()
+    private val _groups = MutableStateFlow<List<Group>>(emptyList())
+    val groups: StateFlow<List<Group>> = _groups.asStateFlow()
 
-    fun addGroup(
-        groupId: String,
-        name: String,
-        owner: String,
-        members: List<String>,
-        roomPassword: String
-    ) {
-        val data = mapOf(
-            "name" to name,
-            "owner" to owner,
-            "createdAt" to System.currentTimeMillis(),
-            "members" to members,
-            "groupID" to groupId,
-            "roomPassword" to roomPassword
-        )
-        groupRepository.addGroup(groupId, data) { success ->
-            if (success) loadGroups() // refresh list after adding
+    private val _userGroups = MutableStateFlow<List<Group>>(emptyList())
+    val userGroups: StateFlow<List<Group>> = _userGroups.asStateFlow()
+
+    fun addGroup(group: Group) {
+        groupRepository.addGroup(group) { success ->
+            if (success) loadGroups()
         }
     }
 
@@ -42,12 +34,12 @@ class GroupViewModel @Inject constructor(
         }
     }
 
-    fun getGroup(groupId: String, onResult: (Map<String, Any>?) -> Unit) {
+    fun getGroup(groupId: String, onResult: (Group?) -> Unit) {
         groupRepository.getGroup(groupId, onResult)
     }
 
-    fun updateGroup(groupId: String, updates: Map<String, Any>) {
-        groupRepository.updateGroup(groupId, updates) { success ->
+    fun updateGroup(groupId: String, group: Group) {
+        groupRepository.updateGroup(groupId, group) { success ->
             if (success) loadGroups()
         }
     }
@@ -59,23 +51,37 @@ class GroupViewModel @Inject constructor(
     }
 
     fun transferOwnership(groupId: String, newOwnerId: String) {
-        updateGroup(groupId, mapOf("owner" to newOwnerId))
+        getGroup(groupId) { group ->
+            group?.let {
+                updateGroup(groupId, it.copy(owner = newOwnerId))
+            }
+        }
     }
 
     fun removeMember(groupId: String, userId: String) {
         getGroup(groupId) { group ->
             group?.let {
-                val members = (it["members"] as List<*>).toMutableList()
-                members.remove(userId)
-                updateGroup(groupId, mapOf("members" to members))
+                val updatedMembers = it.members.filter { id -> id != userId }
+                updateGroup(groupId, it.copy(members = updatedMembers))
+
+                // Also remove from user's groups list
+                userRepository.removeGroupFromUser(userId, groupId)
             }
         }
     }
 
-    fun getGroupsForUser(userId: String, onResult: (List<Map<String, Any>>) -> Unit) {
-        groupRepository.getAllGroups { allGroups ->
-            val filtered = allGroups.filter { (it["members"] as List<*>).contains(userId) }
-            onResult(filtered)
+    // NEW: Efficiently load groups for a specific user using their groups list
+    fun loadGroupsForUser(userId: String) {
+        userRepository.getUser(userId) { user ->
+            user?.let {
+                if (it.groups.isNotEmpty()) {
+                    groupRepository.getGroupsByIds(it.groups) { groups ->
+                        _userGroups.value = groups
+                    }
+                } else {
+                    _userGroups.value = emptyList()
+                }
+            }
         }
     }
 
@@ -85,10 +91,16 @@ class GroupViewModel @Inject constructor(
                 onResult(false)
                 return@getGroup
             }
-            if (group["roomPassword"] == password) {
-                val members = (group["members"] as List<*>).toMutableList()
-                if (!members.contains(userId)) members.add(userId)
-                updateGroup(groupId, mapOf("members" to members))
+            if (group.password == password) {
+                val updatedMembers = if (!group.members.contains(userId)) {
+                    group.members + userId
+                } else {
+                    group.members
+                }
+                updateGroup(groupId, group.copy(members = updatedMembers))
+
+                // Add group to user's groups list
+                userRepository.addGroupToUser(userId, groupId)
                 onResult(true)
             } else {
                 onResult(false)

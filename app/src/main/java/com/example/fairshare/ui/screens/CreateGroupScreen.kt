@@ -87,7 +87,6 @@ fun CreateGroupScreen(navController: NavController) {
 
 
                     if (isValid) {
-
                         //groupViewModel
                         navController.popBackStack()
                     } else {
