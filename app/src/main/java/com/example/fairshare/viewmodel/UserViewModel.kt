@@ -97,22 +97,27 @@ class UserViewModel @Inject constructor(
 
     fun refreshUserFromFirestore() {
         val uid = auth.currentUser?.uid ?: return
-        userRepository.getUser(uid) { user ->
-            if (user != null) {
-                _userProfile.value = user
-                viewModelScope.launch {
+
+        viewModelScope.launch {
+            userRepository.getUser(uid)
+                .onSuccess { user ->
+                    _userProfile.value = user
                     userPrefs.saveUser(
                         displayName = user.displayName ?: "",
                         email = user.email ?: "",
-                        photoUrl = user.photoUrl ?: "",
+                        photoUrl = user.photoUrl ?: ""
                     )
                 }
-            }
+                .onFailure { exception ->
+                    Log.e(TAG, "Failed to refresh user from Firestore", exception)
+                }
         }
     }
 
     fun clearUser() {
-        viewModelScope.launch { userPrefs.clearUser() }
+        viewModelScope.launch {
+            userPrefs.clearUser()
+        }
         _userProfile.value = null
         _userStats.value = null
     }
@@ -124,9 +129,16 @@ class UserViewModel @Inject constructor(
             Log.e(TAG, "Cannot load user - UID is NULL")
             return
         }
+
         _isLoading.value = true
-        userRepository.getUser(uid) { user ->
-            _userProfile.value = user
+        viewModelScope.launch {
+            userRepository.getUser(uid)
+                .onSuccess { user ->
+                    _userProfile.value = user
+                }
+                .onFailure { exception ->
+                    Log.e(TAG, "Failed to load user", exception)
+                }
             _isLoading.value = false
         }
     }
@@ -141,15 +153,25 @@ class UserViewModel @Inject constructor(
         }
 
         _isLoading.value = true
-        userRepository.updateUser(uid, updatedUser) { success ->
+        viewModelScope.launch {
+            val userData = mapOf(
+                "displayName" to (updatedUser.displayName ?: ""),
+                "email" to (updatedUser.email ?: ""),
+                "photoUrl" to (updatedUser.photoUrl ?: ""),
+                "groups" to updatedUser.groups
+            )
+
+            userRepository.updateUser(uid, userData)
+                .onSuccess {
+                    loadCurrentUser()
+                    Log.d(TAG, "Profile updated successfully")
+                    onComplete(true)
+                }
+                .onFailure { exception ->
+                    Log.e(TAG, "Failed to update profile", exception)
+                    onComplete(false)
+                }
             _isLoading.value = false
-            if (success) {
-                loadCurrentUser()
-                Log.d(TAG, "Profile updated successfully")
-            } else {
-                Log.e(TAG, "Failed to update profile")
-            }
-            onComplete(success)
         }
     }
 
@@ -181,15 +203,18 @@ class UserViewModel @Inject constructor(
         }
 
         _isLoading.value = true
-        userRepository.deleteUser(uid) { success ->
+        viewModelScope.launch {
+            userRepository.deleteUser(uid)
+                .onSuccess {
+                    clearUser()
+                    Log.d(TAG, "User account deleted successfully")
+                    onComplete(true)
+                }
+                .onFailure { exception ->
+                    Log.e(TAG, "Failed to delete user account", exception)
+                    onComplete(false)
+                }
             _isLoading.value = false
-            if (success) {
-                clearUser()
-                Log.d(TAG, "User account deleted successfully")
-            } else {
-                Log.e(TAG, "Failed to delete user account")
-            }
-            onComplete(success)
         }
     }
 
@@ -200,41 +225,46 @@ class UserViewModel @Inject constructor(
         }
 
         _isLoading.value = true
-        userRepository.getUserSubCollectionDocument(
-            userId = uid,
-            subCollectionName = STATS_SUBCOLLECTION,
-            documentId = STATS_DOCUMENT_ID,
-            clazz = UserStats::class.java
-        ) { stats ->
+        viewModelScope.launch {
+            userRepository.getUserSubCollectionDocument(
+                userId = uid,
+                subCollectionName = STATS_SUBCOLLECTION,
+                documentId = STATS_DOCUMENT_ID,
+                clazz = UserStats::class.java
+            )
+                .onSuccess { stats ->
+                    _userStats.value = stats
+                    Log.d(TAG, "✅ Stats loaded: $stats")
+                }
+                .onFailure { exception ->
+                    // Initialize with default stats if none exist
+                    _userStats.value = UserStats()
+                    initializeUserStats()
+                    Log.w(TAG, "⚠️ No stats document found, initializing defaults", exception)
+                }
             _isLoading.value = false
-
-            if (stats != null) {
-                _userStats.value = stats
-                Log.d(TAG, "✅ Stats loaded: $stats")
-            } else {
-                // Initialize with default stats if none exist
-                _userStats.value = UserStats()
-                initializeUserStats()
-                Log.w(TAG, "⚠️ No stats document found, initializing defaults")
-            }
         }
     }
+
     private fun initializeUserStats() {
         val uid = auth.currentUser?.uid ?: return
 
-        userRepository.addToUserSubCollection(
-            userId = uid,
-            subCollectionName = STATS_SUBCOLLECTION,
-            documentId = STATS_DOCUMENT_ID,
-            data = UserStats()
-        ) { success ->
-            if (success) {
-                Log.d(TAG, "✅ Stats document initialized")
-            } else {
-                Log.e(TAG, "❌ Failed to initialize stats")
-            }
+        viewModelScope.launch {
+            userRepository.addToUserSubCollection(
+                userId = uid,
+                subCollectionName = STATS_SUBCOLLECTION,
+                documentId = STATS_DOCUMENT_ID,
+                data = UserStats()
+            )
+                .onSuccess {
+                    Log.d(TAG, "✅ Stats document initialized")
+                }
+                .onFailure { exception ->
+                    Log.e(TAG, "❌ Failed to initialize stats", exception)
+                }
         }
     }
+
     fun updateStatsForExpense(expense: ExpenseData, isAdding: Boolean = true) {
         val currentStats = _userStats.value ?: UserStats()
         val multiplier = if (isAdding) 1.0 else -1.0
@@ -307,18 +337,20 @@ class UserViewModel @Inject constructor(
     private fun saveUserStats(stats: UserStats) {
         val uid = auth.currentUser?.uid ?: return
 
-        userRepository.addToUserSubCollection(
-            userId = uid,
-            subCollectionName = STATS_SUBCOLLECTION,
-            documentId = STATS_DOCUMENT_ID,
-            data = stats
-        ) { success ->
-            if (success) {
-                _userStats.value = stats
-                Log.d(TAG, "✅ Stats updated: $stats")
-            } else {
-                Log.e(TAG, "❌ Failed to update stats")
-            }
+        viewModelScope.launch {
+            userRepository.addToUserSubCollection(
+                userId = uid,
+                subCollectionName = STATS_SUBCOLLECTION,
+                documentId = STATS_DOCUMENT_ID,
+                data = stats
+            )
+                .onSuccess {
+                    _userStats.value = stats
+                    Log.d(TAG, "✅ Stats updated: $stats")
+                }
+                .onFailure { exception ->
+                    Log.e(TAG, "❌ Failed to update stats", exception)
+                }
         }
     }
 

@@ -7,6 +7,7 @@ import com.example.fairshare.navigation.AppNavigation
 import com.example.fairshare.ui.theme.FairShareTheme
 import com.example.fairshare.viewmodel.AuthViewModel
 import com.example.fairshare.viewmodel.ExpenseViewModel
+import com.example.fairshare.viewmodel.GroupViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 
 @Composable
@@ -14,9 +15,10 @@ fun MyApp() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
     val userViewModel: UserViewModel = hiltViewModel()
+    val groupViewModel: GroupViewModel = hiltViewModel()
     val expenseViewModel: ExpenseViewModel = hiltViewModel()
 
     FairShareTheme {
-        AppNavigation(navController = navController, authViewModel = authViewModel, userViewModel = userViewModel, expenseViewModel = expenseViewModel)
+        AppNavigation(navController, authViewModel, userViewModel, expenseViewModel, groupViewModel)
     }
 }

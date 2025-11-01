@@ -12,11 +12,10 @@ class GroupRepository @Inject constructor(
 
     companion object {
         private const val COLLECTION_PATH = "groups"
-        private const val USERS_COLLECTION = "users"
         private const val TAG = "GroupRepository"
     }
 
-    fun addGroup(group: Group, onResult: (Boolean) -> Unit) {
+    suspend fun addGroup(group: Group): Result<Unit> {
         Log.d(TAG, "Attempting to add group with ID: ${group.groupId}")
 
         val groupData = mapOf(
@@ -28,76 +27,79 @@ class GroupRepository @Inject constructor(
             "password" to group.password
         )
 
-        firestoreService.addDocument(
+        return firestoreService.addDocument(
             collectionPath = COLLECTION_PATH,
             documentId = group.groupId,
-            data = groupData,
-            onResult = { success ->
-                if (success) {
-                    Log.d(TAG, "Group successfully added: ${group.groupId}")
-                    // Update all members' user documents
-                    group.members.forEach { userId ->
-                        userRepository.addGroupToUser(userId, group.groupId)
+            data = groupData
+        ).onSuccess {
+            Log.d(TAG, "Group successfully added: ${group.groupId}")
+
+            // Update all members' user documents
+            group.members.forEach { userId ->
+                userRepository.addGroupToUser(userId, group.groupId)
+                    .onFailure { e ->
+                        Log.e(TAG, "Failed to add group to user $userId", e)
                     }
-                } else {
-                    Log.e(TAG, "Error adding group: ${group.groupId}")
-                }
-                onResult(success)
             }
-        )
+        }.onFailure {
+            Log.e(TAG, "Error adding group: ${group.groupId}", it)
+        }
     }
 
-    fun getGroup(groupId: String, onResult: (Group?) -> Unit) {
-        firestoreService.getDocumentAsMap(
+    suspend fun getGroup(groupId: String): Result<Group> {
+        return firestoreService.getDocumentAsMap(
             collectionPath = COLLECTION_PATH,
-            documentId = groupId,
-            onResult = { map ->
-                val group = map?.let { mapToGroup(it) }
-                onResult(group)
-            }
-        )
+            documentId = groupId
+        ).mapCatching { map ->
+            mapToGroup(map) ?: throw Exception("Failed to parse group data")
+        }.onSuccess {
+            Log.d(TAG, "Group retrieved: $groupId")
+        }.onFailure {
+            Log.e(TAG, "Error getting group: $groupId", it)
+        }
     }
 
-    fun getAllGroups(onResult: (List<Group>) -> Unit) {
-        firestoreService.getAllDocumentsAsMap(
-            collectionPath = COLLECTION_PATH,
-            onResult = { maps ->
-                val groups = maps.mapNotNull { mapToGroup(it) }
-                onResult(groups)
-            }
-        )
+    suspend fun getAllGroups(): Result<List<Group>> {
+        return firestoreService.getAllDocumentsAsMap(
+            collectionPath = COLLECTION_PATH
+        ).map { maps ->
+            maps.mapNotNull { mapToGroup(it) }
+        }.onSuccess {
+            Log.d(TAG, "Retrieved ${it.size} groups")
+        }.onFailure {
+            Log.e(TAG, "Error getting all groups", it)
+        }
     }
 
     // NEW: Fetch groups by their IDs (from user's groups list)
-    fun getGroupsByIds(groupIds: List<String>, onResult: (List<Group>) -> Unit) {
+    suspend fun getGroupsByIds(groupIds: List<String>): Result<List<Group>> {
         if (groupIds.isEmpty()) {
-            onResult(emptyList())
-            return
+            return Result.success(emptyList())
         }
 
-        val groups = mutableListOf<Group>()
-        var completed = 0
-
-        groupIds.forEach { groupId ->
-            getGroup(groupId) { group ->
-                group?.let { groups.add(it) }
-                completed++
-                if (completed == groupIds.size) {
-                    onResult(groups)
-                }
+        return runCatching {
+            // Fetch all groups concurrently using coroutines
+            val groups = groupIds.mapNotNull { groupId ->
+                getGroup(groupId).getOrNull()
             }
+            groups
+        }.onSuccess {
+            Log.d(TAG, "Retrieved ${it.size} groups by IDs")
+        }.onFailure {
+            Log.e(TAG, "Error getting groups by IDs", it)
         }
     }
 
-    fun updateGroup(
+    suspend fun updateGroup(
         groupId: String,
-        group: Group,
-        onResult: (Boolean) -> Unit
-    ) {
+        group: Group
+    ): Result<Unit> {
         Log.d(TAG, "Attempting to update group: $groupId")
 
-        // Get old group to compare members
-        getGroup(groupId) { oldGroup ->
+        return runCatching {
+            // Get old group to compare members
+            val oldGroup = getGroup(groupId).getOrThrow()
+
             val updates = mapOf(
                 "name" to group.name,
                 "owner" to group.owner,
@@ -109,58 +111,57 @@ class GroupRepository @Inject constructor(
             firestoreService.updateDocument(
                 collectionPath = COLLECTION_PATH,
                 documentId = groupId,
-                updates = updates,
-                onResult = { success ->
-                    if (success) {
-                        Log.d(TAG, "Group successfully updated: $groupId")
+                updates = updates
+            ).getOrThrow()
 
-                        // Sync member changes if members list changed
-                        oldGroup?.let { old ->
-                            val removedMembers = old.members.filter { !group.members.contains(it) }
-                            val addedMembers = group.members.filter { !old.members.contains(it) }
+            Log.d(TAG, "Group successfully updated: $groupId")
 
-                            removedMembers.forEach { userId ->
-                                userRepository.removeGroupFromUser(userId, groupId)
-                            }
+            // Sync member changes if members list changed
+            val removedMembers = oldGroup.members.filter { !group.members.contains(it) }
+            val addedMembers = group.members.filter { !oldGroup.members.contains(it) }
 
-                            addedMembers.forEach { userId ->
-                                userRepository.addGroupToUser(userId, groupId)
-                            }
-                        }
-                    } else {
-                        Log.e(TAG, "Error updating group: $groupId")
+            removedMembers.forEach { userId ->
+                userRepository.removeGroupFromUser(userId, groupId)
+                    .onFailure { e ->
+                        Log.e(TAG, "Failed to remove group from user $userId", e)
                     }
-                    onResult(success)
-                }
-            )
+            }
+
+            addedMembers.forEach { userId ->
+                userRepository.addGroupToUser(userId, groupId)
+                    .onFailure { e ->
+                        Log.e(TAG, "Failed to add group to user $userId", e)
+                    }
+            }
+        }.onFailure {
+            Log.e(TAG, "Error updating group: $groupId", it)
         }
     }
 
-    fun deleteGroup(groupId: String, onResult: (Boolean) -> Unit) {
+    suspend fun deleteGroup(groupId: String): Result<Int> {
         Log.d(TAG, "Attempting to delete group: $groupId")
 
-        // First get the group to know which users to update
-        getGroup(groupId) { group ->
-            group?.let {
-                // Remove group from all members' user documents
-                it.members.forEach { userId ->
-                    userRepository.removeGroupFromUser(userId, groupId)
-                }
+        return runCatching {
+            // First get the group to know which users to update
+            val group = getGroup(groupId).getOrThrow()
+
+            // Remove group from all members' user documents
+            group.members.forEach { userId ->
+                userRepository.removeGroupFromUser(userId, groupId)
+                    .onFailure { e ->
+                        Log.e(TAG, "Failed to remove group from user $userId", e)
+                    }
             }
 
             // Then delete the group
             firestoreService.deleteDocument(
                 collectionPath = COLLECTION_PATH,
-                documentId = groupId,
-                onResult = { success ->
-                    if (success) {
-                        Log.d(TAG, "Group successfully deleted: $groupId")
-                    } else {
-                        Log.e(TAG, "Error deleting group: $groupId")
-                    }
-                    onResult(success)
-                }
-            )
+                documentId = groupId
+            ).getOrThrow()
+
+            Log.d(TAG, "Group successfully deleted: $groupId")
+        }.onFailure {
+            Log.e(TAG, "Error deleting group: $groupId", it)
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.fairshare.repository
 
+import android.util.Log
 import com.example.fairshare.data.firebase.FirestoreService
 import com.example.fairshare.data.models.ExpenseData
 import javax.inject.Inject
@@ -10,9 +11,10 @@ class ExpenseRepository @Inject constructor(
 
     companion object {
         private const val COLLECTION_PATH = "expenses"
+        private const val TAG = "ExpenseRepository"
     }
 
-    fun addExpense(expense: ExpenseData, onResult: (Boolean) -> Unit) {
+    suspend fun addExpense(expense: ExpenseData): Result<ExpenseData> {
         val docId = expense.id.ifEmpty {
             firestoreService.generateDocumentId(COLLECTION_PATH)
         }
@@ -23,63 +25,80 @@ class ExpenseRepository @Inject constructor(
             expense
         }
 
-        firestoreService.addDocument(
+        return firestoreService.addDocument(
             collectionPath = COLLECTION_PATH,
             documentId = docId,
-            data = expenseToSave,
-            onResult = { success ->
-                onResult(success)
+            data = expenseToSave
+        ).map { expenseToSave }
+            .onSuccess {
+                Log.d(TAG, "Expense added successfully: $docId")
             }
-        )
+            .onFailure {
+                Log.e(TAG, "Error adding expense: $docId", it)
+            }
     }
 
-    fun getExpense(expenseId: String, onResult: (ExpenseData?) -> Unit) {
-        firestoreService.getDocument(
+    suspend fun getExpense(expenseId: String): Result<ExpenseData> {
+        return firestoreService.getDocument(
             collectionPath = COLLECTION_PATH,
             documentId = expenseId,
-            clazz = ExpenseData::class.java,
-            onResult = onResult
-        )
+            clazz = ExpenseData::class.java
+        ).onSuccess {
+            Log.d(TAG, "Expense retrieved: $expenseId")
+        }.onFailure {
+            Log.e(TAG, "Error getting expense: $expenseId", it)
+        }
     }
 
-    fun getExpensesByUser(userId: String, onResult: (List<ExpenseData>) -> Unit) {
-        firestoreService.queryDocuments(
+    suspend fun getExpensesByUser(userId: String): Result<List<ExpenseData>> {
+        return firestoreService.queryDocuments(
             collectionPath = COLLECTION_PATH,
             field = "userId",
             value = userId,
-            clazz = ExpenseData::class.java,
-            onResult = onResult
-        )
+            clazz = ExpenseData::class.java
+        ).onSuccess {
+            Log.d(TAG, "Retrieved ${it.size} expenses for user: $userId")
+        }.onFailure {
+            Log.e(TAG, "Error getting expenses for user: $userId", it)
+        }
     }
 
-    fun getExpensesByGroup(groupId: String, onResult: (List<ExpenseData>) -> Unit) {
-        firestoreService.queryDocuments(
+    suspend fun getExpensesByGroup(groupId: String): Result<List<ExpenseData>> {
+        return firestoreService.queryDocuments(
             collectionPath = COLLECTION_PATH,
             field = "groupId",
             value = groupId,
-            clazz = ExpenseData::class.java,
-            onResult = onResult
-        )
+            clazz = ExpenseData::class.java
+        ).onSuccess {
+            Log.d(TAG, "Retrieved ${it.size} expenses for group: $groupId")
+        }.onFailure {
+            Log.e(TAG, "Error getting expenses for group: $groupId", it)
+        }
     }
 
-    fun updateExpense(
+    suspend fun updateExpense(
         expenseId: String,
-        updates: Map<String, Any>,
-        onResult: (Boolean) -> Unit
-    ) {
-        firestoreService.updateDocument(
+        updates: Map<String, Any>
+    ): Result<Unit> {
+        return firestoreService.updateDocument(
             collectionPath = COLLECTION_PATH,
             documentId = expenseId,
-            updates = updates,
-            onResult = onResult
-        )
+            updates = updates
+        ).onSuccess {
+            Log.d(TAG, "Expense updated: $expenseId")
+        }.onFailure {
+            Log.e(TAG, "Error updating expense: $expenseId", it)
+        }
     }
 
-    fun deleteExpense(expenseId: String, onResult: (Boolean) -> Unit) {
-        firestoreService.deleteDocument(
+    suspend fun deleteExpense(expenseId: String): Result<Unit> {
+        return firestoreService.deleteDocument(
             collectionPath = COLLECTION_PATH,
-            documentId = expenseId,
-            onResult = onResult
-        )
+            documentId = expenseId
+        ).onSuccess {
+            Log.d(TAG, "Expense deleted: $expenseId")
+        }.onFailure {
+            Log.e(TAG, "Error deleting expense: $expenseId", it)
+        }
     }
 }
