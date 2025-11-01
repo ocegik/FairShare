@@ -105,11 +105,11 @@ fun AppNavigation(
             }
 
             composable(Screen.PersonalExpense.route) {
-                PersonalExpenseScreen(navController, expenseViewModel, authViewModel)
+                PersonalExpenseScreen(navController, expenseViewModel, authViewModel, userViewModel)
             }
 
             composable(Screen.GroupExpense.route) {
-                GroupExpenseScreen(navController, expenseViewModel, authViewModel)
+                GroupExpenseScreen(navController, expenseViewModel, authViewModel, userViewModel)
             }
 
             composable(Screen.History.route) {
