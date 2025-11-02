@@ -73,28 +73,20 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (photoUrl != null) {
-                AsyncImage(
-                    model = photoUrl,
-                    contentDescription = "Profile photo",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .background(Color.Gray, CircleShape)
-                )
-            }
+            AsyncImage(
+                model = photoUrl,
+                contentDescription = "Profile photo",
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+            )
 
             Text(
-                text = "Hello, ${displayName ?: "Guest"}!",
+                text = "Hello, ${displayName}!",
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = "Email: ${email ?: "N/A"}",
+                text = "Email: $email",
                 style = MaterialTheme.typography.bodyMedium
             )
 
