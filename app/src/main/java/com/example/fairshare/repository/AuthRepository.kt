@@ -21,7 +21,8 @@ class AuthRepository @Inject constructor(
             uid = firebaseUser.uid,
             displayName = firebaseUser.displayName,
             email = firebaseUser.email,
-            photoUrl = firebaseUser.photoUrl?.toString()
+            photoUrl = firebaseUser.photoUrl?.toString(),
+            groups = emptyList()
         )
     }
 
@@ -36,32 +37,33 @@ class AuthRepository @Inject constructor(
             uid = firebaseUser.uid,
             displayName = firebaseUser.displayName,
             email = firebaseUser.email,
-            photoUrl = firebaseUser.photoUrl?.toString()
+            photoUrl = firebaseUser.photoUrl?.toString(),
+            groups = emptyList()
         )
 
         val isNewUser = result.additionalUserInfo?.isNewUser ?: false
 
         if (isNewUser) {
-            try {
-                // Convert User to Map for Firestore
-                val userData = mapOf(
-                    "uid" to user.uid,
-                    "displayName" to (user.displayName ?: ""),
-                    "email" to (user.email ?: ""),
-                    "photoUrl" to (user.photoUrl ?: "")
-                )
-
-                userRepository.saveUser(user.uid, userData) { success ->
-                    if (success) {
-                        Log.d(TAG, "New user saved to Firestore: ${user.uid}")
-                    } else {
-                        Log.e(TAG, "Failed to save new user to Firestore: ${user.uid}")
-                    }
+            // Save new user to Firestore
+            userRepository.saveUser(user)
+                .onSuccess {
+                    Log.d(TAG, "New user saved to Firestore: ${user.uid}")
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to save new user to Firestore: ${user.uid}", e)
-                // Continue with sign-in regardless of Firestore save result
-            }
+                .onFailure { e ->
+                    Log.e(TAG, "Failed to save new user to Firestore: ${user.uid}", e)
+                    // Continue with sign-in regardless of Firestore save result
+                }
+        } else {
+            // Existing user - optionally fetch from Firestore to get groups
+            userRepository.getUser(user.uid)
+                .onSuccess { firestoreUser ->
+                    Log.d(TAG, "Existing user loaded from Firestore: ${user.uid}")
+                    return@runCatching firestoreUser // Return user with groups
+                }
+                .onFailure { e ->
+                    Log.w(TAG, "Could not load user from Firestore, using auth data: ${user.uid}", e)
+                    // Continue with basic user data from auth
+                }
         }
 
         user
@@ -69,5 +71,6 @@ class AuthRepository @Inject constructor(
 
     fun signOut() {
         firebaseAuthService.signOut()
+        Log.d(TAG, "User signed out")
     }
 }

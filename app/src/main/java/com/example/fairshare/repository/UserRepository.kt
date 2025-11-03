@@ -13,158 +13,108 @@ class UserRepository @Inject constructor(
         private const val TAG = "UserRepository"
     }
 
-    fun saveUser(user: User, onResult: (Boolean) -> Unit) {
+    suspend fun saveUser(user: User): Result<Unit> {
         Log.d(TAG, "Attempting to save user with ID: ${user.uid}")
 
-        val userData = buildMap {
-            put("uid", user.uid)
-            user.displayName?.let { put("displayName", it) }
-            user.email?.let { put("email", it) }
-            user.photoUrl?.let { put("photoUrl", it) }
-            put("groups", user.groups)
-        }
+        val userData = mapOf(
+            "uid" to user.uid,
+            "displayName" to (user.displayName ?: ""),
+            "email" to (user.email ?: ""),
+            "photoUrl" to (user.photoUrl ?: ""),
+            "groups" to user.groups
+        )
 
-        firestoreService.addDocument(
+        return firestoreService.addDocument(
             collectionPath = COLLECTION_PATH,
             documentId = user.uid,
-            data = userData,
-            onResult = { success ->
-                if (success) {
-                    Log.d(TAG, "User successfully saved: ${user.uid}")
-                } else {
-                    Log.e(TAG, "Error saving user: ${user.uid}")
-                }
-                onResult(success)
-            }
-        )
+            data = userData
+        ).onSuccess {
+            Log.d(TAG, "User successfully saved: ${user.uid}")
+        }.onFailure {
+            Log.e(TAG, "Error saving user: ${user.uid}", it)
+        }
     }
 
-    fun getUser(userId: String, onResult: (User?) -> Unit) {
-        firestoreService.getDocumentAsMap(
+    suspend fun getUser(userId: String): Result<User> {
+        Log.d(TAG, "Attempting to get user: $userId")
+
+        return firestoreService.getDocumentAsMap(
             collectionPath = COLLECTION_PATH,
-            documentId = userId,
-            onResult = { map ->
-                val user = map?.let { mapToUser(it) }
-                onResult(user)
-            }
-        )
+            documentId = userId
+        ).mapCatching { map ->
+            mapToUser(map) ?: throw Exception("Failed to parse user data")
+        }.onSuccess {
+            Log.d(TAG, "User successfully retrieved: $userId")
+        }.onFailure {
+            Log.e(TAG, "Error getting user: $userId", it)
+        }
     }
 
-    fun deleteUser(userId: String, onResult: (Boolean) -> Unit) {
+    suspend fun deleteUser(userId: String): Result<Unit> {
         Log.d(TAG, "Attempting to delete user: $userId")
 
-        firestoreService.deleteDocument(
+        return firestoreService.deleteDocument(
             collectionPath = COLLECTION_PATH,
-            documentId = userId,
-            onResult = { success ->
-                if (success) {
-                    Log.d(TAG, "User successfully deleted: $userId")
-                } else {
-                    Log.e(TAG, "Error deleting user: $userId")
-                }
-                onResult(success)
-            }
-        )
+            documentId = userId
+        ).onSuccess {
+            Log.d(TAG, "User successfully deleted: $userId")
+        }.onFailure {
+            Log.e(TAG, "Error deleting user: $userId", it)
+        }
     }
 
-    fun updateUser(
-        userId: String,
-        user: User,
-        onResult: (Boolean) -> Unit
-    ) {
+    suspend fun updateUser(userId: String, updates: Map<String, Any>): Result<Unit> {
         Log.d(TAG, "Attempting to update user: $userId")
 
-        val updates = buildMap{
-            user.displayName?.let { put("displayName", it) }
-            user.email?.let { put("email", it) }
-            user.photoUrl?.let { put("photoUrl", it) }
-            put("groups", user.groups)
-        }
-
-        firestoreService.updateDocument(
+        return firestoreService.updateDocument(
             collectionPath = COLLECTION_PATH,
             documentId = userId,
-            updates = updates,
-            onResult = { success ->
-                if (success) {
-                    Log.d(TAG, "User successfully updated: $userId")
-                } else {
-                    Log.e(TAG, "Error updating user: $userId")
-                }
-                onResult(success)
-            }
-        )
+            updates = updates
+        ).onSuccess {
+            Log.d(TAG, "User successfully updated: $userId")
+        }.onFailure {
+            Log.e(TAG, "Error updating user: $userId", it)
+        }
     }
 
     // Add a group to user's groups list
-    fun addGroupToUser(userId: String, groupId: String, onResult: (Boolean) -> Unit = {}) {
-        getUser(userId) { user ->
-            user?.let {
-                val currentGroups = it.groups.toMutableList()
-                if (!currentGroups.contains(groupId)) {
-                    currentGroups.add(groupId)
-                    val updates = mapOf("groups" to currentGroups)
+    suspend fun addGroupToUser(userId: String, groupId: String): Result<Unit> {
+        return getUser(userId).mapCatching { user ->
+            val currentGroups = user.groups.toMutableList()
 
-                    firestoreService.updateDocument(
-                        collectionPath = COLLECTION_PATH,
-                        documentId = userId,
-                        updates = updates,
-                        onResult = { success ->
-                            if (success) {
-                                Log.d(TAG, "Group $groupId added to user $userId")
-                            } else {
-                                Log.e(TAG, "Failed to add group $groupId to user $userId")
-                            }
-                            onResult(success)
-                        }
-                    )
-                } else {
-                    Log.d(TAG, "User $userId already in group $groupId")
-                    onResult(true)
-                }
-            } ?: run {
-                Log.e(TAG, "User $userId not found")
-                onResult(false)
+            if (currentGroups.contains(groupId)) {
+                Log.d(TAG, "User $userId already in group $groupId")
+                return@mapCatching
             }
+
+            currentGroups.add(groupId)
+            val updates = mapOf("groups" to currentGroups)
+
+            updateUser(userId, updates).getOrThrow()
+            Log.d(TAG, "Group $groupId added to user $userId")
         }
     }
 
     // Remove a group from user's groups list
-    fun removeGroupFromUser(userId: String, groupId: String, onResult: (Boolean) -> Unit = {}) {
-        getUser(userId) { user ->
-            user?.let {
-                val currentGroups = it.groups.toMutableList()
-                if (currentGroups.remove(groupId)) {
-                    val updates = mapOf("groups" to currentGroups)
+    suspend fun removeGroupFromUser(userId: String, groupId: String): Result<Unit> {
+        return getUser(userId).mapCatching { user ->
+            val currentGroups = user.groups.toMutableList()
 
-                    firestoreService.updateDocument(
-                        collectionPath = COLLECTION_PATH,
-                        documentId = userId,
-                        updates = updates,
-                        onResult = { success ->
-                            if (success) {
-                                Log.d(TAG, "Group $groupId removed from user $userId")
-                            } else {
-                                Log.e(TAG, "Failed to remove group $groupId from user $userId")
-                            }
-                            onResult(success)
-                        }
-                    )
-                } else {
-                    Log.d(TAG, "User $userId not in group $groupId")
-                    onResult(true)
-                }
-            } ?: run {
-                Log.e(TAG, "User $userId not found")
-                onResult(false)
+            if (!currentGroups.remove(groupId)) {
+                Log.d(TAG, "User $userId not in group $groupId")
+                return@mapCatching
             }
+
+            val updates = mapOf("groups" to currentGroups)
+            updateUser(userId, updates).getOrThrow()
+            Log.d(TAG, "Group $groupId removed from user $userId")
         }
     }
 
     // Get all groups for a user
-    fun getUserGroups(userId: String, onResult: (List<String>) -> Unit) {
-        getUser(userId) { user ->
-            onResult(user?.groups ?: emptyList())
+    suspend fun getUserGroups(userId: String): Result<List<String>> {
+        return getUser(userId).map { user ->
+            user.groups
         }
     }
 
@@ -175,10 +125,10 @@ class UserRepository @Inject constructor(
     private fun mapToUser(map: Map<String, Any>): User? {
         return try {
             User(
-                uid = map["userId"] as? String ?: "",
-                displayName = map["name"] as? String ?: "",
-                email = map["email"] as? String ?: "",
-                photoUrl = map["profilePhoto"] as? String ?: "",
+                uid = map["uid"] as? String ?: "",
+                displayName = map["displayName"] as? String,
+                email = map["email"] as? String,
+                photoUrl = map["photoUrl"] as? String,
                 groups = (map["groups"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
             )
         } catch (e: Exception) {
@@ -188,108 +138,89 @@ class UserRepository @Inject constructor(
     }
 
     // Subcollection operations
-    fun <T : Any> addToUserSubCollection(
+    suspend fun <T : Any> addToUserSubCollection(
         userId: String,
         subCollectionName: String,
         documentId: String,
-        data: T,
-        onResult: (Boolean) -> Unit
-    ) {
+        data: T
+    ): Result<Unit> {
         Log.d(TAG, "Adding document to $subCollectionName for user: $userId")
         val fullPath = "$COLLECTION_PATH/$userId/$subCollectionName"
 
-        firestoreService.addDocument(
+        return firestoreService.addDocument(
             collectionPath = fullPath,
             documentId = documentId,
-            data = data,
-            onResult = { success ->
-                if (success) {
-                    Log.d(TAG, "Document added to $subCollectionName: $documentId")
-                } else {
-                    Log.e(TAG, "Error adding document to $subCollectionName")
-                }
-                onResult(success)
-            }
-        )
+            data = data
+        ).onSuccess {
+            Log.d(TAG, "Document added to $subCollectionName: $documentId")
+        }.onFailure {
+            Log.e(TAG, "Error adding document to $subCollectionName", it)
+        }
     }
 
-    fun <T> getUserSubCollection(
+    suspend fun <T> getUserSubCollection(
         userId: String,
         subCollectionName: String,
-        clazz: Class<T>,
-        onResult: (List<T>) -> Unit
-    ) {
+        clazz: Class<T>
+    ): Result<List<T>> {
         val fullPath = "$COLLECTION_PATH/$userId/$subCollectionName"
 
-        firestoreService.getAllDocuments(
+        return firestoreService.getAllDocuments(
             collectionPath = fullPath,
-            clazz = clazz,
-            onResult = onResult
+            clazz = clazz
         )
     }
 
-    fun <T> getUserSubCollectionDocument(
+    suspend fun <T> getUserSubCollectionDocument(
         userId: String,
         subCollectionName: String,
         documentId: String,
-        clazz: Class<T>,
-        onResult: (T?) -> Unit
-    ) {
+        clazz: Class<T>
+    ): Result<T> {
         val fullPath = "$COLLECTION_PATH/$userId/$subCollectionName"
 
-        firestoreService.getDocument(
+        return firestoreService.getDocument(
             collectionPath = fullPath,
             documentId = documentId,
-            clazz = clazz,
-            onResult = onResult
+            clazz = clazz
         )
     }
 
-    fun updateUserSubCollectionDocument(
+    suspend fun updateUserSubCollectionDocument(
         userId: String,
         subCollectionName: String,
         documentId: String,
-        updates: Map<String, Any>,
-        onResult: (Boolean) -> Unit
-    ) {
+        updates: Map<String, Any>
+    ): Result<Unit> {
         Log.d(TAG, "Updating document in $subCollectionName for user: $userId")
         val fullPath = "$COLLECTION_PATH/$userId/$subCollectionName"
 
-        firestoreService.updateDocument(
+        return firestoreService.updateDocument(
             collectionPath = fullPath,
             documentId = documentId,
-            updates = updates,
-            onResult = { success ->
-                if (success) {
-                    Log.d(TAG, "Document updated in $subCollectionName: $documentId")
-                } else {
-                    Log.e(TAG, "Error updating document in $subCollectionName")
-                }
-                onResult(success)
-            }
-        )
+            updates = updates
+        ).onSuccess {
+            Log.d(TAG, "Document updated in $subCollectionName: $documentId")
+        }.onFailure {
+            Log.e(TAG, "Error updating document in $subCollectionName", it)
+        }
     }
 
-    fun deleteUserSubCollectionDocument(
+    suspend fun deleteUserSubCollectionDocument(
         userId: String,
         subCollectionName: String,
-        documentId: String,
-        onResult: (Boolean) -> Unit
-    ) {
+        documentId: String
+    ): Result<Unit> {
         Log.d(TAG, "Deleting document from $subCollectionName for user: $userId")
         val fullPath = "$COLLECTION_PATH/$userId/$subCollectionName"
 
-        firestoreService.deleteDocument(
+        return firestoreService.deleteDocument(
             collectionPath = fullPath,
-            documentId = documentId,
-            onResult = { success ->
-                if (success) {
-                    Log.d(TAG, "Document deleted from $subCollectionName: $documentId")
-                } else {
-                    Log.e(TAG, "Error deleting document from $subCollectionName")
-                }
-                onResult(success)
-            }
-        )
+            documentId = documentId
+        ).onSuccess {
+            Log.d(TAG, "Document deleted from $subCollectionName: $documentId")
+        }.onFailure {
+            Log.e(TAG, "Error deleting document from $subCollectionName", it)
+        }
     }
 }

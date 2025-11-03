@@ -48,8 +48,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideGroupRepository(
-        firestoreService: FirestoreService
-    ): GroupRepository = GroupRepository(firestoreService)
+        firestoreService: FirestoreService,
+        userRepository: UserRepository
+    ): GroupRepository = GroupRepository(firestoreService, userRepository)
 
     // Provide UserRepository
     @Provides
