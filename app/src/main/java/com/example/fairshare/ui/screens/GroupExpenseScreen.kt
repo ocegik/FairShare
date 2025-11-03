@@ -19,11 +19,13 @@ import com.example.fairshare.ui.components.BackButton
 import com.example.fairshare.ui.components.ExpenseFormScreen
 import com.example.fairshare.viewmodel.AuthViewModel
 import com.example.fairshare.viewmodel.ExpenseViewModel
+import com.example.fairshare.viewmodel.UserViewModel
 
 @Composable
 fun GroupExpenseScreen(navController: NavHostController,
                        expenseViewModel: ExpenseViewModel,
-                       authViewModel: AuthViewModel) {
+                       authViewModel: AuthViewModel,
+                       userViewModel: UserViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -47,6 +49,6 @@ fun GroupExpenseScreen(navController: NavHostController,
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-        ExpenseFormScreen(navController, isGroupExpense = true, expenseViewModel, authViewModel)
+        ExpenseFormScreen(navController, isGroupExpense = true, expenseViewModel, authViewModel, userViewModel)
     }
 }

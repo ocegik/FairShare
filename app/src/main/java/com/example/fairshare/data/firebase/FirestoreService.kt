@@ -1,6 +1,7 @@
 package com.example.fairshare.data.firebase
 
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class FirestoreService @Inject constructor(
@@ -8,119 +9,146 @@ class FirestoreService @Inject constructor(
 ) {
 
     // Generic CRUD operations
-    fun <T : Any> addDocument(
+    suspend fun <T : Any> addDocument(
         collectionPath: String,
         documentId: String,
-        data: T,
-        onResult: (Boolean) -> Unit
-    ) {
+        data: T
+    ): Result<Unit> {  // ← Returns Result with success OR error details
+        return try {
+            firestore.collection(collectionPath)
+                .document(documentId)
+                .set(data)
+                .await()  // ← Suspends until complete (no callback needed!)
 
-        firestore.collection(collectionPath)
-            .document(documentId)
-            .set(data)
-            .addOnSuccessListener {
-                onResult(true) }
-            .addOnFailureListener {
-                onResult(false) }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)  // ← Keeps actual error message
+        }
     }
 
-    fun <T> getDocument(
+    suspend fun <T> getDocument(
         collectionPath: String,
         documentId: String,
-        clazz: Class<T>,
-        onResult: (T?) -> Unit
-    ) {
-        firestore.collection(collectionPath)
-            .document(documentId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                onResult(snapshot.toObject(clazz))
+        clazz: Class<T>
+    ): Result<T> {
+        return try {
+            val snapshot = firestore.collection(collectionPath)
+                .document(documentId)
+                .get()
+                .await()
+
+            val data = snapshot.toObject(clazz)
+            if (data != null) {
+                Result.success(data)
+            } else {
+                Result.failure(Exception("Document not found or data is null"))
             }
-            .addOnFailureListener { onResult(null) }
+        } catch (e: Exception) {
+            Result.failure(e)  // ← Network error is distinct
+        }
     }
 
-    fun getDocumentAsMap(
+    suspend fun updateDocument(
         collectionPath: String,
         documentId: String,
-        onResult: (Map<String, Any>?) -> Unit
-    ) {
-        firestore.collection(collectionPath)
-            .document(documentId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                if (snapshot.exists()) onResult(snapshot.data)
-                else onResult(null)
-            }
-            .addOnFailureListener { onResult(null) }
+        updates: Map<String, Any>
+    ): Result<Unit> {
+        return try {
+            firestore.collection(collectionPath)
+                .document(documentId)
+                .update(updates)
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    fun <T> getAllDocuments(
+    suspend fun deleteDocument(
         collectionPath: String,
-        clazz: Class<T>,
-        onResult: (List<T>) -> Unit
-    ) {
-        firestore.collection(collectionPath)
-            .get()
-            .addOnSuccessListener { query ->
-                val list = query.documents.mapNotNull { it.toObject(clazz) }
-                onResult(list)
-            }
-            .addOnFailureListener { onResult(emptyList()) }
+        documentId: String
+    ): Result<Unit> {
+        return try {
+            firestore.collection(collectionPath)
+                .document(documentId)
+                .delete()
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    fun getAllDocumentsAsMap(
+    suspend fun <T> getAllDocuments(
         collectionPath: String,
-        onResult: (List<Map<String, Any>>) -> Unit
-    ) {
-        firestore.collection(collectionPath)
-            .get()
-            .addOnSuccessListener { query ->
-                val list = query.documents.mapNotNull { it.data }
-                onResult(list)
-            }
-            .addOnFailureListener { onResult(emptyList()) }
+        clazz: Class<T>
+    ): Result<List<T>> {
+        return try {
+            val query = firestore.collection(collectionPath)
+                .get()
+                .await()
+
+            val list = query.documents.mapNotNull { it.toObject(clazz) }
+            Result.success(list)
+        } catch (e: Exception) {
+            Result.failure(e)  // ← Error is distinct from empty result
+        }
     }
 
-    fun <T> queryDocuments(
+    suspend fun getDocumentAsMap(
+        collectionPath: String,
+        documentId: String
+    ): Result<Map<String, Any>> {
+        return try {
+            val snapshot = firestore.collection(collectionPath)
+                .document(documentId)
+                .get()
+                .await()
+
+            if (snapshot.exists() && snapshot.data != null) {
+                Result.success(snapshot.data!!)
+            } else {
+                Result.failure(Exception("Document not found"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getAllDocumentsAsMap(
+        collectionPath: String
+    ): Result<List<Map<String, Any>>> {
+        return try {
+            val query = firestore.collection(collectionPath)
+                .get()
+                .await()
+
+            val list = query.documents.mapNotNull { it.data }
+            Result.success(list)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun <T> queryDocuments(
         collectionPath: String,
         field: String,
         value: Any,
-        clazz: Class<T>,
-        onResult: (List<T>) -> Unit
-    ) {
-        firestore.collection(collectionPath)
-            .whereEqualTo(field, value)
-            .get()
-            .addOnSuccessListener { query ->
-                val list = query.documents.mapNotNull { it.toObject(clazz) }
-                onResult(list)
-            }
-            .addOnFailureListener { onResult(emptyList()) }
-    }
+        clazz: Class<T>
+    ): Result<List<T>> {
+        return try {
+            val query = firestore.collection(collectionPath)
+                .whereEqualTo(field, value)
+                .get()
+                .await()
 
-    fun updateDocument(
-        collectionPath: String,
-        documentId: String,
-        updates: Map<String, Any>,
-        onResult: (Boolean) -> Unit
-    ) {
-        firestore.collection(collectionPath)
-            .document(documentId)
-            .update(updates)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
-    }
-
-    fun deleteDocument(
-        collectionPath: String,
-        documentId: String,
-        onResult: (Boolean) -> Unit
-    ) {
-        firestore.collection(collectionPath)
-            .document(documentId)
-            .delete()
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
+            val list = query.documents.mapNotNull { it.toObject(clazz) }
+            Result.success(list)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     fun generateDocumentId(collectionPath: String): String {

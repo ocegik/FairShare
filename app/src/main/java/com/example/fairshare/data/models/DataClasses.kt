@@ -4,7 +4,8 @@ data class User(
     val uid: String,
     val displayName: String?,
     val email: String?,
-    val photoUrl: String?
+    val photoUrl: String?,
+    val groups: List<String> = emptyList()
 )
 
 data class ExpenseData(
@@ -31,4 +32,20 @@ data class DebtData(
     var groupId: String? = null,
     var createdAt: Long = System.currentTimeMillis(),
     var settledAt: Long? = null
+)
+
+data class UserStats(
+    val receivables: Double = 0.0,
+    val debt: Double = 0.0,
+    val income: Double = 0.0,
+    val expense: Double = 0.0
+)
+
+data class Group(
+    var groupId: String = "",
+    val name: String = "",
+    val owner: String = "",
+    val password: String = "",
+    val members: List<String> = emptyList(),
+    var createdAt: Long = System.currentTimeMillis(),
 )

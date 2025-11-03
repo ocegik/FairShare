@@ -26,18 +26,22 @@ class AuthViewModel @Inject constructor(
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
+    companion object{
+        private const val TAG = "AuthViewModel"
+    }
+
     init {
-        Log.d("AuthViewModel", "=== AuthViewModel CREATED ===")
+        Log.d(TAG, "=== AuthViewModel CREATED ===")
         checkCurrentUser()
     }
 
     private fun checkCurrentUser() {
         val user = repository.getCurrentUser()
-        Log.d("AuthViewModel", "checkCurrentUser: user = $user")
+        Log.d(TAG, "checkCurrentUser: user = $user")
         user?.let {
-            Log.d("AuthViewModel", "User found - uid: ${it.uid}, name: ${it.displayName}")
+            Log.d(TAG, "User found - uid: ${it.uid}, name: ${it.displayName}")
             _authState.value = AuthState.Success(it)
-        } ?: Log.d("AuthViewModel", "No current user")
+        } ?: Log.d(TAG, "No current user")
     }
 
     fun signInWithGoogle(idToken: String) {
@@ -46,11 +50,11 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             repository.signInWithGoogle(idToken)
                 .onSuccess { user ->
-                    Log.d("AuthViewModel", "✅ Sign-in SUCCESS - uid: ${user.uid}, name: ${user.displayName}")
+                    Log.d(TAG, "✅ Sign-in SUCCESS - uid: ${user.uid}, name: ${user.displayName}")
                     _authState.value = AuthState.Success(user)
                 }
                 .onFailure { exception ->
-                    Log.e("AuthViewModel", "❌ Sign-in FAILED: ${exception.message}")
+                    Log.e(TAG, "❌ Sign-in FAILED: ${exception.message}")
                     _authState.value = AuthState.Error(
                         exception.message ?: "Sign in failed"
                     )
@@ -60,11 +64,17 @@ class AuthViewModel @Inject constructor(
 
     fun signOut(context: Context) {
         viewModelScope.launch {
-            repository.signOut()
-            val cm = CredentialManager.create(context)
-            cm.clearCredentialState(ClearCredentialStateRequest())
-            _authState.value = AuthState.Idle
-            Log.d("AuthViewModel", "User signed out")
+            try {
+                repository.signOut()
+                val cm = CredentialManager.create(context)
+                cm.clearCredentialState(ClearCredentialStateRequest())
+                _authState.value = AuthState.Idle
+                Log.d(TAG, "User signed out")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error during sign out", e)
+                // Still update state even if credential clear fails
+                _authState.value = AuthState.Idle
+            }
         }
     }
 
@@ -85,11 +95,11 @@ class AuthViewModel @Inject constructor(
         .map { state ->
             when (state) {
                 is AuthState.Success -> {
-                    Log.d("AuthViewModel", "currentUserId: ${state.user.uid}")
+                    Log.d(TAG, "currentUserId: ${state.user.uid}")
                     state.user.uid
                 }
                 else -> {
-                    Log.d("AuthViewModel", "currentUserId: null (state: ${state::class.simpleName})")
+                    Log.d(TAG, "currentUserId: null (state: ${state::class.simpleName})")
                     null
                 }
             }

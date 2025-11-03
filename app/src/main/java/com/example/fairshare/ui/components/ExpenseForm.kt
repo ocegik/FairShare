@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.fairshare.data.models.ExpenseData
 import com.example.fairshare.viewmodel.AuthViewModel
@@ -45,14 +44,14 @@ fun ExpenseFormScreen(
     navController: NavHostController,
     isGroupExpense: Boolean = false,
     expenseViewModel: ExpenseViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    userViewModel: UserViewModel
 ) {
 
     val userId by authViewModel.currentUserId.collectAsState()
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
-
 
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
@@ -180,10 +179,11 @@ fun ExpenseFormScreen(
                         userId = currentUserId,
                         groupId = if (isGroupExpense) "groupIdHere" else null,
                         participants = if (isGroupExpense) selectedPeople else null,
-                        paidBy = if (isGroupExpense) "currentUserIdHere" else null
+                        paidBy = if (isGroupExpense) currentUserId else null
                     )
 
                     expenseViewModel.addExpense(expense)
+                    userViewModel.updateStatsForExpense(expense)
                     navController.popBackStack()
                 }
                 else {
