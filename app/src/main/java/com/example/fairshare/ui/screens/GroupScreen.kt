@@ -22,6 +22,7 @@ import com.example.fairshare.navigation.Screen
 
 @Composable
 fun GroupScreen(navController: NavController) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()

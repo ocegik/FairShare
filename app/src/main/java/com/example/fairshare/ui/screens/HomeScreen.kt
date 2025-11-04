@@ -12,9 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -26,6 +32,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,9 +47,10 @@ import coil.compose.AsyncImage
 import com.example.fairshare.navigation.Screen
 import com.example.fairshare.ui.components.FloatingActionButtonMenuSample
 import com.example.fairshare.viewmodel.UserViewModel
+import kotlinx.coroutines.launch
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController,
@@ -49,6 +60,26 @@ fun HomeScreen(
     val photoUrl by userViewModel.photoUrl.collectAsState()
     val userStats by userViewModel.userStats.collectAsState()
     val isLoading by userViewModel.isLoading.collectAsState()
+
+    var isRefreshing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    // Pull-to-refresh state
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = {
+            scope.launch {
+                isRefreshing = true
+                // Refresh both user and stats
+                userViewModel.refreshUserFromFirestore()
+                userViewModel.refreshStats()
+                // Optional: add small delay for smoother spinner
+                kotlinx.coroutines.delay(800)
+                isRefreshing = false
+            }
+        }
+    )
+
 
     Scaffold(
         topBar = {
@@ -91,18 +122,22 @@ fun HomeScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.Center
+                .padding(padding)
+                .pullRefresh(pullRefreshState),
+            contentAlignment = Alignment.TopCenter
         ) {
-            if (isLoading && userStats == null) {
-                CircularProgressIndicator()
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (isLoading && userStats == null) {
+                    Spacer(modifier = Modifier.height(200.dp))
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                } else {
                     Text(
                         text = "Welcome back,",
                         style = MaterialTheme.typography.titleMedium,
@@ -140,11 +175,13 @@ fun HomeScreen(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                                 Text(
-                                    "₹${String.format(
-                                        Locale.getDefault(),
-                                        "%.2f",
-                                        userStats?.income ?: 0.0
-                                    )}",
+                                    "₹${
+                                        String.format(
+                                            Locale.getDefault(),
+                                            "%.2f",
+                                            userStats?.income ?: 0.0
+                                        )
+                                    }",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -170,11 +207,13 @@ fun HomeScreen(
                                     color = MaterialTheme.colorScheme.onErrorContainer
                                 )
                                 Text(
-                                    "₹${String.format(
-                                        Locale.getDefault(),
-                                        "%.2f",
-                                        userStats?.income ?: 0.0
-                                    )}",
+                                    "₹${
+                                        String.format(
+                                            Locale.getDefault(),
+                                            "%.2f",
+                                            userStats?.income ?: 0.0
+                                        )
+                                    }",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onErrorContainer
@@ -208,11 +247,13 @@ fun HomeScreen(
                                     color = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
                                 Text(
-                                    "₹${String.format(
-                                        Locale.getDefault(),
-                                        "%.2f",
-                                        userStats?.income ?: 0.0
-                                    )}",
+                                    "₹${
+                                        String.format(
+                                            Locale.getDefault(),
+                                            "%.2f",
+                                            userStats?.income ?: 0.0
+                                        )
+                                    }",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -238,11 +279,13 @@ fun HomeScreen(
                                     color = MaterialTheme.colorScheme.onTertiaryContainer
                                 )
                                 Text(
-                                    "₹${String.format(
-                                        Locale.getDefault(),
-                                        "%.2f",
-                                        userStats?.income ?: 0.0
-                                    )}",
+                                    "₹${
+                                        String.format(
+                                            Locale.getDefault(),
+                                            "%.2f",
+                                            userStats?.income ?: 0.0
+                                        )
+                                    }",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -272,6 +315,11 @@ fun HomeScreen(
                     }
                 }
             }
+            PullRefreshIndicator(
+                refreshing = isRefreshing,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
     }
 }
