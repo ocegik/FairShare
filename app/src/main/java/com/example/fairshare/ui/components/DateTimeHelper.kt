@@ -1,6 +1,9 @@
 package com.example.fairshare.ui.components
 
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 fun mergeDateAndTime(dateMillis: Long?, hour: Int?, minute: Int?): Long {
     return if (dateMillis != null && hour != null && minute != null) {
@@ -24,4 +27,10 @@ fun mergeDateAndTime(dateMillis: Long?, hour: Int?, minute: Int?): Long {
         // Fallback to current date and time
         System.currentTimeMillis()
     }
+}
+
+fun formatDateTime(timestamp: Long): String {
+    if (timestamp == 0L) return ""
+    val sdf = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
+    return sdf.format(Date(timestamp))
 }

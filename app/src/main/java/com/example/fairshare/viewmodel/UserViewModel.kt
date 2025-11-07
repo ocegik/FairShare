@@ -358,6 +358,12 @@ class UserViewModel @Inject constructor(
         fetchUserStats()
     }
 
+    suspend fun getGroupsOfUser(userId: String): List<String> {
+        return userRepository.getUserGroups(userId)
+            .getOrElse { emptyList() }
+    }
+
+
 }
 
 enum class DebtOperation {
