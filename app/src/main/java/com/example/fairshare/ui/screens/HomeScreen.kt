@@ -133,7 +133,7 @@ fun HomeScreen(
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (isLoading && userStats == null) {
+                if (userStats == null && isLoading) {
                     Spacer(modifier = Modifier.height(200.dp))
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
@@ -211,7 +211,7 @@ fun HomeScreen(
                                         String.format(
                                             Locale.getDefault(),
                                             "%.2f",
-                                            userStats?.income ?: 0.0
+                                            userStats?.expense ?: 0.0
                                         )
                                     }",
                                     style = MaterialTheme.typography.titleMedium,
@@ -251,7 +251,7 @@ fun HomeScreen(
                                         String.format(
                                             Locale.getDefault(),
                                             "%.2f",
-                                            userStats?.income ?: 0.0
+                                            userStats?.debt ?: 0.0
                                         )
                                     }",
                                     style = MaterialTheme.typography.titleMedium,
@@ -283,7 +283,7 @@ fun HomeScreen(
                                         String.format(
                                             Locale.getDefault(),
                                             "%.2f",
-                                            userStats?.income ?: 0.0
+                                            userStats?.receivables ?: 0.0
                                         )
                                     }",
                                     style = MaterialTheme.typography.titleMedium,
