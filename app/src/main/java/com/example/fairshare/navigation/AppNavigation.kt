@@ -29,6 +29,7 @@ import com.example.fairshare.ui.screens.ProfileScreen
 import com.example.fairshare.ui.screens.StatsScreen
 import com.example.fairshare.viewmodel.ExpenseViewModel
 import com.example.fairshare.viewmodel.GroupViewModel
+import com.example.fairshare.viewmodel.HistoryViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -38,7 +39,8 @@ fun AppNavigation(
     authViewModel: AuthViewModel,
     userViewModel: UserViewModel,
     expenseViewModel: ExpenseViewModel,
-    groupViewModel: GroupViewModel
+    groupViewModel: GroupViewModel,
+    historyViewModel: HistoryViewModel
 ) {
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
 
@@ -115,7 +117,7 @@ fun AppNavigation(
             }
 
             composable(Screen.History.route) {
-                HistoryScreen(navController)
+                HistoryScreen(navController, historyViewModel)
             }
 
             composable(Screen.Group.route) {

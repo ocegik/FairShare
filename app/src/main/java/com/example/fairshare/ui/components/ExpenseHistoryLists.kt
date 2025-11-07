@@ -20,53 +20,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.fairshare.data.models.ExpenseData
 
 @Composable
-fun ExpenseHistoryList(type: String) {
-    val placeholderExpenses = when (type) {
-        "Personal" -> List(8) { index ->
-            ExpenseItemData(
-                title = "Personal Expense #$index",
-                amount = (150..800).random(),
-                date = "Oct ${8 + index}, 2025",
-                category = listOf("Food", "Bills", "Subscriptions").random()
-            )
-        }
-
-        "Group" -> List(6) { index ->
-            ExpenseItemData(
-                title = "Group Trip #$index",
-                amount = (300..2500).random(),
-                date = "Oct ${5 + index}, 2025",
-                category = listOf("Trip", "Shared Rent", "Party", "Event").random()
-            )
-        }
-
-        "Yours" -> List(10) { index ->
-            ExpenseItemData(
-                title = "Expense by You #$index",
-                amount = (200..1500).random(),
-                date = "Oct ${10 + index}, 2025",
-                category = listOf("Personal", "Group", "Misc").random()
-            )
-        }
-
-        else -> emptyList()
-    }
-
+fun ExpenseHistoryList(expenses: List<ExpenseData>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(12.dp)
     ) {
-        items(placeholderExpenses) { expense ->
-            ExpenseHistoryItem(expense)
+        items(expenses) { expense ->
+            ExpenseHistoryItem(
+                ExpenseItemData(
+                    title = expense.title,
+                    amount = expense.amount,
+                    date = formatDateTime(expense.dateTime),
+                    category = expense.category
+                )
+            )
         }
     }
 }
+
 data class ExpenseItemData(
     val title: String,
-    val amount: Int,
+    val amount: Double,
     val date: String,
     val category: String
 )
