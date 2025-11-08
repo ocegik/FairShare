@@ -5,7 +5,8 @@ data class User(
     val displayName: String?,
     val email: String?,
     val photoUrl: String?,
-    val groups: List<String> = emptyList()
+    val groups: List<String> = emptyList(),
+    val bookMarkedGroup: String? = null
 )
 
 data class ExpenseData(

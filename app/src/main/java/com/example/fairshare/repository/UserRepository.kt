@@ -129,7 +129,8 @@ class UserRepository @Inject constructor(
                 displayName = map["displayName"] as? String,
                 email = map["email"] as? String,
                 photoUrl = map["photoUrl"] as? String,
-                groups = (map["groups"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+                groups = (map["groups"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
+                bookMarkedGroup = map["bookMarkedGroup"] as? String
             )
         } catch (e: Exception) {
             Log.e(TAG, "Error converting map to User: ${e.message}")
