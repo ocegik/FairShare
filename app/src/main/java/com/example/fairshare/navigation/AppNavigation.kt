@@ -124,7 +124,7 @@ fun AppNavigation(
             }
 
             composable(Screen.Group.route) {
-                GroupScreen(navController, groupViewModel, authViewModel)
+                GroupScreen(navController, groupViewModel, authViewModel, userViewModel)
             }
 
             composable(Screen.Stats.route) {
@@ -156,7 +156,7 @@ fun AppNavigation(
                 arguments = listOf(navArgument("groupId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val groupId = backStackEntry.arguments?.getString("groupId")!!
-                GroupDetailsScreen(groupId, groupViewModel)
+                GroupDetailsScreen(groupId, groupViewModel, userViewModel)
             }
 
         }

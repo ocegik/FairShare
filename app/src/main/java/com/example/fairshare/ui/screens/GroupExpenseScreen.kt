@@ -47,7 +47,13 @@ fun GroupExpenseScreen(navController: NavHostController,
     val userGroups by groupViewModel.userGroups.collectAsState()
     val bookmarkedGroupId by userViewModel.bookmarkedGroupId.collectAsState()
 
-    var selectedGroupId by remember { mutableStateOf(bookmarkedGroupId) }
+    var selectedGroupId by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(userGroups, bookmarkedGroupId) {
+        val fallback = userGroups.firstOrNull()?.groupId
+        selectedGroupId = bookmarkedGroupId.takeIf { !it.isNullOrBlank() } ?: fallback
+    }
+
 
     val members = remember(selectedGroupId, userGroups) {
         selectedGroupId?.let { gid ->
@@ -80,10 +86,15 @@ fun GroupExpenseScreen(navController: NavHostController,
         }
         GroupSelector(
             groups = userGroups,
-            onGroupSelected = { id ->
-                selectedGroupId = id
-            }
+            selectedGroupId = selectedGroupId,
+            onGroupSelected = { id -> selectedGroupId = id }
         )
+
+        if (selectedGroupId == null) {
+            Text("Select a group to add expenses.")
+            return@Column
+        }
+
         ExpenseFormScreen(
             navController = navController,
             isGroupExpense = true,

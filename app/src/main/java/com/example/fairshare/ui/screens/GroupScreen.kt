@@ -1,5 +1,6 @@
 package com.example.fairshare.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,19 +22,24 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fairshare.navigation.Screen
 import com.example.fairshare.ui.components.GroupItem
 import com.example.fairshare.viewmodel.AuthViewModel
 import com.example.fairshare.viewmodel.GroupViewModel
+import com.example.fairshare.viewmodel.UserViewModel
 
 @Composable
 fun GroupScreen(navController: NavController,
                 groupViewModel: GroupViewModel,
-                authViewModel: AuthViewModel) {
+                authViewModel: AuthViewModel,
+                userViewModel: UserViewModel
+) {
 
     val userId by authViewModel.currentUserId.collectAsState()
+    val bookmarkedGroupId by userViewModel.bookmarkedGroupId.collectAsState()
 
     LaunchedEffect(userId) {
         if (!userId.isNullOrBlank()) {
@@ -43,6 +49,7 @@ fun GroupScreen(navController: NavController,
 
     val userGroups by groupViewModel.userGroups.collectAsState()
     val uiState by groupViewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -101,10 +108,26 @@ fun GroupScreen(navController: NavController,
         Spacer(modifier = Modifier.height(12.dp))
 
         userGroups.forEach { group ->
-            GroupItem(group = group) {
-                // navigate to group details
-                navController.navigate("group_details/${group.groupId}")
-            }
+            GroupItem(
+                group = group,
+                groupViewModel = groupViewModel,
+                isBookmarked = group.groupId == bookmarkedGroupId,
+                onBookmarkClick = {
+                    val newBookmarkId = if (group.groupId == bookmarkedGroupId) null else group.groupId
+                    userViewModel.updateBookMarkedGroup(newBookmarkId ?: "") { success ->
+                        if (success) {
+                            val message = if (newBookmarkId != null)
+                                "Bookmarked ${group.name}"
+                            else
+                                "Removed bookmark"
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
+                onClick = {
+                    navController.navigate("group_details/${group.groupId}")
+                }
+            )
             Spacer(modifier = Modifier.height(8.dp))
         }
     }

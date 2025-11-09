@@ -375,10 +375,16 @@ class UserViewModel @Inject constructor(
 
     fun updateBookMarkedGroup(groupId: String, onComplete: (Boolean) -> Unit = {}) {
         val currentUser = _userProfile.value ?: return
-        updateProfile(currentUser.copy(bookMarkedGroup = groupId), onComplete)
+        val updates = mapOf("bookMarkedGroup" to groupId)
+
+        viewModelScope.launch {
+            val result = userRepository.updateUser(currentUser.uid, updates)
+            onComplete(result.isSuccess)
+            if (result.isSuccess) {
+                _userProfile.value = currentUser.copy(bookMarkedGroup = groupId)
+            }
+        }
     }
-
-
 
 }
 

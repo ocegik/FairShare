@@ -17,6 +17,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,13 +30,22 @@ import com.example.fairshare.data.models.Group
 @Composable
 fun GroupSelector(
     groups: List<Group>,
+    selectedGroupId: String?,
     onGroupSelected: (String) -> Unit
 ) {
     var showSheet by remember { mutableStateOf(false) }
     var sheetState = rememberModalBottomSheetState()
 
     // Current selection persists at this level
-    var selectedGroupName by remember { mutableStateOf<String?>(null) }
+    var selectedGroupName by remember {
+        mutableStateOf(
+            groups.find { it.groupId == selectedGroupId }?.name
+        )
+    }
+
+    LaunchedEffect(selectedGroupId, groups) {
+        selectedGroupName = groups.find { it.groupId == selectedGroupId }?.name
+    }
 
     Column(
         modifier = Modifier
