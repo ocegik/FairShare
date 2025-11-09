@@ -21,7 +21,8 @@ class UserRepository @Inject constructor(
             "displayName" to (user.displayName ?: ""),
             "email" to (user.email ?: ""),
             "photoUrl" to (user.photoUrl ?: ""),
-            "groups" to user.groups
+            "groups" to user.groups,
+            "bookMarkedGroup" to (user.bookMarkedGroup ?: "")
         )
 
         return firestoreService.addDocument(

@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fairshare.data.models.Group
+import com.example.fairshare.data.models.GroupMember
+import com.example.fairshare.data.models.GroupUiData
 import com.example.fairshare.repository.GroupRepository
 import com.example.fairshare.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -227,6 +229,39 @@ class GroupViewModel @Inject constructor(
 
     fun loadInitialUserGroups(userId: String) {
         loadGroupsForUser(userId)
+    }
+
+    private suspend fun toGroupMember(userId: String, ownerId: String): GroupMember {
+        val user = userRepository.getUser(userId).getOrThrow()
+        return GroupMember(
+            uid = user.uid,
+            displayName = user.displayName,
+            email = user.email,
+            photoUrl = user.photoUrl,
+            isOwner = userId == ownerId
+        )
+    }
+
+    suspend fun getGroupFullDetails(groupId: String): Result<GroupUiData> {
+        return runCatching {
+            val group = groupRepository.getGroup(groupId).getOrThrow()
+
+            val members = group.members.map { id ->
+                toGroupMember(id, group.owner)
+            }.sortedByDescending { it.isOwner } // owner first
+
+            GroupUiData(
+                group = group,
+                members = members
+            )
+        }
+    }
+    suspend fun getGroupPreviewMembers(group: Group): List<GroupMember> {
+        val previewIds = group.members.take(3)
+
+        return previewIds.map { id ->
+            toGroupMember(id, group.owner)
+        }
     }
 
     companion object {
