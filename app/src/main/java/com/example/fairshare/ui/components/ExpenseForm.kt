@@ -33,8 +33,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.fairshare.data.models.ExpenseData
 import com.example.fairshare.viewmodel.AuthViewModel
+import com.example.fairshare.viewmodel.DebtViewModel
 import com.example.fairshare.viewmodel.ExpenseViewModel
 import com.example.fairshare.viewmodel.UserViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 
@@ -46,6 +50,7 @@ fun ExpenseFormScreen(
     expenseViewModel: ExpenseViewModel,
     authViewModel: AuthViewModel,
     userViewModel: UserViewModel,
+    debtViewModel: DebtViewModel,
     groupId: String? = null,
     members: List<String> = emptyList()
 ) {
@@ -186,9 +191,26 @@ fun ExpenseFormScreen(
 
                     expenseViewModel.addExpense(expense)
                     userViewModel.updateStatsForExpense(expense)
-                    navController.popBackStack()
-                }
-                else {
+
+                    if (isGroupExpense && groupId != null && selectedPeople.isNotEmpty()) {
+                        // Launch coroutine to create debts and wait for completion
+                        CoroutineScope(Dispatchers.Main).launch {
+                            val success = createDebtsForGroupExpense(
+                                expenseId = expense.id,
+                                amount = expense.amount,
+                                paidBy = currentUserId,
+                                participants = selectedPeople,
+                                groupId = groupId,
+                                debtViewModel = debtViewModel
+                            )
+                            // Navigate back after debts are created
+                            navController.popBackStack()
+                        }
+                    } else {
+                        // For non-group expenses, navigate immediately
+                        navController.popBackStack()
+                    }
+                } else {
                     Log.e("ExpenseForm", "Validation failed - expense not created")
                 }
             },
