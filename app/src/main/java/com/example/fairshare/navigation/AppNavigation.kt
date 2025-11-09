@@ -20,6 +20,7 @@ import com.example.fairshare.ui.screens.LoginScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.fairshare.ui.screens.BalancesScreen
 import com.example.fairshare.ui.screens.CreateGroupScreen
 import com.example.fairshare.ui.screens.GroupDetailsScreen
 import com.example.fairshare.ui.screens.GroupExpenseScreen
@@ -157,6 +158,9 @@ fun AppNavigation(
             ) { backStackEntry ->
                 val groupId = backStackEntry.arguments?.getString("groupId")!!
                 GroupDetailsScreen(groupId, groupViewModel, userViewModel)
+            }
+            composable(Screen.Balances.route) {
+                BalancesScreen(navController)
             }
 
         }
