@@ -64,3 +64,9 @@ data class GroupUiData(
     val members: List<GroupMember>
 )
 
+data class DebtSummary(
+    val fromUserId: String,
+    val toUserId: String,
+    val totalAmount: Double
+)
+
