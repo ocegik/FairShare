@@ -45,7 +45,9 @@ fun ExpenseFormScreen(
     isGroupExpense: Boolean = false,
     expenseViewModel: ExpenseViewModel,
     authViewModel: AuthViewModel,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    groupId: String? = null,
+    members: List<String> = emptyList()
 ) {
 
     val userId by authViewModel.currentUserId.collectAsState()
@@ -65,7 +67,7 @@ fun ExpenseFormScreen(
     var selectedMinute by remember { mutableStateOf<Int?>(null) }
 
     // Group-specific state
-    val allPeople = listOf("Tarun", "Mohit", "Pramod", "Pandu", "Ankit")
+    val allPeople = members
     var selectedPeople by remember { mutableStateOf(allPeople) }
 
     LaunchedEffect(entryType) {
@@ -177,7 +179,7 @@ fun ExpenseFormScreen(
                         entryType = entryType,
                         dateTime = mergedDateTime,
                         userId = currentUserId,
-                        groupId = if (isGroupExpense) "groupIdHere" else null,
+                        groupId = if (isGroupExpense) groupId else null,
                         participants = if (isGroupExpense) selectedPeople else null,
                         paidBy = if (isGroupExpense) currentUserId else null
                     )

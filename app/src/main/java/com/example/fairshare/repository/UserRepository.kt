@@ -21,7 +21,8 @@ class UserRepository @Inject constructor(
             "displayName" to (user.displayName ?: ""),
             "email" to (user.email ?: ""),
             "photoUrl" to (user.photoUrl ?: ""),
-            "groups" to user.groups
+            "groups" to user.groups,
+            "bookMarkedGroup" to (user.bookMarkedGroup ?: "")
         )
 
         return firestoreService.addDocument(
@@ -129,7 +130,8 @@ class UserRepository @Inject constructor(
                 displayName = map["displayName"] as? String,
                 email = map["email"] as? String,
                 photoUrl = map["photoUrl"] as? String,
-                groups = (map["groups"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+                groups = (map["groups"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
+                bookMarkedGroup = map["bookMarkedGroup"] as? String
             )
         } catch (e: Exception) {
             Log.e(TAG, "Error converting map to User: ${e.message}")

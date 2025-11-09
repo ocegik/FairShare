@@ -5,7 +5,8 @@ data class User(
     val displayName: String?,
     val email: String?,
     val photoUrl: String?,
-    val groups: List<String> = emptyList()
+    val groups: List<String> = emptyList(),
+    val bookMarkedGroup: String? = null
 )
 
 data class ExpenseData(
@@ -49,3 +50,17 @@ data class Group(
     val members: List<String> = emptyList(),
     var createdAt: Long = System.currentTimeMillis(),
 )
+
+data class GroupMember(
+    val uid: String,
+    val displayName: String?,
+    val email: String?,
+    val photoUrl: String?,
+    val isOwner: Boolean
+)
+
+data class GroupUiData(
+    val group: Group,
+    val members: List<GroupMember>
+)
+

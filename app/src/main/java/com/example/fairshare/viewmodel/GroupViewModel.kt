@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fairshare.data.models.Group
+import com.example.fairshare.data.models.GroupMember
+import com.example.fairshare.data.models.GroupUiData
 import com.example.fairshare.repository.GroupRepository
 import com.example.fairshare.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,218 +27,195 @@ class GroupViewModel @Inject constructor(
     private val _userGroups = MutableStateFlow<List<Group>>(emptyList())
     val userGroups: StateFlow<List<Group>> = _userGroups.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _uiState = MutableStateFlow<GroupUiState>(GroupUiState.Idle)
+    val uiState: StateFlow<GroupUiState> = _uiState.asStateFlow()
 
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
+    // ------------------------------------------------------------------------
+    // UI STATE
+    // ------------------------------------------------------------------------
 
-    // Add group
-    fun addGroup(group: Group, onComplete: (Result<Unit>) -> Unit = {}) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            groupRepository.addGroup(group)
-                .onSuccess {
-                    Log.d(TAG, "Group added successfully")
-                    loadGroups()
-                    onComplete(Result.success(Unit))
-                }
-                .onFailure { e ->
-                    Log.e(TAG, "Failed to add group", e)
-                    _error.value = e.message
-                    onComplete(Result.failure(e))
-                }
-            _isLoading.value = false
-        }
+    sealed class GroupUiState {
+        object Idle : GroupUiState()
+        object Loading : GroupUiState()
+        data class Success(val message: String? = null) : GroupUiState()
+        data class Error(val message: String) : GroupUiState()
     }
 
-    // Load all groups
-    fun loadGroups() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            groupRepository.getAllGroups()
-                .onSuccess { list ->
-                    _groups.value = list
-                    Log.d(TAG, "Loaded ${list.size} groups")
-                }
-                .onFailure { e ->
-                    Log.e(TAG, "Failed to load groups", e)
-                    _error.value = e.message
-                }
-            _isLoading.value = false
-        }
+    // ------------------------------------------------------------------------
+    // PRIVATE INTERNAL HELPERS
+    // ------------------------------------------------------------------------
+
+    private suspend fun loadGroupsInternal() {
+        val list = groupRepository.getAllGroups().getOrThrow()
+        _groups.value = list
     }
 
-    // Get single group
+    private suspend fun loadUserGroupsInternal(userId: String) {
+        val user = userRepository.getUser(userId).getOrThrow()
+
+        val groups =
+            if (user.groups.isNotEmpty())
+                groupRepository.getGroupsByIds(user.groups).getOrThrow()
+            else emptyList()
+
+        _userGroups.value = groups
+    }
+
+    // ------------------------------------------------------------------------
+    // PUBLIC FUNCTIONS (UI SHOULD CALL THESE)
+    // ------------------------------------------------------------------------
+
     suspend fun getGroup(groupId: String): Result<Group> {
         return groupRepository.getGroup(groupId)
     }
-
-    // Update group
-    fun updateGroup(groupId: String, group: Group, onComplete: (Result<Unit>) -> Unit = {}) {
+    fun addGroup(group: Group) {
         viewModelScope.launch {
-            _isLoading.value = true
-            groupRepository.updateGroup(groupId, group)
-                .onSuccess {
-                    Log.d(TAG, "Group updated successfully")
-                    loadGroups()
-                    onComplete(Result.success(Unit))
-                }
-                .onFailure { e ->
-                    Log.e(TAG, "Failed to update group", e)
-                    _error.value = e.message
-                    onComplete(Result.failure(e))
-                }
-            _isLoading.value = false
+            runCatching {
+                _uiState.value = GroupUiState.Loading
+
+                groupRepository.addGroup(group).getOrThrow()
+                loadGroupsInternal()
+
+                _uiState.value = GroupUiState.Success("Group created successfully")
+            }.onFailure { e ->
+                _uiState.value =
+                    GroupUiState.Error(e.message ?: "Failed to create group")
+            }
         }
     }
 
-    // Delete group
-    fun deleteGroup(groupId: String, onComplete: (Result<Unit>) -> Unit = {}) {
+    fun loadGroups() {
         viewModelScope.launch {
-            _isLoading.value = true
-            groupRepository.deleteGroup(groupId)
-                .onSuccess {
-                    Log.d(TAG, "Group deleted successfully")
-                    loadGroups()
-                    onComplete(Result.success(Unit))
-                }
-                .onFailure { e ->
-                    Log.e(TAG, "Failed to delete group", e)
-                    _error.value = e.message
-                    onComplete(Result.failure(e))
-                }
-            _isLoading.value = false
+            runCatching {
+                _uiState.value = GroupUiState.Loading
+
+                val list = groupRepository.getAllGroups().getOrThrow()
+                _groups.value = list
+
+                _uiState.value = GroupUiState.Idle
+            }.onFailure { e ->
+                _uiState.value =
+                    GroupUiState.Error(e.message ?: "Failed to load groups")
+            }
         }
     }
 
-    // Transfer ownership
-    fun transferOwnership(groupId: String, newOwnerId: String, onComplete: (Result<Unit>) -> Unit = {}) {
-        viewModelScope.launch {
-            groupRepository.getGroup(groupId)
-                .onSuccess { group ->
-                    updateGroup(groupId, group.copy(owner = newOwnerId), onComplete)
-                }
-                .onFailure { e ->
-                    Log.e(TAG, "Failed to transfer ownership", e)
-                    _error.value = e.message
-                    onComplete(Result.failure(e))
-                }
-        }
-    }
-
-    // Remove member from group
-    fun removeMember(groupId: String, userId: String, onComplete: (Result<Unit>) -> Unit = {}) {
-        viewModelScope.launch {
-            groupRepository.getGroup(groupId)
-                .onSuccess { group ->
-                    val updatedMembers = group.members.filter { id -> id != userId }
-                    updateGroup(groupId, group.copy(members = updatedMembers)) { result ->
-                        if (result.isSuccess) {
-                            // Also remove from user's groups list
-                            viewModelScope.launch {
-                                userRepository.removeGroupFromUser(userId, groupId)
-                                    .onFailure { e ->
-                                        Log.e(TAG, "Failed to remove group from user", e)
-                                    }
-                            }
-                        }
-                        onComplete(result)
-                    }
-                }
-                .onFailure { e ->
-                    Log.e(TAG, "Failed to remove member", e)
-                    _error.value = e.message
-                    onComplete(Result.failure(e))
-                }
-        }
-    }
-
-    // Load groups for a specific user
     fun loadGroupsForUser(userId: String) {
         viewModelScope.launch {
-            _isLoading.value = true
-            userRepository.getUser(userId)
-                .onSuccess { user ->
-                    if (user.groups.isNotEmpty()) {
-                        groupRepository.getGroupsByIds(user.groups)
-                            .onSuccess { groups ->
-                                _userGroups.value = groups
-                                Log.d(TAG, "Loaded ${groups.size} groups for user $userId")
-                            }
-                            .onFailure { e ->
-                                Log.e(TAG, "Failed to load user groups", e)
-                                _error.value = e.message
-                            }
-                    } else {
-                        _userGroups.value = emptyList()
-                        Log.d(TAG, "User has no groups")
-                    }
-                }
-                .onFailure { e ->
-                    Log.e(TAG, "Failed to load user", e)
-                    _error.value = e.message
-                }
-            _isLoading.value = false
+            runCatching {
+                _uiState.value = GroupUiState.Loading
+
+                loadUserGroupsInternal(userId)
+
+                _uiState.value = GroupUiState.Idle
+            }.onFailure { e ->
+                _uiState.value =
+                    GroupUiState.Error(e.message ?: "Failed to load user groups")
+            }
         }
     }
 
-    // Join group with password
-    fun joinGroup(
-        groupId: String,
-        password: String,
-        userId: String,
-        onResult: (Result<Unit>) -> Unit
-    ) {
+    fun updateGroup(groupId: String, group: Group) {
         viewModelScope.launch {
-            _isLoading.value = true
+            runCatching {
+                _uiState.value = GroupUiState.Loading
 
-            groupRepository.getGroup(groupId)
-                .onSuccess { group ->
-                    if (group.password != password) {
-                        Log.d(TAG, "Invalid password for group $groupId")
-                        _error.value = "Invalid password"
-                        onResult(Result.failure(Exception("Invalid password")))
-                        _isLoading.value = false
-                        return@onSuccess
-                    }
+                groupRepository.updateGroup(groupId, group).getOrThrow()
+                loadGroupsInternal()
 
-                    val updatedMembers = if (!group.members.contains(userId)) {
-                        group.members + userId
-                    } else {
-                        Log.d(TAG, "User already in group")
-                        group.members
-                    }
+                _uiState.value = GroupUiState.Success("Group updated successfully")
+            }.onFailure { e ->
+                _uiState.value =
+                    GroupUiState.Error(e.message ?: "Failed to update group")
+            }
+        }
+    }
 
+    fun deleteGroup(groupId: String) {
+        viewModelScope.launch {
+            runCatching {
+                _uiState.value = GroupUiState.Loading
+
+                groupRepository.deleteGroup(groupId).getOrThrow()
+                loadGroupsInternal()
+
+                _uiState.value = GroupUiState.Success("Group deleted successfully")
+            }.onFailure { e ->
+                _uiState.value =
+                    GroupUiState.Error(e.message ?: "Failed to delete group")
+            }
+        }
+    }
+
+    fun transferOwnership(groupId: String, newOwnerId: String) {
+        viewModelScope.launch {
+            runCatching {
+                _uiState.value = GroupUiState.Loading
+
+                val group = groupRepository.getGroup(groupId).getOrThrow()
+                groupRepository.updateGroup(groupId, group.copy(owner = newOwnerId))
+                    .getOrThrow()
+
+                loadGroupsInternal()
+
+                _uiState.value = GroupUiState.Success("Ownership transferred")
+            }.onFailure { e ->
+                _uiState.value =
+                    GroupUiState.Error(e.message ?: "Failed to transfer ownership")
+            }
+        }
+    }
+
+    fun removeMember(groupId: String, userId: String) {
+        viewModelScope.launch {
+            runCatching {
+                _uiState.value = GroupUiState.Loading
+
+                val group = groupRepository.getGroup(groupId).getOrThrow()
+                val updatedMembers = group.members.filter { it != userId }
+
+                groupRepository.updateGroup(groupId, group.copy(members = updatedMembers))
+                    .getOrThrow()
+
+                userRepository.removeGroupFromUser(userId, groupId).getOrThrow()
+
+                _uiState.value = GroupUiState.Success("Member removed")
+            }.onFailure { e ->
+                _uiState.value =
+                    GroupUiState.Error(e.message ?: "Failed to remove member")
+            }
+        }
+    }
+
+    fun joinGroup(groupId: String, password: String, userId: String) {
+        viewModelScope.launch {
+            runCatching {
+                _uiState.value = GroupUiState.Loading
+
+                val group = groupRepository.getGroup(groupId).getOrThrow()
+
+                if (group.password != password)
+                    throw Exception("Invalid password")
+
+                if (!group.members.contains(userId)) {
+                    val updatedMembers = group.members + userId
                     groupRepository.updateGroup(groupId, group.copy(members = updatedMembers))
-                        .onSuccess {
-                            // Add group to user's groups list
-                            viewModelScope.launch {
-                                userRepository.addGroupToUser(userId, groupId)
-                                    .onSuccess {
-                                        Log.d(TAG, "User joined group successfully")
-                                        loadGroupsForUser(userId)
-                                        onResult(Result.success(Unit))
-                                    }
-                                    .onFailure { e ->
-                                        Log.e(TAG, "Failed to add group to user", e)
-                                        onResult(Result.failure(e))
-                                    }
-                            }
-                        }
-                        .onFailure { e ->
-                            Log.e(TAG, "Failed to join group", e)
-                            _error.value = e.message
-                            onResult(Result.failure(e))
-                        }
-                }
-                .onFailure { e ->
-                    Log.e(TAG, "Group not found", e)
-                    _error.value = "Group not found"
-                    onResult(Result.failure(e))
+                        .getOrThrow()
+                    userRepository.addGroupToUser(userId, groupId).getOrThrow()
                 }
 
-            _isLoading.value = false
+                loadUserGroupsInternal(userId)
+
+                _uiState.value = GroupUiState.Success("Joined successfully")
+            }.onFailure { e ->
+                val msg = when {
+                    e.message?.contains("Invalid password") == true -> "Invalid password"
+                    e.message?.contains("not found") == true -> "Group not found"
+                    else -> "Failed to join group"
+                }
+
+                _uiState.value = GroupUiState.Error(msg)
+            }
         }
     }
 
@@ -244,8 +223,45 @@ class GroupViewModel @Inject constructor(
         return groupRepository.generateGroupId()
     }
 
-    fun clearError() {
-        _error.value = null
+    fun clearUiState() {
+        _uiState.value = GroupUiState.Idle
+    }
+
+    fun loadInitialUserGroups(userId: String) {
+        loadGroupsForUser(userId)
+    }
+
+    private suspend fun toGroupMember(userId: String, ownerId: String): GroupMember {
+        val user = userRepository.getUser(userId).getOrThrow()
+        return GroupMember(
+            uid = user.uid,
+            displayName = user.displayName,
+            email = user.email,
+            photoUrl = user.photoUrl,
+            isOwner = userId == ownerId
+        )
+    }
+
+    suspend fun getGroupFullDetails(groupId: String): Result<GroupUiData> {
+        return runCatching {
+            val group = groupRepository.getGroup(groupId).getOrThrow()
+
+            val members = group.members.map { id ->
+                toGroupMember(id, group.owner)
+            }.sortedByDescending { it.isOwner } // owner first
+
+            GroupUiData(
+                group = group,
+                members = members
+            )
+        }
+    }
+    suspend fun getGroupPreviewMembers(group: Group): List<GroupMember> {
+        val previewIds = group.members.take(3)
+
+        return previewIds.map { id ->
+            toGroupMember(id, group.owner)
+        }
     }
 
     companion object {

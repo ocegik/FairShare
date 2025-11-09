@@ -51,6 +51,11 @@ class UserViewModel @Inject constructor(
     val userGroups: StateFlow<List<String>> = _userProfile.map { it?.groups ?: emptyList() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    val bookmarkedGroupId: StateFlow<String?> = _userProfile
+        .map { it?.bookMarkedGroup }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -74,7 +79,8 @@ class UserViewModel @Inject constructor(
                     localData["displayName"],
                     localData["email"],
                     localData["photoUrl"],
-                    emptyList()
+                    emptyList(),
+
                 )
                 _userProfile.value = cachedUser
             }
@@ -154,12 +160,16 @@ class UserViewModel @Inject constructor(
 
         _isLoading.value = true
         viewModelScope.launch {
-            val userData = mapOf(
+            val userData = mutableMapOf(
                 "displayName" to (updatedUser.displayName ?: ""),
                 "email" to (updatedUser.email ?: ""),
                 "photoUrl" to (updatedUser.photoUrl ?: ""),
                 "groups" to updatedUser.groups
             )
+
+            updatedUser.bookMarkedGroup?.let {
+                userData["bookMarkedGroup"] = it
+            }
 
             userRepository.updateUser(uid, userData)
                 .onSuccess {
@@ -356,6 +366,24 @@ class UserViewModel @Inject constructor(
 
     fun refreshStats() {
         fetchUserStats()
+    }
+
+    suspend fun getGroupsOfUser(userId: String): List<String> {
+        return userRepository.getUserGroups(userId)
+            .getOrElse { emptyList() }
+    }
+
+    fun updateBookMarkedGroup(groupId: String, onComplete: (Boolean) -> Unit = {}) {
+        val currentUser = _userProfile.value ?: return
+        val updates = mapOf("bookMarkedGroup" to groupId)
+
+        viewModelScope.launch {
+            val result = userRepository.updateUser(currentUser.uid, updates)
+            onComplete(result.isSuccess)
+            if (result.isSuccess) {
+                _userProfile.value = currentUser.copy(bookMarkedGroup = groupId)
+            }
+        }
     }
 
 }

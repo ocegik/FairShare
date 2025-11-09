@@ -13,12 +13,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.fairshare.data.models.AuthState
 import com.example.fairshare.ui.screens.LoginScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.fairshare.ui.screens.CreateGroupScreen
+import com.example.fairshare.ui.screens.GroupDetailsScreen
 import com.example.fairshare.ui.screens.GroupExpenseScreen
 import com.example.fairshare.ui.screens.GroupScreen
 import com.example.fairshare.ui.screens.HistoryScreen
@@ -29,6 +32,7 @@ import com.example.fairshare.ui.screens.ProfileScreen
 import com.example.fairshare.ui.screens.StatsScreen
 import com.example.fairshare.viewmodel.ExpenseViewModel
 import com.example.fairshare.viewmodel.GroupViewModel
+import com.example.fairshare.viewmodel.HistoryViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -38,7 +42,8 @@ fun AppNavigation(
     authViewModel: AuthViewModel,
     userViewModel: UserViewModel,
     expenseViewModel: ExpenseViewModel,
-    groupViewModel: GroupViewModel
+    groupViewModel: GroupViewModel,
+    historyViewModel: HistoryViewModel
 ) {
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
 
@@ -111,15 +116,15 @@ fun AppNavigation(
             }
 
             composable(Screen.GroupExpense.route) {
-                GroupExpenseScreen(navController, expenseViewModel, authViewModel, userViewModel)
+                GroupExpenseScreen(navController, expenseViewModel, authViewModel, userViewModel, groupViewModel)
             }
 
             composable(Screen.History.route) {
-                HistoryScreen(navController)
+                HistoryScreen(navController, historyViewModel)
             }
 
             composable(Screen.Group.route) {
-                GroupScreen(navController)
+                GroupScreen(navController, groupViewModel, authViewModel, userViewModel)
             }
 
             composable(Screen.Stats.route) {
@@ -146,6 +151,14 @@ fun AppNavigation(
             composable(Screen.JoinGroup.route) {
                 JoinGroupScreen(navController)
             }
+            composable(
+                route = "group_details/{groupId}",
+                arguments = listOf(navArgument("groupId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val groupId = backStackEntry.arguments?.getString("groupId")!!
+                GroupDetailsScreen(groupId, groupViewModel, userViewModel)
+            }
+
         }
     }
 }
