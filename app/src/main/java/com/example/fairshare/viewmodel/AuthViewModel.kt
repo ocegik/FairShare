@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import androidx.credentials.ClearCredentialStateRequest
 import com.example.fairshare.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -62,21 +63,25 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun signOut(context: Context) {
+    fun signOut(context: Context, userViewModel: UserViewModel? = null) {
         viewModelScope.launch {
             try {
                 repository.signOut()
-                val cm = CredentialManager.create(context)
-                cm.clearCredentialState(ClearCredentialStateRequest())
+                CredentialManager.create(context).clearCredentialState(ClearCredentialStateRequest())
+
+                // Wait until user cache is fully cleared
+                userViewModel?.clearUser()
+                delay(500) // 🔥 gives datastore & flows time to reset
+
                 _authState.value = AuthState.Idle
-                Log.d(TAG, "User signed out")
+                Log.d(TAG, "✅ User fully signed out and cache cleared")
             } catch (e: Exception) {
-                Log.e(TAG, "Error during sign out", e)
-                // Still update state even if credential clear fails
+                Log.e(TAG, "❌ Error during sign out", e)
                 _authState.value = AuthState.Idle
             }
         }
     }
+
 
     fun resetState() {
         _authState.value = AuthState.Idle

@@ -38,7 +38,7 @@ class UserPreferences(private val context: Context) {
             "displayName" to (prefs[DISPLAY_NAME] ?: ""),
             "email" to (prefs[EMAIL] ?: ""),
             "photoUrl" to (prefs[PHOTO_URL] ?: ""),
-            "bookmarkedGroup" to (prefs[BOOKMARK_GROUP] ?: "")
+            "bookMarkedGroup" to (prefs[BOOKMARK_GROUP] ?: "")
         )
     }
 

@@ -12,6 +12,8 @@ import com.example.fairshare.data.models.UserStats
 import com.example.fairshare.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -64,10 +66,78 @@ class UserViewModel @Inject constructor(
     val userStats: StateFlow<UserStats?> = _userStats
 
     init {
-        loadUserFromCache()
-        refreshUserFromFirestore()
-        fetchUserStats()
+        Log.d(TAG, "UserViewModel created — waiting for login to initialize.")
     }
+
+    fun initializeUser() {
+        val uid = auth.currentUser?.uid
+        if (uid.isNullOrEmpty()) {
+            Log.d(TAG, "No logged-in user — skipping initializeUser()")
+            return
+        }
+
+        viewModelScope.launch {
+            Log.d(TAG, "Initializing user data for UID: $uid")
+            refreshUserFromFirestore()
+            fetchUserStats()
+        }
+    }
+
+    fun refreshUserFromFirestore() {
+        val uid = auth.currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            _isLoading.value = true
+
+            userRepository.getUser(uid)
+                .onSuccess { user ->
+                    if (user.displayName.isNullOrEmpty()) {
+                        Log.w(TAG, "Firestore user empty — reinitializing")
+                        createUserInFirestore()
+                        return@launch
+                    }
+                    _userProfile.value = user
+                    userPrefs.saveUser(
+                        displayName = user.displayName,
+                        email = user.email ?: "",
+                        photoUrl = user.photoUrl ?: ""
+                    )
+                    Log.d(TAG, "✅ User loaded from Firestore: ${user.displayName}")
+                }
+                .onFailure {
+                    Log.e(TAG, "User not found in Firestore — creating new doc")
+                    createUserInFirestore()
+                }
+
+            _isLoading.value = false
+        }
+    }
+
+    private suspend fun createUserInFirestore() {
+        val firebaseUser = auth.currentUser ?: return
+        val newUser = User(
+            uid = firebaseUser.uid,
+            displayName = firebaseUser.displayName ?: "",
+            email = firebaseUser.email ?: "",
+            photoUrl = firebaseUser.photoUrl?.toString(),
+            groups = emptyList(),
+            bookMarkedGroup = ""
+        )
+        userRepository.saveUser(newUser)
+            .onSuccess {
+                Log.d(TAG, "✅ Created new Firestore user for ${newUser.uid}")
+                _userProfile.value = newUser
+                userPrefs.saveUser(
+                    displayName = newUser.displayName ?: "",
+                    email = newUser.email ?: "",
+                    photoUrl = newUser.photoUrl ?: ""
+                )
+            }
+            .onFailure { Log.e(TAG, "❌ Failed to create Firestore user", it) }
+    }
+
+
+
     private fun loadUserFromCache() {
         viewModelScope.launch {
             userPrefs.userData.firstOrNull()?.let { localData ->
@@ -101,32 +171,19 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun refreshUserFromFirestore() {
-        val uid = auth.currentUser?.uid ?: return
-
-        viewModelScope.launch {
-            userRepository.getUser(uid)
-                .onSuccess { user ->
-                    _userProfile.value = user
-                    userPrefs.saveUser(
-                        displayName = user.displayName ?: "",
-                        email = user.email ?: "",
-                        photoUrl = user.photoUrl ?: ""
-                    )
-                }
-                .onFailure { exception ->
-                    Log.e(TAG, "Failed to refresh user from Firestore", exception)
-                }
-        }
-    }
-
     fun clearUser() {
         viewModelScope.launch {
             userPrefs.clearUser()
         }
         _userProfile.value = null
         _userStats.value = null
+
+        // ✅ cancel all running jobs that might reload old user data
+        viewModelScope.coroutineContext.cancelChildren()
+
+        Log.d(TAG, "User cache and collectors cleared")
     }
+
 
 
     // Load current user's profile from Firestore
