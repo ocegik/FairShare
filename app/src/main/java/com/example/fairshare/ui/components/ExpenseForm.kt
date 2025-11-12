@@ -64,7 +64,7 @@ fun ExpenseFormScreen(
     var amount by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
-    var entryType by remember { mutableStateOf("Expense") }
+    var entryType by remember { mutableStateOf(if (isGroupExpense) "Expense" else "Income") }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
