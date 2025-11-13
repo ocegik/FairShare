@@ -152,7 +152,7 @@ fun AppNavigation(
             }
 
             composable(Screen.JoinGroup.route) {
-                JoinGroupScreen(navController)
+                JoinGroupScreen(navController, authViewModel, groupViewModel)
             }
             composable(
                 route = "group_details/{groupId}",
