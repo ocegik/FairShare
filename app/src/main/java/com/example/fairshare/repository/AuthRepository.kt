@@ -3,6 +3,7 @@ package com.example.fairshare.repository
 import android.util.Log
 import com.example.fairshare.data.firebase.FirebaseAuthService
 import com.example.fairshare.data.models.User
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 
@@ -28,46 +29,49 @@ class AuthRepository @Inject constructor(
 
     suspend fun signInWithGoogle(idToken: String): Result<User> = runCatching {
         val result = firebaseAuthService.signInWithCredential(idToken)
+        val firebaseUser = result.user ?: throw Exception("Firebase user is null after sign-in")
 
-        val firebaseUser = result.user
-            ?: throw Exception("Firebase user is null after sign-in")
-
-        // Create User object from Firebase Auth data
-        val user = User(
+        val baseUser = User(
             uid = firebaseUser.uid,
-            displayName = firebaseUser.displayName,
-            email = firebaseUser.email,
-            photoUrl = firebaseUser.photoUrl?.toString(),
-            groups = emptyList()
+            displayName = firebaseUser.displayName ?: "",
+            email = firebaseUser.email ?: "",
+            photoUrl = firebaseUser.photoUrl?.toString() ?: "",
+            groups = emptyList(),
+            bookMarkedGroup = ""
         )
 
         val isNewUser = result.additionalUserInfo?.isNewUser ?: false
 
         if (isNewUser) {
-            // Save new user to Firestore
-            userRepository.saveUser(user)
-                .onSuccess {
-                    Log.d(TAG, "New user saved to Firestore: ${user.uid}")
-                }
-                .onFailure { e ->
-                    Log.e(TAG, "Failed to save new user to Firestore: ${user.uid}", e)
-                    // Continue with sign-in regardless of Firestore save result
-                }
-        } else {
-            // Existing user - optionally fetch from Firestore to get groups
-            userRepository.getUser(user.uid)
-                .onSuccess { firestoreUser ->
-                    Log.d(TAG, "Existing user loaded from Firestore: ${user.uid}")
-                    return@runCatching firestoreUser // Return user with groups
-                }
-                .onFailure { e ->
-                    Log.w(TAG, "Could not load user from Firestore, using auth data: ${user.uid}", e)
-                    // Continue with basic user data from auth
-                }
-        }
+            // --- STEP 1: Write full user doc before returning ---
+            userRepository.saveUser(baseUser).onFailure {
+                throw Exception("Failed to initialize Firestore user: ${it.message}")
+            }
 
-        user
+            // --- STEP 2: Double-check Firestore has the doc ---
+            repeat(3) { attempt ->
+                val firestoreUser = userRepository.getUser(baseUser.uid).getOrNull()
+                if (firestoreUser != null && !firestoreUser.displayName.isNullOrEmpty()) {
+                    Log.d(TAG, "✅ Firestore confirmed user initialized")
+                    return@runCatching firestoreUser
+                }
+                Log.d(TAG, "Firestore doc not ready yet, retry ${attempt + 1}")
+                delay(400) // wait a bit for Firestore sync
+            }
+
+            // fallback if Firestore hasn’t synced yet
+            Log.w(TAG, "⚠️ Firestore user not yet readable, returning baseUser")
+            return@runCatching baseUser
+        } else {
+            // --- Existing user path ---
+            return@runCatching userRepository.getUser(baseUser.uid).getOrElse {
+                Log.w(TAG, "Could not load Firestore user; fallback to baseUser")
+                baseUser
+            }
+        }
     }
+
+
 
     fun signOut() {
         firebaseAuthService.signOut()

@@ -24,6 +24,7 @@ import com.example.fairshare.ui.components.BackButton
 import com.example.fairshare.ui.components.ExpenseFormScreen
 import com.example.fairshare.ui.components.GroupSelector
 import com.example.fairshare.viewmodel.AuthViewModel
+import com.example.fairshare.viewmodel.DebtViewModel
 import com.example.fairshare.viewmodel.ExpenseViewModel
 import com.example.fairshare.viewmodel.GroupViewModel
 import com.example.fairshare.viewmodel.UserViewModel
@@ -33,7 +34,8 @@ fun GroupExpenseScreen(navController: NavHostController,
                        expenseViewModel: ExpenseViewModel,
                        authViewModel: AuthViewModel,
                        userViewModel: UserViewModel,
-                       groupViewModel: GroupViewModel
+                       groupViewModel: GroupViewModel,
+                       debtViewModel: DebtViewModel
 ) {
 
     val userId by authViewModel.currentUserId.collectAsState()
@@ -101,6 +103,7 @@ fun GroupExpenseScreen(navController: NavHostController,
             expenseViewModel = expenseViewModel,
             authViewModel = authViewModel,
             userViewModel = userViewModel,
+            debtViewModel = debtViewModel,
             groupId = selectedGroupId,
             members = members)
     }

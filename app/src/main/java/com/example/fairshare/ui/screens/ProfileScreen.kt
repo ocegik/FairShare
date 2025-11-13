@@ -93,7 +93,7 @@ fun ProfileScreen(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            Button(onClick = { authViewModel.signOut(context) }) {
+            Button(onClick = { authViewModel.signOut(context, userViewModel) }) {
                 Text("Sign Out")
             }
         }

@@ -90,8 +90,8 @@ fun LoginScreen(
             is AuthState.Success -> {
                 Log.d("LoginScreen", "=== Auth SUCCESS ===")
                 Log.d("LoginScreen", "User: ${state.user.uid}")
-                delay(500)
                 Log.d("LoginScreen", "Calling loadCurrentUser()...")
+                userViewModel.initializeUser()
                 userViewModel.loadCurrentUser()
 
                 Toast.makeText(

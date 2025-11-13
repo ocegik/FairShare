@@ -17,6 +17,7 @@ import androidx.navigation.NavHostController
 import com.example.fairshare.ui.components.BackButton
 import com.example.fairshare.ui.components.ExpenseFormScreen
 import com.example.fairshare.viewmodel.AuthViewModel
+import com.example.fairshare.viewmodel.DebtViewModel
 import com.example.fairshare.viewmodel.ExpenseViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 
@@ -24,7 +25,8 @@ import com.example.fairshare.viewmodel.UserViewModel
 fun PersonalExpenseScreen(navController: NavHostController,
                           expenseViewModel: ExpenseViewModel,
                           authViewModel: AuthViewModel,
-                          userViewModel: UserViewModel) {
+                          userViewModel: UserViewModel,
+                          debtViewModel: DebtViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -48,7 +50,7 @@ fun PersonalExpenseScreen(navController: NavHostController,
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-        ExpenseFormScreen(navController, isGroupExpense = false, expenseViewModel, authViewModel, userViewModel)
+        ExpenseFormScreen(navController, isGroupExpense = false, expenseViewModel, authViewModel, userViewModel, debtViewModel)
     }
 }
 
