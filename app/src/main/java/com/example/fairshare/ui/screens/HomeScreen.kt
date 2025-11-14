@@ -51,6 +51,7 @@ import com.example.fairshare.ui.components.FloatingActionButtonMenuSample
 import com.example.fairshare.ui.components.StatCard
 import com.example.fairshare.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable

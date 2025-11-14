@@ -1,6 +1,7 @@
 package com.example.fairshare.ui.components
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -81,13 +82,13 @@ fun ExpenseFormScreen(
 
     Column(
         modifier = Modifier
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(vertical = 8.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Text(
             text = "Add Expense",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
@@ -101,15 +102,21 @@ fun ExpenseFormScreen(
 
         OutlinedButton(
             onClick = { showBottomSheet = true },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp),
+            shape = RoundedCornerShape(14.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
             Text(
                 text = category.ifBlank { "Select Category" },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyLarge
             )
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = "Select category"
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -216,10 +223,10 @@ fun ExpenseFormScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(12.dp)
+                .height(54.dp),
+            shape = RoundedCornerShape(14.dp)
         ) {
-            Text("Save Expense", fontSize = 16.sp)
+            Text("Save Expense", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         }
         Spacer(modifier = Modifier.height(16.dp))
     }
