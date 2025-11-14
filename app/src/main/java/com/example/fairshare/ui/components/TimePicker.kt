@@ -29,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import java.util.Calendar
@@ -56,13 +55,13 @@ fun CustomTimePickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = RoundedCornerShape(20.dp),
-            tonalElevation = 6.dp,
+            shape = RoundedCornerShape(16.dp),
+            tonalElevation = 8.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -70,8 +69,8 @@ fun CustomTimePickerDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Select Time",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                        text = "Select a Time",
+                        style = MaterialTheme.typography.titleMedium
                     )
 
                     if (configuration.screenHeightDp > 400) {
@@ -90,8 +89,7 @@ fun CustomTimePickerDialog(
                                 } else {
                                     Icons.Default.Schedule
                                 },
-                                contentDescription = "Toggle time picker mode",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                contentDescription = "Toggle time picker mode"
                             )
                         }
                     }
@@ -107,8 +105,8 @@ fun CustomTimePickerDialog(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     TextButton(onClick = onDismiss) {
                         Text("Cancel")
