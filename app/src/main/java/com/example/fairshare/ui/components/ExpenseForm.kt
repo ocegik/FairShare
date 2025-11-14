@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.fairshare.data.models.ExpenseData
+import com.example.fairshare.data.models.GroupMember
 import com.example.fairshare.viewmodel.AuthViewModel
 import com.example.fairshare.viewmodel.DebtOperation
 import com.example.fairshare.viewmodel.DebtViewModel
@@ -54,7 +55,7 @@ fun ExpenseFormScreen(
     userViewModel: UserViewModel,
     debtViewModel: DebtViewModel,
     groupId: String? = null,
-    members: List<String> = emptyList()
+    members: List<GroupMember> = emptyList()
 ) {
 
     val userId by authViewModel.currentUserId.collectAsState()
@@ -74,8 +75,9 @@ fun ExpenseFormScreen(
     var selectedMinute by remember { mutableStateOf<Int?>(null) }
 
     // Group-specific state
-    val allPeople = members
+    val allPeople = members.map { it.uid }   // List<String>
     var selectedPeople by remember { mutableStateOf(allPeople) }
+
 
     LaunchedEffect(entryType) {
         category = ""
@@ -124,9 +126,11 @@ fun ExpenseFormScreen(
         // Group-specific people selector
         if (isGroupExpense) {
             ExpensePeopleSelector(
-                people = allPeople,
+                people = members,
+                selectedIds = selectedPeople,
                 onSelectionChange = { selectedPeople = it }
             )
+
         }
 
         NoteField(note) { note = it }

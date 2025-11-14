@@ -64,12 +64,12 @@ fun GroupExpenseScreen(navController: NavHostController,
         selectedGroupId = bookmarkedGroupId.takeIf { !it.isNullOrBlank() } ?: fallback
     }
 
-
-    val members = remember(selectedGroupId, userGroups) {
-        selectedGroupId?.let { gid ->
-            userGroups.find { it.groupId == gid }?.members ?: emptyList()
-        } ?: emptyList()
+    LaunchedEffect(selectedGroupId) {
+        selectedGroupId?.let { groupViewModel.loadFullGroup(it) }
     }
+
+    val fullGroupData by groupViewModel.fullGroupData.collectAsState()
+    val members = fullGroupData?.members ?: emptyList()
 
     Column(
         modifier = Modifier
@@ -95,6 +95,7 @@ fun GroupExpenseScreen(navController: NavHostController,
             selectedGroupId = selectedGroupId,
             onGroupSelected = { id -> selectedGroupId = id }
         )
+        Spacer(modifier = Modifier.height(12.dp))
 
         if (selectedGroupId == null) {
             Text("Select a group to add expenses.")

@@ -30,6 +30,9 @@ class GroupViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<GroupUiState>(GroupUiState.Idle)
     val uiState: StateFlow<GroupUiState> = _uiState.asStateFlow()
 
+    private val _fullGroupData = MutableStateFlow<GroupUiData?>(null)
+    val fullGroupData = _fullGroupData.asStateFlow()
+
     // ------------------------------------------------------------------------
     // UI STATE
     // ------------------------------------------------------------------------
@@ -242,6 +245,13 @@ class GroupViewModel @Inject constructor(
         )
     }
 
+    suspend fun getMemberName(groupId: String, userId: String): String {
+        val groupData = getGroupFullDetails(groupId).getOrNull()
+        val member = groupData?.members?.find { it.uid == userId }
+        return member?.displayName ?: "Unknown"
+    }
+
+
     suspend fun getGroupFullDetails(groupId: String): Result<GroupUiData> {
         return runCatching {
             val group = groupRepository.getGroup(groupId).getOrThrow()
@@ -261,6 +271,13 @@ class GroupViewModel @Inject constructor(
 
         return previewIds.map { id ->
             toGroupMember(id, group.owner)
+        }
+    }
+
+    fun loadFullGroup(groupId: String) {
+        viewModelScope.launch {
+            val result = getGroupFullDetails(groupId)
+            _fullGroupData.value = result.getOrNull()
         }
     }
 

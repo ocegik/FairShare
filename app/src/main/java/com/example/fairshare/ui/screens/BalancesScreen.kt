@@ -21,7 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,7 +49,8 @@ fun BalancesScreen(
     val debts by debtViewModel.debts.collectAsState()
     val isLoading by debtViewModel.isLoading.collectAsState()
 
-    var selectedTab by remember { mutableStateOf(0) } // 0 = You Owe, 1 = You're Owed
+
+    var selectedTab by remember { mutableIntStateOf(0) } // 0 = You Owe, 1 = You're Owed
     var selectedGroupId by remember { mutableStateOf<String?>(null) }
 
     // Load user's groups
@@ -152,33 +155,39 @@ fun BalancesScreen(
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(debts.filter {
-                    if (selectedGroupId != null) {
-                        it.groupId == selectedGroupId
-                    } else true
-                }.filter {
-                    if (selectedTab == 0) {
-                        it.fromUserId == userId
-                    } else {
-                        it.toUserId == userId
+                items(
+                    debts.filter {
+                        if (selectedGroupId != null) it.groupId == selectedGroupId else true
+                    }.filter {
+                        if (selectedTab == 0) it.fromUserId == userId else it.toUserId == userId
                     }
-                }) { debt ->
+                ) { debt ->
+
+                    val fromName by produceState(initialValue = "") {
+                        value = groupViewModel.getMemberName(debt.groupId ?: "", debt.fromUserId)
+
+                    }
+
+                    val toName by produceState(initialValue = "") {
+                        value = groupViewModel.getMemberName(debt.groupId ?: "", debt.toUserId)
+
+                    }
+
                     DebtCard(
                         debt = debt,
+                        fromName = fromName,
+                        toName = toName,
                         currentUserId = userId ?: "",
                         onSettle = {
                             debtViewModel.settleDebt(
                                 debtId = debt.id,
                                 groupId = debt.groupId,
-                                onComplete = { success ->
-                                    if (success) {
-                                        // Optionally show success message
-                                    }
-                                }
+                                onComplete = {}
                             )
                         }
                     )
                 }
+
             }
         }
     }
