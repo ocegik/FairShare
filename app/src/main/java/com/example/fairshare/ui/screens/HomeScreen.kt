@@ -48,6 +48,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.fairshare.navigation.Screen
 import com.example.fairshare.ui.components.FloatingActionButtonMenuSample
+import com.example.fairshare.ui.components.StatCard
 import com.example.fairshare.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -164,144 +165,48 @@ fun HomeScreen(
                     // Stats Summary Cards
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Income Card
-                        Card(
-                            modifier = Modifier.weight(1f),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    "Income",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                                Text(
-                                    "₹${
-                                        String.format(
-                                            Locale.getDefault(),
-                                            "%.2f",
-                                            userStats?.income ?: 0.0
-                                        )
-                                    }",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
+                        StatCard(
+                            title = "Income",
+                            amount = userStats?.income ?: 0.0,
+                            accentColor = Color(0xFF4CAF50), // green
+                            modifier = Modifier.weight(1f)
+                        )
 
-                        // Expense Card
-                        Card(
-                            modifier = Modifier.weight(1f),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    "Expenses",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                                Text(
-                                    "₹${
-                                        String.format(
-                                            Locale.getDefault(),
-                                            "%.2f",
-                                            userStats?.expense ?: 0.0
-                                        )
-                                    }",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                            }
-                        }
+                        StatCard(
+                            title = "Expenses",
+                            amount = userStats?.expense ?: 0.0,
+                            accentColor = Color(0xFFE53935), // red
+                            modifier = Modifier.weight(1f)
+                        )
                     }
+
 
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Debt Summary Cards
+                    Spacer(modifier = Modifier.height(12.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Debt (You Owe) Card
-                        Card(
-                            modifier = Modifier.weight(1f),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    "You Owe",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                Text(
-                                    "₹${
-                                        String.format(
-                                            Locale.getDefault(),
-                                            "%.2f",
-                                            userStats?.debt ?: 0.0
-                                        )
-                                    }",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            }
-                        }
+                        StatCard(
+                            title = "You Owe",
+                            amount = userStats?.debt ?: 0.0,
+                            accentColor = Color(0xFFFF9800), // orange
+                            modifier = Modifier.weight(1f)
+                        )
 
-                        // Receivables (Owed to You) Card
-                        Card(
-                            modifier = Modifier.weight(1f),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    "Owed to You",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                                Text(
-                                    "₹${
-                                        String.format(
-                                            Locale.getDefault(),
-                                            "%.2f",
-                                            userStats?.receivables ?: 0.0
-                                        )
-                                    }",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                            }
-                        }
+                        StatCard(
+                            title = "Owed to You",
+                            amount = userStats?.receivables ?: 0.0,
+                            accentColor = Color(0xFF3F51B5), // blue
+                            modifier = Modifier.weight(1f)
+                        )
                     }
+
 
                     Spacer(modifier = Modifier.height(24.dp))
 

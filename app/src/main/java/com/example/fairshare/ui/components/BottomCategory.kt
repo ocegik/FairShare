@@ -29,81 +29,49 @@ fun CategoryBottomSheet(
     onCategorySelected: (String) -> Unit
 ) {
     val categories = if (entryType == "Income") {
-        listOf(
-            "Salary",
-            "Business",
-            "Investment",
-            "Freelance",
-            "Gift",
-            "Rental Income",
-            "Bonus",
-            "Other Income"
-        )
+        listOf("Salary", "Business", "Investment", "Freelance", "Gift",
+            "Rental Income", "Bonus", "Other Income")
     } else {
-        listOf(
-            "Food & Dining",
-            "Transport",
-            "Shopping",
-            "Entertainment",
-            "Bills & Utilities",
-            "Health & Fitness",
-            "Education",
-            "Travel",
-            "Groceries",
-            "Other Expense"
-        )
+        listOf("Food & Dining", "Transport", "Shopping", "Entertainment",
+            "Bills & Utilities", "Health & Fitness", "Education", "Travel",
+            "Groceries", "Other Expense")
     }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(20.dp)
     ) {
+
         Text(
             text = "Select Category",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        Icon(
-            imageVector = if (entryType == "Income")
-                Icons.Default.ArrowUpward
-            else
-                Icons.Default.ArrowDownward,
-            contentDescription = entryType,
-            tint = if (entryType == "Income")
-                Color(0xFF4CAF50)
-            else
-                Color(0xFFF44336)
+            modifier = Modifier.padding(bottom = 20.dp)
         )
 
         categories.forEach { category ->
-            Surface(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onCategorySelected(category) },
-                color = Color.Transparent
+                    .clickable { onCategorySelected(category) }
+                    .padding(vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Optional: Add category icons
-                    Icon(
-                        imageVector = getCategoryIcon(category),
-                        contentDescription = category,
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = category,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
+                Icon(
+                    imageVector = getCategoryIcon(category),
+                    contentDescription = category,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = category,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(28.dp))
     }
 }
