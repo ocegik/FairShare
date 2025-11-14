@@ -18,6 +18,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import java.time.DayOfWeek
@@ -35,73 +36,55 @@ fun CustomDatePickerDialog(
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            tonalElevation = 8.dp,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            // Initialize with current date
-            val currentDateMillis = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                LocalDate.now()
-                    .atStartOfDay(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli()
-            } else {
-                Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }.timeInMillis
-            }
 
-            val datePickerState = rememberDatePickerState(
-                initialSelectedDateMillis = currentDateMillis,
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            tonalElevation = 6.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            val todayMillis = LocalDate.now()
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+
+            val state = rememberDatePickerState(
+                initialSelectedDateMillis = todayMillis,
                 selectableDates = object : SelectableDates {
                     override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            val dayOfWeek = Instant.ofEpochMilli(utcTimeMillis)
-                                .atZone(ZoneId.of("UTC"))
-                                .toLocalDate()
-                                .dayOfWeek
-                            dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY
-                        } else {
-                            val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                            calendar.timeInMillis = utcTimeMillis
-                            calendar[Calendar.DAY_OF_WEEK] != Calendar.SATURDAY &&
-                                    calendar[Calendar.DAY_OF_WEEK] != Calendar.SUNDAY
-                        }
+                        val day = Instant.ofEpochMilli(utcTimeMillis)
+                            .atZone(ZoneId.of("UTC"))
+                            .toLocalDate()
+                            .dayOfWeek
+
+                        return day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY
                     }
 
-                    override fun isSelectableYear(year: Int): Boolean {
-                        return year > 2022
-                    }
+                    override fun isSelectableYear(year: Int) = year > 2022
                 }
             )
 
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
+
                 Text(
-                    text = "Select a Date",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "Select Date",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
-                DatePicker(state = datePickerState)
+                DatePicker(state = state)
 
                 Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
                         Text("Cancel")
                     }
                     TextButton(onClick = {
-                        // Use selected date or fall back to current date
-                        onDateSelected(datePickerState.selectedDateMillis ?: currentDateMillis)
+                        onDateSelected(state.selectedDateMillis ?: todayMillis)
                         onDismiss()
                     }) {
                         Text("OK")
@@ -111,4 +94,5 @@ fun CustomDatePickerDialog(
         }
     }
 }
+
 

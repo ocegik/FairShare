@@ -1,8 +1,11 @@
 package com.example.fairshare.ui.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddLink
@@ -34,9 +37,16 @@ fun TitleField(value: String, onChange: (String) -> Unit) {
         value = value,
         onValueChange = onChange,
         label = { Text("Title") },
-        leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
+        leadingIcon = {
+            Icon(Icons.Filled.Edit,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+
         singleLine = true,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(58.dp),
+        shape = RoundedCornerShape(14.dp)
     )
 }
 
@@ -46,10 +56,16 @@ fun AmountField(value: String, onChange: (String) -> Unit) {
         value = value,
         onValueChange = { if (it.all { ch -> ch.isDigit() }) onChange(it) },
         label = { Text("Amount (₹)") },
-        leadingIcon = { Icon(Icons.Filled.CurrencyRupee, contentDescription = null) },
+        leadingIcon = {
+            Icon(Icons.Filled.CurrencyRupee,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(58.dp),
+        shape = RoundedCornerShape(14.dp)
     )
 }
 
@@ -59,8 +75,14 @@ fun NoteField(value: String, onChange: (String) -> Unit) {
         value = value,
         onValueChange = onChange,
         label = { Text("Note (optional)") },
-        leadingIcon = { Icon(Icons.Filled.AddLink, contentDescription = null) },
-        modifier = Modifier.fillMaxWidth()
+        leadingIcon = { Icon(
+            Icons.Filled.AddLink,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
+        shape = RoundedCornerShape(14.dp)
     )
 }
 
@@ -93,7 +115,10 @@ fun PasswordField(
                     Icon(imageVector = icon, contentDescription = if (passwordVisible) "Hide password" else "Show password")
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(58.dp),
+            shape = RoundedCornerShape(14.dp)
         )
 
         if (isError && errorMessage != null) {
@@ -101,7 +126,7 @@ fun PasswordField(
                 text = errorMessage,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                modifier = Modifier.padding(start = 6.dp, top = 4.dp)
             )
         }
     }
