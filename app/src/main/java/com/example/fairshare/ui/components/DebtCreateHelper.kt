@@ -15,35 +15,22 @@ suspend fun createDebtsForGroupExpense(
     participants: List<String>,
     groupId: String,
     debtViewModel: DebtViewModel
-): Boolean {
-    Log.d("DebtCreation", "=== Creating debts for expense: $expenseId ===")
-    Log.d("DebtCreation", "Paid by: $paidBy")
-    Log.d("DebtCreation", "Participants: $participants")
-    Log.d("DebtCreation", "Total amount: $amount")
+): List<DebtData> {
 
-    // Calculate share per person
     val numberOfPeople = participants.size
     val sharePerPerson = amount / numberOfPeople
 
-    Log.d("DebtCreation", "Number of people: $numberOfPeople")
-    Log.d("DebtCreation", "Share per person: $sharePerPerson")
-
-    // Track success of all debt creations
-    var allSuccessful = true
-
-    // Create debt for each participant (except the person who paid)
     val debtsToCreate = participants.filter { it != paidBy }
+    val createdDebts = mutableListOf<DebtData>()
 
-    Log.d("DebtCreation", "Creating ${debtsToCreate.size} debts")
-
-    // Use a CompletableDeferred to wait for all debts to be created
     val results = debtsToCreate.map { participantId ->
         CompletableDeferred<Boolean>().apply {
+
             val debt = DebtData(
-                id = "", // Repository will generate ID
+                id = "",
                 expenseId = expenseId,
-                fromUserId = participantId, // Person who owes
-                toUserId = paidBy, // Person who paid
+                fromUserId = participantId,
+                toUserId = paidBy,
                 amount = sharePerPerson,
                 status = "pending",
                 groupId = groupId,
@@ -51,24 +38,16 @@ suspend fun createDebtsForGroupExpense(
                 settledAt = null
             )
 
-            Log.d("DebtCreation", "Creating debt: $participantId owes $paidBy $$sharePerPerson")
-
-            // Add debt through ViewModel
             debtViewModel.addDebt(debt) { success ->
                 if (success) {
-                    Log.d("DebtCreation", "✓ Debt created successfully")
-                } else {
-                    Log.e("DebtCreation", "✗ Failed to create debt")
-                    allSuccessful = false
+                    createdDebts.add(debt)
                 }
                 complete(success)
             }
         }
     }
 
-    // Wait for all debts to be created
     results.forEach { it.await() }
 
-    Log.d("DebtCreation", "=== Debt creation process completed (success: $allSuccessful) ===")
-    return allSuccessful
+    return createdDebts
 }

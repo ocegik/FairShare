@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.fairshare.data.models.ExpenseData
 import com.example.fairshare.viewmodel.AuthViewModel
+import com.example.fairshare.viewmodel.DebtOperation
 import com.example.fairshare.viewmodel.DebtViewModel
 import com.example.fairshare.viewmodel.ExpenseViewModel
 import com.example.fairshare.viewmodel.UserViewModel
@@ -202,7 +203,7 @@ fun ExpenseFormScreen(
                     if (isGroupExpense && groupId != null && selectedPeople.isNotEmpty()) {
                         // Launch coroutine to create debts and wait for completion
                         CoroutineScope(Dispatchers.Main).launch {
-                            val success = createDebtsForGroupExpense(
+                            val debts = createDebtsForGroupExpense(
                                 expenseId = expense.id,
                                 amount = expense.amount,
                                 paidBy = currentUserId,
@@ -210,6 +211,10 @@ fun ExpenseFormScreen(
                                 groupId = groupId,
                                 debtViewModel = debtViewModel
                             )
+
+                            debts.forEach { debt ->
+                                userViewModel.updateStatsForDebt(debt, DebtOperation.DEBT_ADDED)
+                            }
                             // Navigate back after debts are created
                             navController.popBackStack()
                         }
