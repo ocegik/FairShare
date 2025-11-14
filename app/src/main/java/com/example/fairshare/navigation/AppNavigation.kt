@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.fairshare.data.models.AuthState
-import com.example.fairshare.ui.screens.LoginScreen
+import com.example.fairshare.core.data.models.AuthState
+import com.example.fairshare.feature.auth.ui.LoginScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument

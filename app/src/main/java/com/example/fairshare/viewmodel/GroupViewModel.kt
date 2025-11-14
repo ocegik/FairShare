@@ -1,11 +1,10 @@
 package com.example.fairshare.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fairshare.data.models.Group
-import com.example.fairshare.data.models.GroupMember
-import com.example.fairshare.data.models.GroupUiData
+import com.example.fairshare.core.data.models.Group
+import com.example.fairshare.core.data.models.GroupMember
+import com.example.fairshare.core.data.models.GroupUiData
 import com.example.fairshare.repository.GroupRepository
 import com.example.fairshare.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

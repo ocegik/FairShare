@@ -20,7 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fairshare.data.models.ExpenseData
+import com.example.fairshare.core.data.models.ExpenseData
+import com.example.fairshare.core.utils.formatDateTime
 
 @Composable
 fun ExpenseHistoryList(expenses: List<ExpenseData>) {

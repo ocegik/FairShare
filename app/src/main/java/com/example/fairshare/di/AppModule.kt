@@ -1,8 +1,8 @@
 package com.example.fairshare.di
 
-import com.example.fairshare.data.firebase.FirebaseAuthService
-import com.example.fairshare.data.firebase.FirestoreService
-import com.example.fairshare.repository.AuthRepository
+import com.example.fairshare.feature.auth.data.FirebaseAuthService
+import com.example.fairshare.core.firebase.FirestoreService
+import com.example.fairshare.feature.auth.repository.AuthRepository
 import com.example.fairshare.repository.ExpenseRepository
 import com.example.fairshare.repository.GroupRepository
 import com.example.fairshare.repository.UserRepository

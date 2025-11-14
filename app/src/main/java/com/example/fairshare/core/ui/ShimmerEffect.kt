@@ -1,4 +1,4 @@
-package com.example.fairshare.ui.components
+package com.example.fairshare.core.ui
 
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.animation.core.LinearEasing

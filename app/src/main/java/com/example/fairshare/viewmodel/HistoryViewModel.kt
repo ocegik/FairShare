@@ -2,8 +2,8 @@ package com.example.fairshare.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fairshare.data.models.ExpenseData
-import com.example.fairshare.data.models.Group
+import com.example.fairshare.core.data.models.ExpenseData
+import com.example.fairshare.core.data.models.Group
 import com.example.fairshare.repository.ExpenseRepository
 import com.example.fairshare.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth

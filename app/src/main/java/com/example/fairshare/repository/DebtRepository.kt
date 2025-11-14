@@ -2,8 +2,8 @@ package com.example.fairshare.repository
 
 
 import android.util.Log
-import com.example.fairshare.data.firebase.FirestoreService
-import com.example.fairshare.data.models.DebtData
+import com.example.fairshare.core.firebase.FirestoreService
+import com.example.fairshare.core.data.models.DebtData
 import javax.inject.Inject
 
 class DebtRepository @Inject constructor(

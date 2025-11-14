@@ -1,4 +1,4 @@
-package com.example.fairshare.ui.components
+package com.example.fairshare.core.utils
 
 import java.text.SimpleDateFormat
 import java.util.Calendar

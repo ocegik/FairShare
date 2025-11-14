@@ -29,14 +29,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.fairshare.data.models.Group
-import com.example.fairshare.data.models.GroupMember
+import com.example.fairshare.core.data.models.Group
+import com.example.fairshare.core.data.models.GroupMember
 import com.example.fairshare.viewmodel.GroupViewModel
 import androidx.compose.material3.Icon
 import androidx.compose.ui.text.font.FontWeight
+import com.example.fairshare.core.utils.formatDateTime
 
 
 @Composable

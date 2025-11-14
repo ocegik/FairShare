@@ -1,4 +1,4 @@
-package com.example.fairshare.data.firebase
+package com.example.fairshare.core.firebase
 
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await

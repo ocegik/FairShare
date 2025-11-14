@@ -1,4 +1,4 @@
-package com.example.fairshare.data.models
+package com.example.fairshare.core.data.models
 
 data class User(
     val uid: String,

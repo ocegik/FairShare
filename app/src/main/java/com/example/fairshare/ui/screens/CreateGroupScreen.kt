@@ -1,9 +1,7 @@
 package com.example.fairshare.ui.screens
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,10 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.fairshare.data.models.Group
-import com.example.fairshare.ui.components.BackButton
-import com.example.fairshare.ui.components.PasswordField
-import com.example.fairshare.ui.components.TitleField
+import com.example.fairshare.core.data.models.Group
+import com.example.fairshare.core.ui.BackButton
+import com.example.fairshare.core.ui.PasswordField
+import com.example.fairshare.core.ui.TitleField
 import com.example.fairshare.viewmodel.AuthViewModel
 import com.example.fairshare.viewmodel.GroupViewModel
 

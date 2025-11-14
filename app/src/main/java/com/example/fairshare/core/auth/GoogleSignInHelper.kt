@@ -1,4 +1,4 @@
-package com.example.fairshare.core
+package com.example.fairshare.core.auth
 
 import android.content.Context
 import androidx.credentials.CredentialManager
@@ -10,7 +10,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import java.util.UUID
 
 class GoogleSignInHelper(private val context: Context) {
-    private val credentialManager = CredentialManager.create(context)
+    private val credentialManager = CredentialManager.Companion.create(context)
 
     // Silent login for returning users
     suspend fun signInAuthorized(webClientId: String): Result<String> = runCatching {
@@ -50,13 +50,12 @@ class GoogleSignInHelper(private val context: Context) {
     private fun handleCredentialResponse(resp: GetCredentialResponse): String {
         val cred = resp.credential
         if (cred is CustomCredential &&
-            cred.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+            cred.type == GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
         ) {
-            val gitc = GoogleIdTokenCredential.createFrom(cred.data)
+            val gitc = GoogleIdTokenCredential.Companion.createFrom(cred.data)
             return gitc.idToken
         } else {
             throw Exception("Unexpected credential type")
         }
     }
 }
-

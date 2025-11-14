@@ -1,11 +1,11 @@
-package com.example.fairshare.repository
+package com.example.fairshare.feature.auth.repository
 
 import android.util.Log
-import com.example.fairshare.data.firebase.FirebaseAuthService
-import com.example.fairshare.data.models.User
+import com.example.fairshare.core.data.models.User
+import com.example.fairshare.feature.auth.data.FirebaseAuthService
+import com.example.fairshare.repository.UserRepository
 import kotlinx.coroutines.delay
 import javax.inject.Inject
-
 
 class AuthRepository @Inject constructor(
     private val firebaseAuthService: FirebaseAuthService,

@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.fairshare.viewmodel.AuthViewModel
 import coil.compose.AsyncImage
-import com.example.fairshare.ui.components.BackButton
+import com.example.fairshare.core.ui.BackButton
 import com.example.fairshare.viewmodel.UserViewModel
 
 

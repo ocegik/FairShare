@@ -1,4 +1,4 @@
-package com.example.fairshare.data.models
+package com.example.fairshare.core.data.models
 
 sealed class AuthState {
     object Idle : AuthState()
