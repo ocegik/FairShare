@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.fairshare.data.models.DebtData
+import com.example.fairshare.core.data.models.DebtData
 
 @Composable
 fun DebtCard(

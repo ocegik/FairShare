@@ -1,8 +1,8 @@
 package com.example.fairshare.repository
 
 import android.util.Log
-import com.example.fairshare.data.firebase.FirestoreService
-import com.example.fairshare.data.models.Group
+import com.example.fairshare.core.firebase.FirestoreService
+import com.example.fairshare.core.data.models.Group
 import javax.inject.Inject
 
 class GroupRepository @Inject constructor(

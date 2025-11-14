@@ -1,4 +1,4 @@
-package com.example.fairshare.data.firebase
+package com.example.fairshare.feature.auth.data
 
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth

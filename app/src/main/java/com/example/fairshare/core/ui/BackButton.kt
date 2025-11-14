@@ -1,4 +1,4 @@
-package com.example.fairshare.ui.components
+package com.example.fairshare.core.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*

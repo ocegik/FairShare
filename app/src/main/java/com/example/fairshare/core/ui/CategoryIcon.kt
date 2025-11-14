@@ -1,4 +1,4 @@
-package com.example.fairshare.ui.components
+package com.example.fairshare.core.ui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance

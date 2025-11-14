@@ -1,11 +1,8 @@
 package com.example.fairshare.ui.components
 
-import android.util.Log
-import com.example.fairshare.data.models.DebtData
-import com.example.fairshare.data.models.ExpenseData
+import com.example.fairshare.core.data.models.DebtData
 import com.example.fairshare.viewmodel.DebtViewModel
 import kotlinx.coroutines.CompletableDeferred
-import java.util.UUID
 
 // Fixed version with proper async handling
 suspend fun createDebtsForGroupExpense(

@@ -32,8 +32,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.fairshare.data.models.ExpenseData
-import com.example.fairshare.data.models.GroupMember
+import com.example.fairshare.core.data.models.ExpenseData
+import com.example.fairshare.core.data.models.GroupMember
+import com.example.fairshare.core.ui.AmountField
+import com.example.fairshare.core.ui.NoteField
+import com.example.fairshare.core.ui.TitleField
+import com.example.fairshare.core.utils.mergeDateAndTime
 import com.example.fairshare.viewmodel.AuthViewModel
 import com.example.fairshare.viewmodel.DebtOperation
 import com.example.fairshare.viewmodel.DebtViewModel

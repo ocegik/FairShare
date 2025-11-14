@@ -1,6 +1,5 @@
 package com.example.fairshare.ui.screens
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.fairshare.ui.components.BackButton
+import com.example.fairshare.core.ui.BackButton
 import com.example.fairshare.ui.components.ExpenseFormScreen
 import com.example.fairshare.ui.components.GroupSelector
 import com.example.fairshare.viewmodel.AuthViewModel

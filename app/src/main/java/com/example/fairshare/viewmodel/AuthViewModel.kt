@@ -5,13 +5,13 @@ import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fairshare.data.models.AuthState
+import com.example.fairshare.core.data.models.AuthState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.credentials.ClearCredentialStateRequest
-import com.example.fairshare.repository.AuthRepository
+import com.example.fairshare.feature.auth.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import javax.inject.Inject

@@ -37,8 +37,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.fairshare.data.models.GroupUiData
-import com.example.fairshare.ui.components.formatDateTime
+import com.example.fairshare.core.data.models.GroupUiData
+import com.example.fairshare.core.utils.formatDateTime
 import com.example.fairshare.viewmodel.GroupViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 

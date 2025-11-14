@@ -3,8 +3,8 @@ package com.example.fairshare.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fairshare.data.models.DebtData
-import com.example.fairshare.data.models.DebtSummary
+import com.example.fairshare.core.data.models.DebtData
+import com.example.fairshare.core.data.models.DebtSummary
 import com.example.fairshare.repository.DebtRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

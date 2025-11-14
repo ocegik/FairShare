@@ -1,4 +1,4 @@
-package com.example.fairshare.ui.screens
+package com.example.fairshare.feature.auth.ui
 
 import android.util.Log
 import android.widget.Toast
@@ -39,13 +39,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.fairshare.core.GoogleSignInHelper
-import com.example.fairshare.data.models.AuthState
+import com.example.fairshare.core.auth.GoogleSignInHelper
+import com.example.fairshare.core.data.models.AuthState
 import com.example.fairshare.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 import com.example.fairshare.R
 import com.example.fairshare.viewmodel.UserViewModel
-import kotlinx.coroutines.delay
 
 @Composable
 fun LoginScreen(
