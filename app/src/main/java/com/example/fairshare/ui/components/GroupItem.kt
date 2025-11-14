@@ -36,7 +36,7 @@ import com.example.fairshare.data.models.Group
 import com.example.fairshare.data.models.GroupMember
 import com.example.fairshare.viewmodel.GroupViewModel
 import androidx.compose.material3.Icon
-
+import androidx.compose.ui.text.font.FontWeight
 
 
 @Composable
@@ -57,107 +57,109 @@ fun GroupItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(18.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isBookmarked)
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
             else
                 MaterialTheme.colorScheme.surface
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(18.dp)) {
 
-            // Title row with bookmark
+            // --- Header Row ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(group.name, style = MaterialTheme.typography.titleMedium)
-                    if (isBookmarked) {
-                        Spacer(Modifier.width(8.dp))
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Bookmarked",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Bookmark button
-                    IconButton(
-                        onClick = { onBookmarkClick() },
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                            contentDescription = if (isBookmarked) "Remove bookmark" else "Add bookmark",
-                            tint = if (isBookmarked)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        group.name,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                        maxLines = 1
+                    )
 
-                    Spacer(Modifier.width(4.dp))
+                    Spacer(Modifier.height(4.dp))
 
                     Text(
                         "#${group.groupId.take(5)}",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                IconButton(
+                    onClick = onBookmarkClick,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                        contentDescription = null,
+                        tint = if (isBookmarked)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(14.dp))
 
-            // Member Preview Section
+            // --- Member Section ---
             Text(
                 text = "Members (${group.members.size})",
-                style = MaterialTheme.typography.labelMedium.copy(color = Color.Gray)
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
 
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(8.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                preview.forEach { member ->
+
+                preview.take(5).forEach { member ->
                     AsyncImage(
                         model = member.photoUrl,
                         contentDescription = null,
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
                     )
 
-                    Spacer(Modifier.width(6.dp))
+                    Spacer(Modifier.width(8.dp))
                 }
 
-                if (group.members.size > 3) {
-                    Text("…more", style = MaterialTheme.typography.labelSmall)
+                if (group.members.size > preview.size) {
+                    Text(
+                        "+${group.members.size - preview.size} more",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(14.dp))
 
-            // Owner + Created date
-            Text(
-                text = "Owner: ${preview.firstOrNull { it.isOwner }?.displayName ?: "Unknown"}",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray
-            )
+            // --- Footer Info ---
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
 
-            Text(
-                text = "Created: ${formatDateTime(group.createdAt)}",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray
-            )
+                Text(
+                    text = "Owner: ${preview.firstOrNull { it.isOwner }?.displayName ?: "Unknown"}",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+
+                Text(
+                    text = "Created: ${formatDateTime(group.createdAt)}",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+            }
         }
     }
 }

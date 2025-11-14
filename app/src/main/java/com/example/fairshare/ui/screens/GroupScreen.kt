@@ -23,23 +23,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fairshare.navigation.Screen
+import com.example.fairshare.ui.components.CreateJoinSection
 import com.example.fairshare.ui.components.GroupItem
 import com.example.fairshare.viewmodel.AuthViewModel
 import com.example.fairshare.viewmodel.GroupViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 
 @Composable
-fun GroupScreen(navController: NavController,
-                groupViewModel: GroupViewModel,
-                authViewModel: AuthViewModel,
-                userViewModel: UserViewModel
+fun GroupScreen(
+    navController: NavController,
+    groupViewModel: GroupViewModel,
+    authViewModel: AuthViewModel,
+    userViewModel: UserViewModel
 ) {
-
     val userId by authViewModel.currentUserId.collectAsState()
     val bookmarkedGroupId by userViewModel.bookmarkedGroupId.collectAsState()
+    val userGroups by groupViewModel.userGroups.collectAsState()
+    val uiState by groupViewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(userId) {
         if (!userId.isNullOrBlank()) {
@@ -47,65 +52,41 @@ fun GroupScreen(navController: NavController,
         }
     }
 
-    val userGroups by groupViewModel.userGroups.collectAsState()
-    val uiState by groupViewModel.uiState.collectAsState()
-    val context = LocalContext.current
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()), // allows scrolling if needed
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp, vertical = 24.dp)
     ) {
-        Text(
-            text = "Room Screen",
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Need a new group?", style = MaterialTheme.typography.bodyMedium)
-            Spacer(Modifier.width(8.dp))
-            TextButton(onClick = { navController.navigate(Screen.CreateGroup.route) }) {
-                Text("Create", color = MaterialTheme.colorScheme.primary)
-            }
-        }
-        Spacer(Modifier.width(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Join a group?", style = MaterialTheme.typography.bodyMedium)
-            Spacer(Modifier.width(8.dp))
-            TextButton(onClick = { navController.navigate(Screen.JoinGroup.route) }) {
-                Text("Create", color = MaterialTheme.colorScheme.primary)
-            }
-        }
-        Spacer(modifier = Modifier.height(24.dp))
 
-        // Loading UI
+        // Header ---------------------------------------------------------------
+        Text(
+            "Groups",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+        )
+
+        Spacer(Modifier.height(20.dp))
+
+        // Loading --------------------------------------------------------------
         if (uiState is GroupViewModel.GroupUiState.Loading) {
             CircularProgressIndicator()
             return@Column
         }
 
-        // SHOW GROUPS HERE
+        // Empty State ----------------------------------------------------------
         if (userGroups.isEmpty()) {
-            Text("You are not in any group yet.")
+            Text(
+                text = "You are not in any group yet.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(Modifier.height(30.dp))
+
+            // Bottom CTA for empty case
+            CreateJoinSection(navController)
             return@Column
         }
-
-        Text("Your Groups", style = MaterialTheme.typography.titleMedium)
-
-        Spacer(modifier = Modifier.height(12.dp))
 
         userGroups.forEach { group ->
             GroupItem(
@@ -113,14 +94,15 @@ fun GroupScreen(navController: NavController,
                 groupViewModel = groupViewModel,
                 isBookmarked = group.groupId == bookmarkedGroupId,
                 onBookmarkClick = {
-                    val newBookmarkId = if (group.groupId == bookmarkedGroupId) null else group.groupId
-                    userViewModel.updateBookMarkedGroup(newBookmarkId ?: "") { success ->
+                    val newId = if (group.groupId == bookmarkedGroupId) null else group.groupId
+                    userViewModel.updateBookMarkedGroup(newId ?: "") { success ->
                         if (success) {
-                            val message = if (newBookmarkId != null)
-                                "Bookmarked ${group.name}"
-                            else
-                                "Removed bookmark"
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                if (newId != null) "Bookmarked ${group.name}"
+                                else "Removed bookmark",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 },
@@ -128,7 +110,13 @@ fun GroupScreen(navController: NavController,
                     navController.navigate("group_details/${group.groupId}")
                 }
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
         }
+
+        Spacer(Modifier.height(40.dp))
+
+        // Bottom Create + Join -------------------------------------------------
+        CreateJoinSection(navController)
     }
 }
+

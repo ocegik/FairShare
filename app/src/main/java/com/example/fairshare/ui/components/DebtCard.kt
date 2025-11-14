@@ -20,6 +20,8 @@ import com.example.fairshare.data.models.DebtData
 @Composable
 fun DebtCard(
     debt: DebtData,
+    fromName: String,
+    toName: String,
     currentUserId: String,
     onSettle: () -> Unit
 ) {
@@ -39,13 +41,18 @@ fun DebtCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
+                val title = if (debt.fromUserId == currentUserId)
+                    "You owe $toName"
+                else
+                    "$fromName owes you"
+
                 Column {
                     Text(
-                        text = if (debt.fromUserId == currentUserId)
-                            "You owe ${debt.toUserId}"
-                        else "${debt.fromUserId} owes you",
+                        text = title,
                         style = MaterialTheme.typography.titleMedium
                     )
+
                     Text(
                         text = "₹${String.format("%.2f", debt.amount)}",
                         style = MaterialTheme.typography.headlineSmall,
