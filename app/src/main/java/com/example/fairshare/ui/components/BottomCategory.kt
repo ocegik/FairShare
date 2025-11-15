@@ -15,9 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.fairshare.core.ui.getCategoryIcon
+import com.example.fairshare.R
 
 @Composable
 fun CategoryBottomSheet(
@@ -25,12 +27,29 @@ fun CategoryBottomSheet(
     onCategorySelected: (String) -> Unit
 ) {
     val categories = if (entryType == "Income") {
-        listOf("Salary", "Business", "Investment", "Freelance", "Gift",
-            "Rental Income", "Bonus", "Other Income")
+        listOf(
+            R.string.inc_salary,
+            R.string.inc_business,
+            R.string.inc_investment,
+            R.string.inc_freelance,
+            R.string.inc_gift,
+            R.string.inc_rental_income,
+            R.string.inc_bonus,
+            R.string.inc_other_income
+        )
     } else {
-        listOf("Food & Dining", "Transport", "Shopping", "Entertainment",
-            "Bills & Utilities", "Health & Fitness", "Education", "Travel",
-            "Groceries", "Other Expense")
+        listOf(
+            R.string.exp_food_dining,
+            R.string.exp_transport,
+            R.string.exp_shopping,
+            R.string.exp_entertainment,
+            R.string.exp_bills_utilities,
+            R.string.exp_health_fitness,
+            R.string.exp_education,
+            R.string.exp_travel,
+            R.string.exp_groceries,
+            R.string.exp_other_expense
+        )
     }
 
     Column(
@@ -40,29 +59,31 @@ fun CategoryBottomSheet(
     ) {
 
         Text(
-            text = "Select Category",
+            text = stringResource(R.string.select_category),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        categories.forEach { category ->
+        categories.forEach { categoryRes ->
+            val label = stringResource(categoryRes)
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onCategorySelected(category) }
+                    .clickable { onCategorySelected(label) }
                     .padding(vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = getCategoryIcon(category),
-                    contentDescription = category,
+                    imageVector = getCategoryIcon(label),
+                    contentDescription = label,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = category,
+                    text = label,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }

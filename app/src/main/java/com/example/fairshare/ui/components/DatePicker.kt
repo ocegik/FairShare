@@ -18,9 +18,11 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.fairshare.R
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -69,7 +71,7 @@ fun CustomDatePickerDialog(
             ) {
 
                 Text(
-                    text = "Select Date",
+                    text = stringResource(R.string.select_date),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
@@ -81,13 +83,13 @@ fun CustomDatePickerDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                     TextButton(onClick = {
                         onDateSelected(state.selectedDateMillis ?: todayMillis)
                         onDismiss()
                     }) {
-                        Text("OK")
+                        Text(stringResource(R.string.ok))
                     }
                 }
             }

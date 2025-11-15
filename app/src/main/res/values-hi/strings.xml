@@ -1,0 +1,187 @@
+<resources>
+    <string name="select_category">श्रेणी चुनें</string>
+
+    <string name="exp_food_dining">फूड &amp; डाइनिंग</string>
+    <string name="exp_transport">ट्रांसपोर्ट</string>
+    <string name="exp_shopping">शॉपिंग</string>
+    <string name="exp_entertainment">एंटरटेनमेंट</string>
+    <string name="exp_bills_utilities">बिल्स &amp; यूटिलिटीज़</string>
+    <string name="exp_health_fitness">हेल्थ &amp; फिटनेस</string>
+    <string name="exp_education">एजुकेशन</string>
+    <string name="exp_travel">ट्रैवल</string>
+    <string name="exp_groceries">ग्रॉसरी</string>
+    <string name="exp_other_expense">अन्य खर्च</string>
+
+    <!-- ============================= -->
+    <!--        Income Categories      -->
+    <!-- ============================= -->
+
+    <string name="inc_salary">सैलरी</string>
+    <string name="inc_business">बिज़नेस</string>
+    <string name="inc_investment">इन्वेस्टमेंट</string>
+    <string name="inc_freelance">फ्रीलांस</string>
+    <string name="inc_gift">गिफ्ट</string>
+    <string name="inc_rental_income">रेंटल इनकम</string>
+    <string name="inc_bonus">बोनस</string>
+    <string name="inc_other_income">अन्य इनकम</string>
+
+    <!-- ============================= -->
+    <!--        Group Actions          -->
+    <!-- ============================= -->
+
+    <string name="need_new_group">नया ग्रुप चाहिए?</string>
+    <string name="create">क्रिएट</string>
+    <string name="want_join_group">ग्रुप जॉइन करना चाहते हैं?</string>
+    <string name="join">जॉइन</string>
+
+    <!-- ============================= -->
+    <!--         Date & Time           -->
+    <!-- ============================= -->
+
+    <string name="select_date">तारीख चुनें</string>
+    <string name="select_time">समय चुनें</string>
+    <string name="cancel">कैंसिल</string>
+    <string name="ok">ओके</string>
+
+    <!-- ============================= -->
+    <!--            Debts              -->
+    <!-- ============================= -->
+
+    <string name="you_owe">आप देते हैं</string>
+    <string name="owes_you">आपको दिया जाना है</string>
+    <string name="pending">पेंडिंग</string>
+    <string name="settle">सेटल</string>
+    <string name="settled">सेटल्ड</string>
+
+    <!-- Unified labels -->
+    <string name="you_owe_label">आप देते हैं</string>
+    <string name="you_owe_label_short">आप देते हैं</string>
+    <string name="youre_owed">आपको मिलना है</string>
+    <string name="owed_to_you">आपको दिया जाना है</string>
+
+    <string name="you_owe_none">आप किसी के भी नहीं देते</string>
+    <string name="none_owes_you">कोई भी आप पर नहीं देता</string>
+
+    <!-- ============================= -->
+    <!--           Summary             -->
+    <!-- ============================= -->
+
+    <string name="income">इनकम</string>
+    <string name="expense">खर्च</string>
+
+    <!-- ============================= -->
+    <!--        Expense Form           -->
+    <!-- ============================= -->
+
+    <string name="add_expense">खर्च जोड़ें</string>
+    <string name="save_expense">खर्च सेव करें</string>
+    <string name="select_all_participants">सभी प्रतिभागी चुनें</string>
+    <string name="personal_entry">पर्सनल एंट्री</string>
+    <string name="group_entry">ग्रुप एंट्री</string>
+    <string name="owner">ओनर</string>
+    <string name="created">क्रिएटेड</string>
+    <string name="select_group">ग्रुप चुनें</string>
+    <string name="choose_group">ग्रुप चुनें</string>
+    <string name="note_optional">नोट (वैकल्पिक)</string>
+    <string name="amount">राशि (₹)</string>
+    <string name="title">टाइटल</string>
+    <string name="selected">सेलेक्टेड</string>
+
+    <!-- ============================= -->
+    <!--         Debts Screen          -->
+    <!-- ============================= -->
+
+    <string name="debts_receivables">डेब्ट्स &amp; रिसीवेबल्स</string>
+    <string name="all">सभी</string>
+
+    <!-- ============================= -->
+    <!--      Errors & Warnings        -->
+    <!-- ============================= -->
+
+    <string name="err_password_length">पासवर्ड कम से कम 6 अक्षरों का होना चाहिए</string>
+    <string name="err_user_not_authenticated">यूज़र प्रमाणित नहीं है</string>
+    <string name="err_enter_group_name">कृपया ग्रुप का नाम दर्ज करें</string>
+    <string name="group_created_success">ग्रुप सफलतापूर्वक बनाया गया!</string>
+    <string name="group_not_found">ग्रुप नहीं मिला</string>
+
+    <!-- ============================= -->
+    <!--          Bookmarks            -->
+    <!-- ============================= -->
+
+    <string name="bookmarked">बुकमार्क किया गया</string>
+    <string name="removed_bookmark">बुकमार्क हटाया गया</string>
+    <string name="add_bookmark">बुकमार्क जोड़ें</string>
+
+    <!-- ============================= -->
+    <!--           Members             -->
+    <!-- ============================= -->
+
+    <string name="members">मेंबर्स</string>
+    <string name="unknown_member">अज्ञात मेंबर</string>
+
+    <!-- ============================= -->
+    <!--        Group Expense          -->
+    <!-- ============================= -->
+
+    <string name="group_expense">ग्रुप खर्च</string>
+    <string name="select_group_to_add_expense">खर्च जोड़ने के लिए ग्रुप चुनें।</string>
+    <string name="groups">ग्रुप्स</string>
+    <string name="no_groups_yet">आप किसी भी ग्रुप में नहीं हैं।</string>
+
+    <!-- ============================= -->
+    <!--       Expense History         -->
+    <!-- ============================= -->
+
+    <string name="expense_history">खर्च इतिहास</string>
+
+    <!-- ============================= -->
+    <!--         Home Screen           -->
+    <!-- ============================= -->
+
+    <string name="welcome_back">वेलकम बैक,</string>
+    <string name="income_label">इनकम</string>
+    <string name="expenses_label">खर्चे</string>
+    <string name="track_daily_expenses">अपने दैनिक खर्च आसानी से ट्रैक करें।</string>
+    <string name="view_detailed_stats">विस्तृत आँकड़े देखें</string>
+
+    <!-- ============================= -->
+    <!--        Join Group Page        -->
+    <!-- ============================= -->
+
+    <string name="joined_successfully">सफलतापूर्वक जॉइन हुआ!</string>
+    <string name="join_group">ग्रुप जॉइन करें</string>
+    <string name="enter_group_id">ग्रुप आईडी दर्ज करें</string>
+
+    <!-- ============================= -->
+    <!--       Personal Expense        -->
+    <!-- ============================= -->
+
+    <string name="personal_expense">पर्सनल खर्च</string>
+
+    <!-- ============================= -->
+    <!--           Profile             -->
+    <!-- ============================= -->
+
+    <string name="profile">प्रोफ़ाइल</string>
+    <string name="hello">हैलो,</string>
+    <string name="email">ईमेल</string>
+    <string name="stats">स्टैट्स</string>
+
+    <!-- ============================= -->
+    <!--      Common Future-Proof      -->
+    <!-- ============================= -->
+
+    <string name="delete">डिलीट</string>
+    <string name="edit">एडिट</string>
+    <string name="search">सर्च</string>
+    <string name="filter">फिल्टर</string>
+    <string name="confirm">कन्फ़र्म</string>
+    <string name="loading">लोड हो रहा है…</string>
+    <string name="retry">रीट्राई</string>
+    <string name="continue_label">कन्टिन्यू</string>
+    <string name="close">क्लोज़</string>
+    <string name="password">पासवर्ड</string>
+    <string name="show_password">पासवर्ड दिखाएँ</string>
+    <string name="hide_password">पासवर्ड छुपाएँ</string>
+
+</resources>
