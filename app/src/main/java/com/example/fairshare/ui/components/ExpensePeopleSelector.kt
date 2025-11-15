@@ -16,9 +16,11 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.fairshare.R
 import com.example.fairshare.core.data.models.GroupMember
 
 @Composable
@@ -59,7 +61,10 @@ fun ExpensePeopleSelector(
                 .triStateToggleable(state = parentState, onClick = toggleAll)
         ) {
             TriStateCheckbox(state = parentState, onClick = null)
-            Text("Select All Participants", fontWeight = FontWeight.SemiBold)
+            Text(
+                text = stringResource(R.string.select_all_participants),
+                fontWeight = FontWeight.SemiBold
+            )
         }
 
         // Child rows: show names instead of IDs

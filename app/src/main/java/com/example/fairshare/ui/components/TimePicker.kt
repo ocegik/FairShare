@@ -29,8 +29,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.fairshare.R
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +71,7 @@ fun CustomTimePickerDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Select a Time",
+                        text = stringResource(R.string.select_time),
                         style = MaterialTheme.typography.titleMedium
                     )
 
@@ -109,14 +111,14 @@ fun CustomTimePickerDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                     TextButton(onClick = {
                         // Always return a valid time (selected or current)
                         onTimeSelected(state.hour, state.minute)
                         onDismiss()
                     }) {
-                        Text("OK")
+                        Text(stringResource(R.string.ok))
                     }
                 }
             }

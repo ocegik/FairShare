@@ -14,7 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.fairshare.R
 import com.example.fairshare.core.data.models.DebtData
 
 @Composable
@@ -43,9 +45,9 @@ fun DebtCard(
             ) {
 
                 val title = if (debt.fromUserId == currentUserId)
-                    "You owe $toName"
+                    "${stringResource(R.string.you_owe_label)} $toName"
                 else
-                    "$fromName owes you"
+                    "$fromName ${stringResource(R.string.owed_to_you)}"
 
                 Column {
                     Text(
@@ -65,11 +67,11 @@ fun DebtCard(
                         onClick = onSettle,
                         modifier = Modifier.height(36.dp)
                     ) {
-                        Text("Settle")
+                        Text(stringResource(R.string.settle))
                     }
                 } else if (debt.status == "settled") {
                     Text(
-                        text = "Settled",
+                        text = stringResource(R.string.settled),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
                     )

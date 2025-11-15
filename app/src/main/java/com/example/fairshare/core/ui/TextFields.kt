@@ -24,11 +24,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.fairshare.R
 
 
 @Composable
@@ -36,7 +38,7 @@ fun TitleField(value: String, onChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
-        label = { Text("Title") },
+        label = { Text(stringResource(R.string.title)) },
         leadingIcon = {
             Icon(Icons.Filled.Edit,
             contentDescription = null,
@@ -55,7 +57,7 @@ fun AmountField(value: String, onChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = { if (it.all { ch -> ch.isDigit() }) onChange(it) },
-        label = { Text("Amount (₹)") },
+        label = { Text(stringResource(R.string.amount)) },
         leadingIcon = {
             Icon(Icons.Filled.CurrencyRupee,
             contentDescription = null,
@@ -74,7 +76,7 @@ fun NoteField(value: String, onChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
-        label = { Text("Note (optional)") },
+        label = { Text(stringResource(R.string.note_optional)) },
         leadingIcon = { Icon(
             Icons.Filled.AddLink,
             contentDescription = null,
@@ -90,7 +92,7 @@ fun NoteField(value: String, onChange: (String) -> Unit) {
 fun PasswordField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String = "Password",
+    label: String = stringResource(R.string.password),
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     errorMessage: String? = null
@@ -112,7 +114,10 @@ fun PasswordField(
             trailingIcon = {
                 val icon = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = icon, contentDescription = if (passwordVisible) "Hide password" else "Show password")
+                    Icon(imageVector = icon, contentDescription = if (passwordVisible)
+                        stringResource(R.string.hide_password)
+                    else
+                        stringResource(R.string.show_password))
                 }
             },
             modifier = Modifier

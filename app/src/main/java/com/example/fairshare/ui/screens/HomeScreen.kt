@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -51,7 +52,7 @@ import com.example.fairshare.ui.components.FloatingActionButtonMenuSample
 import com.example.fairshare.ui.components.StatCard
 import com.example.fairshare.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
-import java.util.Locale
+import com.example.fairshare.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
@@ -149,7 +150,7 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(48.dp))
                 } else {
                     Text(
-                        text = "Welcome back,",
+                        text = stringResource(R.string.welcome_back),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
@@ -168,14 +169,14 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         StatCard(
-                            title = "Income",
+                            title = stringResource(R.string.income_label),
                             amount = userStats?.income ?: 0.0,
                             accentColor = Color(0xFF4CAF50), // green
                             modifier = Modifier.weight(1f)
                         )
 
                         StatCard(
-                            title = "Expenses",
+                            title = stringResource(R.string.expenses_label),
                             amount = userStats?.expense ?: 0.0,
                             accentColor = Color(0xFFE53935), // red
                             modifier = Modifier.weight(1f)
@@ -193,14 +194,14 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         StatCard(
-                            title = "You Owe",
+                            title = stringResource(R.string.you_owe_label),
                             amount = userStats?.debt ?: 0.0,
                             accentColor = Color(0xFFFF9800), // orange
                             modifier = Modifier.weight(1f)
                         )
 
                         StatCard(
-                            title = "Owed to You",
+                            title = stringResource(R.string.owed_to_you),
                             amount = userStats?.receivables ?: 0.0,
                             accentColor = Color(0xFF3F51B5), // blue
                             modifier = Modifier.weight(1f)
@@ -211,7 +212,7 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        text = "Track your daily expenses easily.",
+                        text = stringResource(R.string.track_daily_expenses),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                     )
@@ -225,7 +226,7 @@ fun HomeScreen(
                         },
                         modifier = Modifier.fillMaxWidth(0.7f)
                     ) {
-                        Text("View Detailed Stats")
+                        Text(stringResource(R.string.view_detailed_stats))
                     }
                 }
             }

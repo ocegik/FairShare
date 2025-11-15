@@ -28,10 +28,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.fairshare.R
 import com.example.fairshare.core.data.models.ExpenseData
 import com.example.fairshare.core.data.models.GroupMember
 import com.example.fairshare.core.ui.AmountField
@@ -94,10 +96,11 @@ fun ExpenseFormScreen(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Text(
-            text = "Add Expense",
+            text = stringResource(R.string.add_expense),
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+
 
         TitleField(title) { title = it }
         AmountField(amount) { amount = it }
@@ -116,10 +119,11 @@ fun ExpenseFormScreen(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
             Text(
-                text = category.ifBlank { "Select Category" },
+                text = category.ifBlank { stringResource(R.string.select_category) },
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.bodyLarge
             )
+
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = null,
@@ -239,7 +243,12 @@ fun ExpenseFormScreen(
                 .height(54.dp),
             shape = RoundedCornerShape(14.dp)
         ) {
-            Text("Save Expense", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            Text(
+                text = stringResource(R.string.save_expense),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
         }
         Spacer(modifier = Modifier.height(16.dp))
     }
