@@ -1,4 +1,197 @@
 <resources>
-    <string name="app_name">FairShare</string>
+    <string name="app_name" translatable="false">FairShare</string>
     <string name="default_web_client_id">121134471575-21tjvr108ueptfru8i2t97if1g58ae6v.apps.googleusercontent.com</string>
+
+    <!-- ============================= -->
+    <!--           Categories          -->
+    <!-- ============================= -->
+
+    <string name="select_category">Select Category</string>
+
+    <string name="exp_food_dining">Food &amp; Dining</string>
+    <string name="exp_transport">Transport</string>
+    <string name="exp_shopping">Shopping</string>
+    <string name="exp_entertainment">Entertainment</string>
+    <string name="exp_bills_utilities">Bills &amp; Utilities</string>
+    <string name="exp_health_fitness">Health &amp; Fitness</string>
+    <string name="exp_education">Education</string>
+    <string name="exp_travel">Travel</string>
+    <string name="exp_groceries">Groceries</string>
+    <string name="exp_other_expense">Other Expense</string>
+
+    <!-- ============================= -->
+    <!--        Income Categories      -->
+    <!-- ============================= -->
+
+    <string name="inc_salary">Salary</string>
+    <string name="inc_business">Business</string>
+    <string name="inc_investment">Investment</string>
+    <string name="inc_freelance">Freelance</string>
+    <string name="inc_gift">Gift</string>
+    <string name="inc_rental_income">Rental Income</string>
+    <string name="inc_bonus">Bonus</string>
+    <string name="inc_other_income">Other Income</string>
+
+    <!-- ============================= -->
+    <!--        Group Actions          -->
+    <!-- ============================= -->
+
+    <string name="need_new_group">Need a new group?</string>
+    <string name="create">Create</string>
+    <string name="want_join_group">Want to join a group?</string>
+    <string name="join">Join</string>
+
+    <!-- ============================= -->
+    <!--         Date & Time           -->
+    <!-- ============================= -->
+
+    <string name="select_date">Select Date</string>
+    <string name="select_time">Select Time</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+
+    <!-- ============================= -->
+    <!--            Debts              -->
+    <!-- ============================= -->
+
+    <string name="you_owe">You Owe</string>
+    <string name="owes_you">Owes You</string>
+    <string name="pending">Pending</string>
+    <string name="settle">Settle</string>
+    <string name="settled">Settled</string>
+
+    <!-- Unified labels -->
+    <string name="you_owe_label">You Owe</string>
+    <string name="you_owe_label_short">You Owe</string>
+    <string name="youre_owed">You\'re Owed</string>
+    <string name="owed_to_you">Owed to You</string>
+
+    <string name="you_owe_none">You don\'t owe anyone</string>
+    <string name="none_owes_you">Nobody owes you</string>
+
+    <!-- ============================= -->
+    <!--           Summary             -->
+    <!-- ============================= -->
+
+    <string name="income">Income</string>
+    <string name="expense">Expense</string>
+
+    <!-- ============================= -->
+    <!--        Expense Form           -->
+    <!-- ============================= -->
+
+    <string name="add_expense">Add Expense</string>
+    <string name="save_expense">Save Expense</string>
+    <string name="select_all_participants">Select All Participants</string>
+    <string name="personal_entry">Personal Entry</string>
+    <string name="group_entry">Group Entry</string>
+    <string name="owner">Owner</string>
+    <string name="created">Created</string>
+    <string name="select_group">Select Group</string>
+    <string name="choose_group">Choose Group</string>
+    <string name="note_optional">Note (optional)</string>
+    <string name="amount">Amount (₹)</string>
+    <string name="title">Title</string>
+    <string name="selected">Selected</string>
+
+    <!-- ============================= -->
+    <!--         Debts Screen          -->
+    <!-- ============================= -->
+
+    <string name="debts_receivables">Debts &amp; Receivables</string>
+    <string name="all">All</string>
+
+    <!-- ============================= -->
+    <!--      Errors & Warnings        -->
+    <!-- ============================= -->
+
+    <string name="err_password_length">Password must be at least 6 characters</string>
+    <string name="err_user_not_authenticated">User not authenticated</string>
+    <string name="err_enter_group_name">Please enter a group name</string>
+    <string name="group_created_success">Group created successfully!</string>
+    <string name="group_not_found">Group not found</string>
+
+    <!-- ============================= -->
+    <!--          Bookmarks            -->
+    <!-- ============================= -->
+
+    <string name="bookmarked">Bookmarked</string>
+    <string name="removed_bookmark">Removed Bookmark</string>
+    <string name="add_bookmark">Add Bookmark</string>
+
+    <!-- ============================= -->
+    <!--           Members             -->
+    <!-- ============================= -->
+
+    <string name="members">Members</string>
+    <string name="unknown_member">Unknown Member</string>
+
+    <!-- ============================= -->
+    <!--        Group Expense          -->
+    <!-- ============================= -->
+
+    <string name="group_expense">Group Expense</string>
+    <string name="select_group_to_add_expense">Select a group to add expenses.</string>
+    <string name="groups">Groups</string>
+    <string name="no_groups_yet">You are not in any group yet.</string>
+
+    <!-- ============================= -->
+    <!--       Expense History         -->
+    <!-- ============================= -->
+
+    <string name="expense_history">Expense History</string>
+
+    <!-- ============================= -->
+    <!--         Home Screen           -->
+    <!-- ============================= -->
+
+    <string name="welcome_back">Welcome back,</string>
+    <string name="income_label">Income</string>
+    <string name="expenses_label">Expenses</string>
+    <string name="track_daily_expenses">Track your daily expenses easily.</string>
+    <string name="view_detailed_stats">View Detailed Stats</string>
+
+    <!-- ============================= -->
+    <!--        Join Group Page        -->
+    <!-- ============================= -->
+
+    <string name="joined_successfully">Joined Successfully!</string>
+    <string name="join_group">Join Group</string>
+    <string name="enter_group_id">Enter Group ID</string>
+
+    <!-- ============================= -->
+    <!--       Personal Expense        -->
+    <!-- ============================= -->
+
+    <string name="personal_expense">Personal Expense</string>
+
+    <!-- ============================= -->
+    <!--           Profile             -->
+    <!-- ============================= -->
+
+    <string name="profile">Profile</string>
+    <string name="hello">Hello,</string>
+    <string name="email">Email</string>
+    <string name="stats">Stats</string>
+
+    <!-- ============================= -->
+    <!--      Common Future-Proof      -->
+    <!-- ============================= -->
+
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="search">Search</string>
+    <string name="filter">Filter</string>
+    <string name="confirm">Confirm</string>
+    <string name="loading">Loading…</string>
+    <string name="retry">Retry</string>
+    <string name="continue_label">Continue</string>
+    <string name="close">Close</string>
+    <string name="password">Password</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
+
+
+
+
 </resources>
