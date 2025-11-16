@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -53,6 +55,8 @@ import com.example.fairshare.ui.components.StatCard
 import com.example.fairshare.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 import com.example.fairshare.R
+import com.example.fairshare.core.data.models.FabMenuItem
+import com.example.fairshare.ui.components.FabMenu
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
@@ -126,8 +130,22 @@ fun HomeScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButtonMenuSample(navController)
+            FabMenu(
+                items = listOf(
+                    FabMenuItem(
+                        icon = Icons.AutoMirrored.Filled.Message,
+                        label = "Personal Entry",
+                        onClick = { navController.navigate(Screen.PersonalExpense.route) }
+                    ),
+                    FabMenuItem(
+                        icon = Icons.AutoMirrored.Filled.Label,
+                        label = "Group Entry",
+                        onClick = { navController.navigate(Screen.GroupExpense.route) }
+                    )
+                )
+            )
         }
+
     ) { padding ->
         Box(
             modifier = Modifier

@@ -1,5 +1,7 @@
 package com.example.fairshare.core.data.models
 
+import androidx.compose.ui.graphics.vector.ImageVector
+
 data class User(
     val uid: String,
     val displayName: String?,
@@ -69,4 +71,11 @@ data class DebtSummary(
     val toUserId: String,
     val totalAmount: Double
 )
+
+data class FabMenuItem(
+    val icon: ImageVector,
+    val label: String,
+    val onClick: () -> Unit
+)
+
 
