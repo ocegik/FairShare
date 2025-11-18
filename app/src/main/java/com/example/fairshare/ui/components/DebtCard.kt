@@ -27,6 +27,8 @@ fun DebtCard(
     currentUserId: String,
     onSettle: () -> Unit
 ) {
+    val canSettle = debt.fromUserId == currentUserId
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
