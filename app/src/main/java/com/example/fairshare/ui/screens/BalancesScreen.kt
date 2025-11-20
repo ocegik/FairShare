@@ -63,8 +63,11 @@ fun BalancesScreen(
 
     var selectedTab by remember { mutableIntStateOf(0) } // 0 = You Owe, 1 = You're Owed
     var selectedGroupId by remember { mutableStateOf<String?>(null) }
+
     var debtToSettle by remember { mutableStateOf<DebtData?>(null) }
     var showSettleDialog by remember { mutableStateOf(false) }
+
+    var refreshTrigger by remember { mutableIntStateOf(0) }
 
     // Load user's groups
     LaunchedEffect(userId) {
@@ -74,13 +77,13 @@ fun BalancesScreen(
     }
 
     // Load debts when group or tab changes
-    LaunchedEffect(userId, selectedGroupId, selectedTab) {
+    LaunchedEffect(userId, selectedGroupId, selectedTab, refreshTrigger) {
         if (userId != null) {
             if (selectedGroupId != null) {
-                // Load debts for specific group
+                // This loads ALL debts for the group (Mixed In/Out)
                 debtViewModel.loadDebtsByGroup(selectedGroupId!!)
             } else {
-                // Load all user debts
+                // This loads specific lists
                 if (selectedTab == 0) {
                     debtViewModel.loadDebtsOwedByUser(userId!!)
                 } else {
@@ -89,45 +92,55 @@ fun BalancesScreen(
             }
         }
     }
+
+    val displayedDebts = remember(debts, selectedTab, userId, selectedGroupId) {
+        debts.filter { debt ->
+            val isOwedByUser = debt.fromUserId == userId
+            val isOwedToUser = debt.toUserId == userId
+
+            // Only show active (pending) debts or recently settled ones,
+            // depending on your preference. Here we show all returned by VM
+            // but filtered by direction.
+            when (selectedTab) {
+                0 -> isOwedByUser // Tab: You Owe
+                1 -> isOwedToUser // Tab: You are Owed
+                else -> false
+            }
+        }
+    }
+
     if (showSettleDialog && debtToSettle != null) {
         AlertDialog(
             onDismissRequest = {
                 showSettleDialog = false
                 debtToSettle = null
             },
-            title = { Text(stringResource(R.string.confirm_settlement)) },
+            title = { Text("Confirm Settlement") },
             text = {
-                Text(
-                    stringResource(
-                        R.string.confirm_settlement_message,
-                        String.format("%.2f", debtToSettle!!.amount)
-                    )
-                )
+                Text("Mark debt of ₹${String.format("%.2f", debtToSettle!!.amount)} as paid?")
             },
             confirmButton = {
                 TextButton(
                     onClick = {
                         debtToSettle?.let { debt ->
-
-                            // Settle the debt
                             debtViewModel.settleDebt(
                                 debtId = debt.id,
-                                groupId = debt.groupId,
-                                fromUserId = debt.fromUserId,
-                                toUserId = debt.toUserId,
+                                // We don't pass the reload params here anymore,
+                                // we handle reload in the UI callback below
                                 onComplete = { success ->
                                     if (success) {
                                         userViewModel.updateStatsForDebt(debt, DebtOperation.DEBT_SETTLED)
+                                        // Increment trigger to force LaunchedEffect to reload data
+                                        refreshTrigger++
                                     }
                                 }
                             )
-
                         }
                         showSettleDialog = false
                         debtToSettle = null
                     }
                 ) {
-                    Text(stringResource(R.string.confirm))
+                    Text("Confirm")
                 }
             },
             dismissButton = {
@@ -137,7 +150,7 @@ fun BalancesScreen(
                         debtToSettle = null
                     }
                 ) {
-                    Text(stringResource(R.string.cancel))
+                    Text("Cancel")
                 }
             }
         )
@@ -168,7 +181,7 @@ fun BalancesScreen(
                 FilterChip(
                     selected = selectedGroupId == null,
                     onClick = { selectedGroupId = null },
-                    label = { Text(stringResource(R.string.all)) }
+                    label = { Text("All Groups") }
                 )
                 userGroups.forEach { group ->
                     FilterChip(
@@ -206,7 +219,7 @@ fun BalancesScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else if (debts.isEmpty()) {
+        } else if (displayedDebts.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -224,14 +237,22 @@ fun BalancesScreen(
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(debts)
-                { debt ->
-                    val fromName by produceState(initialValue = "") {
-                        value = groupViewModel.getMemberName(debt.groupId ?: "", debt.fromUserId)
+                items(displayedDebts, key = { it.id }) { debt ->
+                    // Helper to fetch names safely
+                    val fromName by produceState(initialValue = "Loading...") {
+                        value = if (debt.fromUserId == userId) {
+                            "You"
+                        } else {
+                            groupViewModel.getMemberName(debt.groupId ?: "", debt.fromUserId)
+                        }
                     }
 
-                    val toName by produceState(initialValue = "") {
-                        value = groupViewModel.getMemberName(debt.groupId ?: "", debt.toUserId)
+                    val toName by produceState(initialValue = "Loading...") {
+                        value = if (debt.toUserId == userId) {
+                            "You"
+                        } else {
+                            groupViewModel.getMemberName(debt.groupId ?: "", debt.toUserId)
+                        }
                     }
 
                     DebtCard(
@@ -239,8 +260,10 @@ fun BalancesScreen(
                         fromName = fromName,
                         toName = toName,
                         currentUserId = userId ?: "",
+                        // Only allow settling if the user is the one getting paid (Tab 1)
+                        // AND the debt is not already settled
+                        canSettle = (selectedTab == 1) && (debt.status == "pending"),
                         onSettle = {
-                            // Show confirmation dialog
                             debtToSettle = debt
                             showSettleDialog = true
                         }

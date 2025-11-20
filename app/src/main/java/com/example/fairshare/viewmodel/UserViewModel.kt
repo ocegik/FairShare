@@ -353,50 +353,79 @@ class UserViewModel @Inject constructor(
     }
 
     fun updateStatsForDebt(debt: DebtData, operation: DebtOperation) {
-        val uid = auth.currentUser?.uid ?: return
+        val uid = auth.currentUser?.uid ?: run {
+            Log.e(TAG, "❌ Cannot update stats: No current user")
+            return
+        }
+
         val currentStats = _userStats.value ?: UserStats()
+
+        Log.d(TAG, "📊 Updating stats for user $uid")
+        Log.d(TAG, "   Operation: $operation")
+        Log.d(TAG, "   Debt: from=${debt.fromUserId}, to=${debt.toUserId}, amount=${debt.amount}")
+        Log.d(TAG, "   Current stats: debt=${currentStats.debt}, receivables=${currentStats.receivables}")
 
         val updatedStats = when (operation) {
             // When user owes money (debt added)
             DebtOperation.DEBT_ADDED -> {
                 if (debt.fromUserId == uid) {
+                    Log.d(TAG, "   → User is DEBTOR: Adding ${debt.amount} to debt")
                     currentStats.copy(
                         debt = (currentStats.debt + debt.amount).coerceAtLeast(0.0)
                     )
                 } else if (debt.toUserId == uid) {
+                    Log.d(TAG, "   → User is CREDITOR: Adding ${debt.amount} to receivables")
                     currentStats.copy(
                         receivables = (currentStats.receivables + debt.amount).coerceAtLeast(0.0)
                     )
-                } else currentStats
+                } else {
+                    Log.w(TAG, "   ⚠️ User not involved in this debt")
+                    currentStats
+                }
             }
+
             // When debt is settled
             DebtOperation.DEBT_SETTLED -> {
                 if (debt.fromUserId == uid) {
+                    Log.d(TAG, "   → User is DEBTOR: Subtracting ${debt.amount} from debt")
                     currentStats.copy(
                         debt = (currentStats.debt - debt.amount).coerceAtLeast(0.0)
                     )
                 } else if (debt.toUserId == uid) {
+                    Log.d(TAG, "   → User is CREDITOR: Subtracting ${debt.amount} from receivables")
                     currentStats.copy(
                         receivables = (currentStats.receivables - debt.amount).coerceAtLeast(0.0)
                     )
-                } else currentStats
+                } else {
+                    Log.w(TAG, "   ⚠️ User not involved in this debt")
+                    currentStats
+                }
             }
+
             // When debt is cancelled/deleted
             DebtOperation.DEBT_CANCELLED -> {
                 if (debt.fromUserId == uid) {
+                    Log.d(TAG, "   → User is DEBTOR: Cancelling - Subtracting ${debt.amount} from debt")
                     currentStats.copy(
                         debt = (currentStats.debt - debt.amount).coerceAtLeast(0.0)
                     )
                 } else if (debt.toUserId == uid) {
+                    Log.d(TAG, "   → User is CREDITOR: Cancelling - Subtracting ${debt.amount} from receivables")
                     currentStats.copy(
                         receivables = (currentStats.receivables - debt.amount).coerceAtLeast(0.0)
                     )
-                } else currentStats
+                } else {
+                    Log.w(TAG, "   ⚠️ User not involved in this debt")
+                    currentStats
+                }
             }
         }
 
         if (updatedStats != currentStats) {
+            Log.d(TAG, "   New stats: debt=${updatedStats.debt}, receivables=${updatedStats.receivables}")
             saveUserStats(updatedStats)
+        } else {
+            Log.w(TAG, "   ⚠️ No stats change detected - nothing to save")
         }
     }
 

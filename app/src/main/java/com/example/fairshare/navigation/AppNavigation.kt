@@ -162,7 +162,7 @@ fun AppNavigation(
                 GroupDetailsScreen(groupId, groupViewModel, userViewModel)
             }
             composable(Screen.Balances.route) {
-                BalancesScreen(navController, debtViewModel, authViewModel,  groupViewModel)
+                BalancesScreen(navController, debtViewModel, authViewModel,  groupViewModel, userViewModel)
             }
 
         }

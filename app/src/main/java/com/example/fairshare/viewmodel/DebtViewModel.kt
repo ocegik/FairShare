@@ -111,9 +111,6 @@ class DebtViewModel @Inject constructor(
     fun updateDebt(
         debtId: String,
         updates: Map<String, Any>,
-        groupId: String? = null,
-        fromUserId: String? = null,
-        toUserId: String? = null,
         onComplete: (Boolean) -> Unit = {}
     ) {
         viewModelScope.launch {
@@ -121,17 +118,9 @@ class DebtViewModel @Inject constructor(
             try {
                 debtRepository.updateDebt(debtId, updates)
                     .onSuccess {
-                        // Refresh based on context
-                        when {
-                            groupId != null -> loadDebtsByGroup(groupId)
-                            fromUserId != null -> loadDebtsOwedByUser(fromUserId)
-                            toUserId != null -> loadDebtsOwedToUser(toUserId)
-                        }
-                        Log.d(TAG, "Debt updated successfully: $debtId")
                         onComplete(true)
                     }
                     .onFailure { exception ->
-                        Log.e(TAG, "Failed to update debt: $debtId", exception)
                         onComplete(false)
                     }
             } finally {
@@ -254,9 +243,7 @@ class DebtViewModel @Inject constructor(
 
     fun settleDebt(
         debtId: String,
-        groupId: String? = null,
-        fromUserId: String? = null,
-        toUserId: String? = null,
+        // Removed group/user params as we rely on UI to trigger refresh
         onComplete: (Boolean) -> Unit = {}
     ) {
         val updates = mapOf(
@@ -264,13 +251,7 @@ class DebtViewModel @Inject constructor(
             "settledAt" to System.currentTimeMillis()
         )
 
-        updateDebt(
-            debtId = debtId,
-            updates = updates,
-            groupId = groupId,
-            fromUserId = fromUserId,
-            toUserId = toUserId,
-            onComplete = onComplete
-        )
+        // Call the simplified update function
+        updateDebt(debtId, updates, onComplete)
     }
 }
