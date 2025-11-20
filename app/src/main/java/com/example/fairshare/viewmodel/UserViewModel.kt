@@ -40,17 +40,19 @@ class UserViewModel @Inject constructor(
 
     private val _userProfile = MutableStateFlow<User?>(null)
     val userProfile: StateFlow<User?> = _userProfile
+    // In UserViewModel
+
     val displayName: StateFlow<String> = _userProfile.map { it?.displayName ?: "" }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     val email: StateFlow<String> = _userProfile.map { it?.email ?: "" }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     val photoUrl: StateFlow<String> = _userProfile.map { it?.photoUrl ?: "" }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     val userGroups: StateFlow<List<String>> = _userProfile.map { it?.groups ?: emptyList() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val bookmarkedGroupId: StateFlow<String?> = _userProfile
         .map { it?.bookMarkedGroup }
@@ -176,9 +178,6 @@ class UserViewModel @Inject constructor(
         }
         _userProfile.value = null
         _userStats.value = null
-
-        // ✅ cancel all running jobs that might reload old user data
-        viewModelScope.coroutineContext.cancelChildren()
 
         Log.d(TAG, "User cache and collectors cleared")
     }

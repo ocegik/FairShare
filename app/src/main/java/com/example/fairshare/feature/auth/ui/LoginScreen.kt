@@ -91,7 +91,6 @@ fun LoginScreen(
                 Log.d("LoginScreen", "User: ${state.user.uid}")
                 Log.d("LoginScreen", "Calling loadCurrentUser()...")
                 userViewModel.initializeUser()
-                userViewModel.loadCurrentUser()
 
                 Toast.makeText(
                     context,
