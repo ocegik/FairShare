@@ -12,7 +12,6 @@ import com.example.fairshare.core.data.models.UserStats
 import com.example.fairshare.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.cancelChildren
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -445,6 +444,67 @@ class UserViewModel @Inject constructor(
                 .onFailure { exception ->
                     Log.e(TAG, "❌ Failed to update stats", exception)
                 }
+        }
+    }
+
+    // 1. Call this to update the OTHER person involved in the debt
+    fun updatePeerStats(targetUserId: String, debt: DebtData, operation: DebtOperation) {
+        val currentUid = auth.currentUser?.uid
+        // Stop if we are trying to update ourselves (already handled by UI logic)
+        if (targetUserId == currentUid) return
+
+        viewModelScope.launch {
+            // Fetch OTHER user's stats
+            userRepository.getUserSubCollectionDocument(
+                userId = targetUserId,
+                subCollectionName = STATS_SUBCOLLECTION,
+                documentId = STATS_DOCUMENT_ID,
+                clazz = UserStats::class.java
+            ).onSuccess { currentStats ->
+                val statsToUpdate = currentStats
+                // Calculate new values
+                val newStats = calculatePeerNewStats(statsToUpdate, debt, operation, targetUserId)
+                // Save back to Firestore
+                savePeerStats(targetUserId, newStats)
+            }.onFailure {
+                // If they don't have stats, create new ones
+                val newStats = calculatePeerNewStats(UserStats(), debt, operation, targetUserId)
+                savePeerStats(targetUserId, newStats)
+            }
+        }
+    }
+
+    // 2. Helper to do the math for the OTHER person
+    private fun calculatePeerNewStats(stats: UserStats, debt: DebtData, op: DebtOperation, targetId: String): UserStats {
+        return when (op) {
+            DebtOperation.DEBT_ADDED -> {
+                if (debt.fromUserId == targetId) {
+                    // Target OWES money (Increase Debt)
+                    stats.copy(debt = (stats.debt + debt.amount).coerceAtLeast(0.0))
+                } else {
+                    // Target is OWED money (Increase Receivables)
+                    stats.copy(receivables = (stats.receivables + debt.amount).coerceAtLeast(0.0))
+                }
+            }
+            DebtOperation.DEBT_SETTLED, DebtOperation.DEBT_CANCELLED -> {
+                if (debt.fromUserId == targetId) {
+                    stats.copy(debt = (stats.debt - debt.amount).coerceAtLeast(0.0))
+                } else {
+                    stats.copy(receivables = (stats.receivables - debt.amount).coerceAtLeast(0.0))
+                }
+            }
+        }
+    }
+
+    // 3. Helper to save the data
+    private suspend fun savePeerStats(userId: String, stats: UserStats) {
+        userRepository.addToUserSubCollection(
+            userId = userId,
+            subCollectionName = STATS_SUBCOLLECTION,
+            documentId = STATS_DOCUMENT_ID,
+            data = stats
+        ).onFailure { e ->
+            Log.e(TAG, "❌ Failed to update peer stats for $userId", e)
         }
     }
 

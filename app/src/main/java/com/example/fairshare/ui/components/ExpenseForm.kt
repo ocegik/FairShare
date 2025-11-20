@@ -226,6 +226,10 @@ fun ExpenseFormScreen(
 
                             debts.forEach { debt ->
                                 userViewModel.updateStatsForDebt(debt, DebtOperation.DEBT_ADDED)
+
+                                val otherUserId = if (debt.fromUserId == currentUserId) debt.toUserId else debt.fromUserId
+
+                                userViewModel.updatePeerStats(otherUserId, debt, DebtOperation.DEBT_ADDED)
                             }
                             // Navigate back after debts are created
                             navController.popBackStack()

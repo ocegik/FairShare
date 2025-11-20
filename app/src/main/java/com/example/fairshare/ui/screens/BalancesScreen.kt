@@ -1,6 +1,5 @@
 package com.example.fairshare.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -125,12 +124,17 @@ fun BalancesScreen(
                         debtToSettle?.let { debt ->
                             debtViewModel.settleDebt(
                                 debtId = debt.id,
-                                // We don't pass the reload params here anymore,
-                                // we handle reload in the UI callback below
                                 onComplete = { success ->
                                     if (success) {
+                                        // 1. Update YOUR stats
                                         userViewModel.updateStatsForDebt(debt, DebtOperation.DEBT_SETTLED)
-                                        // Increment trigger to force LaunchedEffect to reload data
+
+                                        // === ADD THIS SECTION ===
+                                        // 2. Update THEIR stats
+                                        val otherUserId = if (debt.fromUserId == userId) debt.toUserId else debt.fromUserId
+                                        userViewModel.updatePeerStats(otherUserId, debt, DebtOperation.DEBT_SETTLED)
+                                        // ========================
+
                                         refreshTrigger++
                                     }
                                 }
