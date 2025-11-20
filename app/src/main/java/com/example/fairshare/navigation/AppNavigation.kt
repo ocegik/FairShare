@@ -21,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.fairshare.ui.screens.BalancesScreen
+import com.example.fairshare.ui.screens.CreateDebtScreen
 import com.example.fairshare.ui.screens.CreateGroupScreen
 import com.example.fairshare.ui.screens.GroupDetailsScreen
 import com.example.fairshare.ui.screens.GroupExpenseScreen
@@ -165,6 +166,9 @@ fun AppNavigation(
                 BalancesScreen(navController, debtViewModel, authViewModel,  groupViewModel, userViewModel)
             }
 
+            composable(Screen.CreateDebt.route){
+                CreateDebtScreen(navController, debtViewModel, userViewModel, authViewModel)
+            }
         }
     }
 }
