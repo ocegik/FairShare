@@ -42,6 +42,7 @@ import com.example.fairshare.viewmodel.GroupViewModel
 import com.example.fairshare.viewmodel.HistoryViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 import androidx.core.content.edit
+import com.example.fairshare.viewmodel.ThemeViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -53,6 +54,7 @@ fun AppNavigation(
     groupViewModel: GroupViewModel,
     historyViewModel: HistoryViewModel,
     debtViewModel: DebtViewModel,
+    themeViewModel: ThemeViewModel,
     onboardingDone: Boolean,
     profileSetupDone: Boolean
 ) {
@@ -151,7 +153,8 @@ fun AppNavigation(
                         }
                     },
                     userViewModel,
-                    navController
+                    navController,
+                    themeViewModel
                 )
             }
 

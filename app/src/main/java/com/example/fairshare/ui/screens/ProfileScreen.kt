@@ -30,6 +30,8 @@ import com.example.fairshare.viewmodel.AuthViewModel
 import coil.compose.AsyncImage
 import com.example.fairshare.core.ui.BackButton
 import com.example.fairshare.ui.components.LanguageManager
+import com.example.fairshare.ui.theme.AppTheme
+import com.example.fairshare.viewmodel.ThemeViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 
 
@@ -38,12 +40,14 @@ fun ProfileScreen(
     authViewModel: AuthViewModel,
     onSignOut: () -> Unit,
     userViewModel: UserViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    themeViewModel: ThemeViewModel
 ) {
     val context = LocalContext.current
     val displayName by userViewModel.displayName.collectAsState()
     val photoUrl by userViewModel.photoUrl.collectAsState()
     val email by userViewModel.email.collectAsState()
+    val currentTheme by themeViewModel.theme.collectAsState()
 
     LaunchedEffect(displayName, email, photoUrl) {
         Log.d("ProfileScreen", "DisplayName=$displayName, Email=$email, Photo=$photoUrl")
@@ -113,6 +117,19 @@ fun ProfileScreen(
                     Text("हिंदी")
                 }
 
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Button(onClick = { themeViewModel.setTheme(AppTheme.LIGHT) }) {
+                    Text("Light")
+                }
+
+                Button(onClick = { themeViewModel.setTheme(AppTheme.DARK) }) {
+                    Text("Dark")
+                }
+
+                Button(onClick = { themeViewModel.setTheme(AppTheme.BRAND) }) {
+                    Text("Pink Brand")
+                }
             }
 
 
