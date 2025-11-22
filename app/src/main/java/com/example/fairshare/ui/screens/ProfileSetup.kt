@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -49,6 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.fairshare.core.data.models.AppPreferences
 
 // Reuse the Color Palette from the previous screen for consistency
 val NeonCyan = Color(0xFF00E5FF)
@@ -58,6 +60,10 @@ val DeepDark = Color(0xFF0A0A0A)
 fun ProfileSetupScreen(
     onSetupComplete: (String, String, Uri?) -> Unit = { _, _, _ -> }
 ) {
+
+    val context = LocalContext.current
+    val prefs = remember { AppPreferences(context) }
+
     // State
     var name by remember { mutableStateOf("") }
     var handle by remember { mutableStateOf("") }

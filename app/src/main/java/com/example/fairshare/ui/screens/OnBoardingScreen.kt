@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.navigation.NavController
+import com.example.fairshare.core.data.models.AppPreferences
 import com.example.fairshare.navigation.Screen
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -65,8 +67,12 @@ data class OnboardingPageData(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(
-    navController: NavController
+    onOnboardingComplete: () -> Unit
 ) {
+
+    val context = LocalContext.current
+    val prefs = remember { AppPreferences(context) }
+
     // 1. Defined Data (Single Source of Truth)
     val pages = remember {
         listOf(
@@ -136,12 +142,7 @@ fun OnboardingScreen(
             ) {
                 TextButton(
                     // navigate to ProfileSetup when user taps SKIP
-                    onClick = {
-                        navController.navigate(Screen.ProfileSetup.route) {
-                            // optional: remove onboarding from back stack if you have a route constant
-                            popUpTo(Screen.Onboarding.route) { inclusive = true }
-                        }
-                    },
+                    { onOnboardingComplete() },
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
@@ -183,17 +184,13 @@ fun OnboardingScreen(
                     totalSteps = pages.size,
                     color = targetColor,
                     onNext = {
-                        // Haptic Feedback
-                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                         if (pagerState.currentPage < pages.size - 1) {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             }
                         } else {
-                            navController.navigate(Screen.ProfileSetup.route) {
-                                popUpTo(Screen.Onboarding.route) { inclusive = true }
-                            }
+                            onOnboardingComplete()
                         }
                     }
                 )
