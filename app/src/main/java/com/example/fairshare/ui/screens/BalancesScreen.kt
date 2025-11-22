@@ -46,8 +46,8 @@ import com.example.fairshare.R
 import com.example.fairshare.core.data.models.DebtData
 import com.example.fairshare.navigation.Screen
 import com.example.fairshare.ui.components.DebtCard
+import com.example.fairshare.ui.components.DebtOperation
 import com.example.fairshare.viewmodel.AuthViewModel
-import com.example.fairshare.viewmodel.DebtOperation
 import com.example.fairshare.viewmodel.DebtViewModel
 import com.example.fairshare.viewmodel.GroupViewModel
 import com.example.fairshare.viewmodel.UserViewModel

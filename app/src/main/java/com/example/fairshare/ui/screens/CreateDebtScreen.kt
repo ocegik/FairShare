@@ -47,7 +47,7 @@ import com.example.fairshare.core.ui.AmountField
 import com.example.fairshare.core.ui.NoteField
 import com.example.fairshare.ui.components.CustomDatePickerDialog
 import com.example.fairshare.ui.components.DatePickerButton
-import com.example.fairshare.viewmodel.DebtOperation
+import com.example.fairshare.ui.components.DebtOperation
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)

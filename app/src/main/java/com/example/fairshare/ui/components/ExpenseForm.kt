@@ -41,7 +41,6 @@ import com.example.fairshare.core.ui.NoteField
 import com.example.fairshare.core.ui.TitleField
 import com.example.fairshare.core.utils.mergeDateAndTime
 import com.example.fairshare.viewmodel.AuthViewModel
-import com.example.fairshare.viewmodel.DebtOperation
 import com.example.fairshare.viewmodel.DebtViewModel
 import com.example.fairshare.viewmodel.ExpenseViewModel
 import com.example.fairshare.viewmodel.UserViewModel
