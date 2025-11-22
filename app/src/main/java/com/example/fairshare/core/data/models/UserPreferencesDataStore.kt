@@ -20,14 +20,16 @@ class UserPreferences(private val context: Context) {
         private val EMAIL = stringPreferencesKey("email")
         private val PHOTO_URL = stringPreferencesKey("photo_url")
         private val BOOKMARK_GROUP = stringPreferencesKey("bookmarked_group")
+        private val USERNAME = stringPreferencesKey("username")
     }
 
     // --- Save user data ---
-    suspend fun saveUser(displayName: String, email: String, photoUrl: String) {
+    suspend fun saveUser(displayName: String, email: String, photoUrl: String, username: String) {
         context.userDataStore.edit { prefs ->
             prefs[DISPLAY_NAME] = displayName
             prefs[EMAIL] = email
             prefs[PHOTO_URL] = photoUrl
+            prefs[USERNAME] = username
         }
     }
 
@@ -37,7 +39,8 @@ class UserPreferences(private val context: Context) {
             "displayName" to (prefs[DISPLAY_NAME] ?: ""),
             "email" to (prefs[EMAIL] ?: ""),
             "photoUrl" to (prefs[PHOTO_URL] ?: ""),
-            "bookMarkedGroup" to (prefs[BOOKMARK_GROUP] ?: "")
+            "bookMarkedGroup" to (prefs[BOOKMARK_GROUP] ?: ""),
+            "username" to (prefs[USERNAME] ?: "") // Read it
         )
     }
 

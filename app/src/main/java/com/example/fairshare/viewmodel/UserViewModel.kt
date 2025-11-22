@@ -66,8 +66,74 @@ class UserViewModel @Inject constructor(
     private val _userStats = MutableStateFlow<UserStats?>(null)
     val userStats: StateFlow<UserStats?> = _userStats
 
+    private val _usernameCheckLoading = MutableStateFlow(false)
+    val usernameCheckLoading: StateFlow<Boolean> = _usernameCheckLoading
+
+    private val _usernameError = MutableStateFlow<String?>(null)
+    val usernameError: StateFlow<String?> = _usernameError
+
     init {
         Log.d(TAG, "UserViewModel created — waiting for login to initialize.")
+    }
+
+    fun setUsername(newUsername: String, onResult: (Boolean) -> Unit) {
+        val currentUser = _userProfile.value ?: return
+        val cleanedUsername = newUsername.trim().lowercase()
+
+        // 1. Local Validation
+        if (cleanedUsername.length < 3) {
+            _usernameError.value = "Username must be at least 3 characters"
+            onResult(false)
+            return
+        }
+        if (!cleanedUsername.matches(Regex("^[a-z0-9_.]+$"))) {
+            _usernameError.value = "Only letters, numbers, underscores, and dots allowed"
+            onResult(false)
+            return
+        }
+
+        viewModelScope.launch {
+            _usernameCheckLoading.value = true
+            _usernameError.value = null
+
+            // 2. Check Availability First
+            userRepository.checkUsernameAvailability(cleanedUsername)
+                .onSuccess { isAvailable ->
+                    if (isAvailable) {
+                        // 3. Claim the Username
+                        val currentUsername = currentUser.username
+
+                        userRepository.setUsername(currentUser.uid, cleanedUsername, currentUsername)
+                            .onSuccess {
+                                // Update local state manually so UI reflects instantly
+                                _userProfile.value = currentUser.copy(username = cleanedUsername)
+                                userPrefs.saveUser(
+                                    displayName = currentUser.displayName ?: "",
+                                    email = currentUser.email ?: "",
+                                    photoUrl = currentUser.photoUrl ?: "",
+                                    username = currentUser.username
+
+                                )
+                                Log.d(TAG, "✅ Username set to $cleanedUsername")
+                                onResult(true)
+                            }
+                            .onFailure { e ->
+                                _usernameError.value = "Failed to set username. It might have just been taken."
+                                Log.e(TAG, "Failed to set username", e)
+                                onResult(false)
+                            }
+                    } else {
+                        _usernameError.value = "Username is already taken"
+                        onResult(false)
+                    }
+                }
+                .onFailure {
+                    _usernameError.value = "Network error checking username"
+                    onResult(false)
+                }
+
+            _usernameCheckLoading.value = false
+        }
     }
 
     fun initializeUser() {
@@ -101,7 +167,8 @@ class UserViewModel @Inject constructor(
                     userPrefs.saveUser(
                         displayName = user.displayName,
                         email = user.email ?: "",
-                        photoUrl = user.photoUrl ?: ""
+                        photoUrl = user.photoUrl ?: "",
+                        username = user.username
                     )
                     Log.d(TAG, "✅ User loaded from Firestore: ${user.displayName}")
                 }
@@ -132,7 +199,8 @@ class UserViewModel @Inject constructor(
                 userPrefs.saveUser(
                     displayName = newUser.displayName ?: "",
                     email = newUser.email ?: "",
-                    photoUrl = newUser.photoUrl ?: ""
+                    photoUrl = newUser.photoUrl ?: "",
+                    username = newUser.username
                 )
             }
             .onFailure { Log.e(TAG, "❌ Failed to create Firestore user", it) }

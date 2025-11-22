@@ -11,6 +11,8 @@ class UserRepository @Inject constructor(
     companion object {
         private const val COLLECTION_PATH = "users"
         private const val TAG = "UserRepository"
+
+        private const val USERNAMES_COLLECTION = "usernames"
     }
 
     suspend fun saveUser(user: User): Result<Unit> {
@@ -21,6 +23,7 @@ class UserRepository @Inject constructor(
             "displayName" to (user.displayName ?: ""),
             "email" to (user.email ?: ""),
             "photoUrl" to (user.photoUrl ?: ""),
+            "username" to user.username,
             "groups" to user.groups,
             "bookMarkedGroup" to (user.bookMarkedGroup ?: "")
         )
@@ -130,7 +133,7 @@ class UserRepository @Inject constructor(
                 displayName = map["displayName"] as? String,
                 email = map["email"] as? String,
                 photoUrl = map["photoUrl"] as? String,
-                username = "",
+                username = map["username"] as? String ?: "",
                 groups = (map["groups"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                 bookMarkedGroup = map["bookMarkedGroup"] as? String
             )
@@ -224,6 +227,53 @@ class UserRepository @Inject constructor(
             Log.d(TAG, "Document deleted from $subCollectionName: $documentId")
         }.onFailure {
             Log.e(TAG, "Error deleting document from $subCollectionName", it)
+        }
+    }
+
+    suspend fun checkUsernameAvailability(username: String): Result<Boolean> {
+        // We try to get the document usernames/myUsername
+        return firestoreService.getDocumentAsMap(USERNAMES_COLLECTION, username)
+            .map {
+                // If map exists, username is taken (return false for availability)
+                false
+            }
+            .recover {
+                // If document doesn't exist (error), the username is AVAILABLE (return true)
+                true
+            }
+    }
+
+    suspend fun setUsername(uid: String, newUsername: String, oldUsername: String = ""): Result<Unit> {
+
+        // Step A: Create the reservation in 'usernames' collection
+        val reservationData = mapOf("uid" to uid)
+
+        // Try to create the username document.
+        // Prerequisite: Your firestoreService.addDocument should fail if doc already exists,
+        // or you should use a specific 'create' call.
+        val reservationResult = firestoreService.addDocument(
+            collectionPath = USERNAMES_COLLECTION,
+            documentId = newUsername,
+            data = reservationData
+        )
+
+        return if (reservationResult.isSuccess) {
+            // Step B: If reservation successful, update the User Profile
+            val updateResult = updateUser(uid, mapOf("username" to newUsername))
+
+            if (updateResult.isSuccess) {
+                // Step C: Cleanup old username if it existed
+                if (oldUsername.isNotEmpty() && oldUsername != newUsername) {
+                    firestoreService.deleteDocument(USERNAMES_COLLECTION, oldUsername)
+                }
+                Result.success(Unit)
+            } else {
+                // Rollback: We reserved the name but failed to update profile. Delete the reservation.
+                firestoreService.deleteDocument(USERNAMES_COLLECTION, newUsername)
+                Result.failure(Exception("Failed to update user profile"))
+            }
+        } else {
+            Result.failure(Exception("Username already taken"))
         }
     }
 }
