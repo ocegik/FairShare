@@ -10,6 +10,7 @@ import com.example.fairshare.core.data.models.User
 import com.example.fairshare.core.data.models.UserPreferences
 import com.example.fairshare.core.data.models.UserStats
 import com.example.fairshare.repository.UserRepository
+import com.example.fairshare.ui.components.DebtOperation
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -120,6 +121,7 @@ class UserViewModel @Inject constructor(
             displayName = firebaseUser.displayName ?: "",
             email = firebaseUser.email ?: "",
             photoUrl = firebaseUser.photoUrl?.toString(),
+            username = "",
             groups = emptyList(),
             bookMarkedGroup = ""
         )
@@ -149,6 +151,7 @@ class UserViewModel @Inject constructor(
                     localData["displayName"],
                     localData["email"],
                     localData["photoUrl"],
+                    "",
                     emptyList(),
 
                 )
@@ -164,6 +167,7 @@ class UserViewModel @Inject constructor(
                     displayName = localData["displayName"],
                     email = localData["email"],
                     photoUrl = localData["photoUrl"],
+                    username = "",
                     groups = _userProfile.value?.groups ?: emptyList()
                 )
                 _userProfile.value = cachedUser
@@ -532,8 +536,4 @@ class UserViewModel @Inject constructor(
 
 }
 
-enum class DebtOperation {
-    DEBT_ADDED,      // When a new debt is created
-    DEBT_SETTLED,    // When a debt is marked as settled
-    DEBT_CANCELLED   // When a debt is cancelled/deleted
-}
+

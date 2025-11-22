@@ -7,6 +7,7 @@ data class User(
     val displayName: String?,
     val email: String?,
     val photoUrl: String?,
+    val username: String,
     val groups: List<String> = emptyList(),
     val bookMarkedGroup: String? = null
 )
