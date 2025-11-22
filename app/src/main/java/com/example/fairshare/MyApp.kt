@@ -13,7 +13,10 @@ import com.example.fairshare.viewmodel.HistoryViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 
 @Composable
-fun MyApp() {
+fun MyApp(
+    onboardingDone: Boolean,
+    profileSetupDone: Boolean
+) {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
     val userViewModel: UserViewModel = hiltViewModel()
@@ -23,6 +26,15 @@ fun MyApp() {
     val debtViewModel: DebtViewModel = hiltViewModel()
 
     FairShareTheme {
-        AppNavigation(navController, authViewModel, userViewModel, expenseViewModel, groupViewModel, historyViewModel, debtViewModel)
+        AppNavigation(
+            navController,
+            authViewModel,
+            userViewModel,
+            expenseViewModel,
+            groupViewModel,
+            historyViewModel,
+            debtViewModel,
+            onboardingDone = onboardingDone,
+            profileSetupDone = profileSetupDone)
     }
 }

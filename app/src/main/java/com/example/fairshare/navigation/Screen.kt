@@ -14,4 +14,6 @@ sealed class Screen(val route: String) {
     object GroupDetails: Screen("group_details/{groupId}")
     object Balances: Screen("balances")
     object CreateDebt: Screen("createDebt")
+    object Onboarding: Screen("onboarding")
+    object ProfileSetup: Screen("profileSetup")
 }

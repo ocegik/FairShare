@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +43,14 @@ import com.example.fairshare.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 import com.example.fairshare.R
 import com.example.fairshare.viewmodel.UserViewModel
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PieChart
+import androidx.compose.material3.*
+
 
 @Composable
 fun LoginScreen(
@@ -55,61 +61,60 @@ fun LoginScreen(
     val context = LocalContext.current
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
-    var showSignInButton by remember { mutableStateOf(true) }
+
+    // State to control UI visibility
+    var showSignInButton by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
     val webClientId = context.getString(R.string.default_web_client_id)
 
-    // Try silent auto-login for returning users
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
+    // --- LOGIC SECTION (Unchanged logic, just cleaner flow) ---
 
+    // Try silent auto-login
+    LaunchedEffect(Unit) {
+        isLoading = true
+        coroutineScope.launch {
             val helper = GoogleSignInHelper(context)
             helper.signInAuthorized(webClientId)
                 .onSuccess { idToken ->
                     authViewModel.signInWithGoogle(idToken)
                 }
                 .onFailure { e ->
+                    isLoading = false
                     if (e is NoCredentialException) {
-                        // No saved credentials → show button for new users
                         showSignInButton = true
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Sign-in failed: ${e.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        // Silent failure is okay here, just show button
+                        showSignInButton = true
+                        Log.e("LoginScreen", "Silent login failed: ${e.message}")
                     }
                 }
         }
     }
 
-    // Observe auth state changes
+    // Observe auth state
     LaunchedEffect(authState) {
         when (val state = authState) {
+            is AuthState.Loading -> {
+                isLoading = true
+            }
             is AuthState.Success -> {
-                Log.d("LoginScreen", "=== Auth SUCCESS ===")
-                Log.d("LoginScreen", "User: ${state.user.uid}")
-                Log.d("LoginScreen", "Calling loadCurrentUser()...")
+                isLoading = false
                 userViewModel.initializeUser()
-
-                Toast.makeText(
-                    context,
-                    "Welcome ${state.user.displayName}!",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
                 onLoginSuccess()
             }
             is AuthState.Error -> {
-                Toast.makeText(
-                    context,
-                    "Error: ${state.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                isLoading = false
+                showSignInButton = true
+                Toast.makeText(context, state.message, Toast.LENGTH_LONG).show()
                 authViewModel.resetState()
             }
             else -> {}
         }
     }
+
+    // --- UI SECTION ---
 
     Box(
         modifier = Modifier
@@ -117,84 +122,155 @@ fun LoginScreen(
             .background(
                 brush = Brush.verticalGradient(
                     listOf(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
                         MaterialTheme.colorScheme.background
                     )
                 )
-            ),
+            )
+            .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(24.dp),
-            shape = RoundedCornerShape(24.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 24.dp, vertical = 36.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+
+            // 1. Logo / Branding
+            Surface(
+                modifier = Modifier.size(120.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                tonalElevation = 8.dp
             ) {
-                Text(
-                    text = "Welcome to FairShare",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Rounded.PieChart, // Or your App Logo
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
-                )
-
-                Text(
-                    text = "Track and split expenses easily with your friends.",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    textAlign = TextAlign.Center
-                )
-
-                if (authState is AuthState.Loading) {
-                    CircularProgressIndicator()
                 }
+            }
 
-                if (showSignInButton) {
-                    Button(
-                        onClick = {
-                            coroutineScope.launch {
-                                val helper = GoogleSignInHelper(context)
-                                helper.signInFallback(webClientId)
-                                    .onSuccess { idToken ->
-                                        authViewModel.signInWithGoogle(idToken)
-                                    }
-                                    .onFailure { exception ->
-                                        Toast.makeText(
-                                            context,
-                                            "Sign-in failed: ${exception.message}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        shape = RoundedCornerShape(16.dp)
+            Spacer(modifier = Modifier.height(48.dp))
+
+            // 2. Welcome Text
+            Text(
+                text = "FairShare",
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Split bills, not friendships.\nSign in to start tracking.",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            // 3. Loading Indicator OR Sign In Button
+            // 3. Loading Indicator OR Sign In Button
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.height(60.dp)
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 3.dp
+                    )
+                } else {
+                    // FORCE the top-level function usage by adding the package name
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = showSignInButton,
+                        enter = fadeIn() + slideInVertically(initialOffsetY = { 40 })
                     ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_google),
-                            contentDescription = "Google",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = "Sign in with Google",
-                            style = MaterialTheme.typography.labelLarge
+                        GoogleSignInButton(
+                            onClick = {
+                                isLoading = true
+                                coroutineScope.launch {
+                                    val helper = GoogleSignInHelper(context)
+                                    helper.signInFallback(webClientId)
+                                        .onSuccess { idToken ->
+                                            authViewModel.signInWithGoogle(idToken)
+                                        }
+                                        .onFailure { exception ->
+                                            isLoading = false
+                                            Toast.makeText(
+                                                context,
+                                                "Sign-in failed: ${exception.message}",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                }
+                            }
                         )
                     }
                 }
             }
         }
+
+        // 4. Footer (Optional Terms text)
+        Column(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "By continuing, you agree to our Terms & Privacy Policy",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun GoogleSignInButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 0.dp
+        ),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
+    ) {
+        // Ensure you have the Google Icon drawable
+        Icon(
+            painter = painterResource(id = R.drawable.ic_google),
+            contentDescription = "Google Logo",
+            tint = Color.Unspecified, // Keep original Google colors
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = "Continue with Google",
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        )
     }
 }
