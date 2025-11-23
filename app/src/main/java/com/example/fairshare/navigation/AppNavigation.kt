@@ -42,6 +42,9 @@ import com.example.fairshare.viewmodel.GroupViewModel
 import com.example.fairshare.viewmodel.HistoryViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 import androidx.core.content.edit
+import com.example.fairshare.ui.screens.AboutAppScreen
+import com.example.fairshare.ui.screens.AccountSettingsScreen
+import com.example.fairshare.ui.screens.AppSettingsScreen
 import com.example.fairshare.viewmodel.ThemeViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -146,15 +149,8 @@ fun AppNavigation(
 
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    authViewModel,
-                    onSignOut = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    },
                     userViewModel,
                     navController,
-                    themeViewModel
                 )
             }
 
@@ -213,6 +209,25 @@ fun AppNavigation(
                         }
                     }
                 )
+            }
+
+            composable(Screen.AccountSettings.route) {
+                AccountSettingsScreen(
+                    navController = navController,
+                    authViewModel = authViewModel,
+                    userViewModel = userViewModel
+                )
+            }
+
+            composable(Screen.AppSettings.route) {
+                AppSettingsScreen(
+                    navController = navController,
+                    themeViewModel = themeViewModel
+                )
+            }
+
+            composable(Screen.AboutApp.route) {
+                AboutAppScreen(navController = navController)
             }
 
         }

@@ -79,4 +79,9 @@ data class FabMenuItem(
     val onClick: () -> Unit
 )
 
+data class SettingsCategory(
+    val title: String,
+    val description: String? = null,
+    val onClick: () -> Unit
+)
 
