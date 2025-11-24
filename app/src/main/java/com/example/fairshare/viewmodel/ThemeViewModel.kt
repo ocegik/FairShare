@@ -10,10 +10,11 @@ import javax.inject.Inject
 @HiltViewModel
 class ThemeViewModel @Inject constructor() : ViewModel() {
 
-    private val _theme = MutableStateFlow(AppTheme.DARK)
+    private val _theme = MutableStateFlow<AppTheme>(AppTheme.DARK_1)
     val theme = _theme.asStateFlow()
 
     fun setTheme(newTheme: AppTheme) {
         _theme.value = newTheme
     }
 }
+

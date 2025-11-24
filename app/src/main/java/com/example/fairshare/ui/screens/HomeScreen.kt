@@ -103,7 +103,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
-                        .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape)
+                        .border(2.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape)
                         .clickable {
                             navController.navigate(Screen.Profile.route)
                         },

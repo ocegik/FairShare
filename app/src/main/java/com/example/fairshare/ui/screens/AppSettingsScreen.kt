@@ -64,26 +64,68 @@ fun AppSettingsScreen(
 
             // --- Theme Section ---
             SettingsSectionTitle("Appearance")
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // You can make these RadioButtons or selectable rows for better UI
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
+                // THEME 1 — Blue + Teal
                 Button(
-                    onClick = { themeViewModel.setTheme(AppTheme.LIGHT) },
+                    onClick = { themeViewModel.setTheme(AppTheme.LIGHT_1) },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                ) { Text("Light Mode") }
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1A73E8),
+                        contentColor = Color.White
+                    )
+                ) { Text("Theme 1 — Light (Blue + Teal)") }
 
                 Button(
-                    onClick = { themeViewModel.setTheme(AppTheme.DARK) },
+                    onClick = { themeViewModel.setTheme(AppTheme.DARK_1) },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-                ) { Text("Dark Mode") }
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF174EA6),
+                        contentColor = Color.White
+                    )
+                ) { Text("Theme 1 — Dark (Blue + Teal)") }
+
+
+                // THEME 2 — Indigo + Cyan
+                Button(
+                    onClick = { themeViewModel.setTheme(AppTheme.LIGHT_2) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF3F51B5),
+                        contentColor = Color.White
+                    )
+                ) { Text("Theme 2 — Light (Indigo + Cyan)") }
 
                 Button(
-                    onClick = { themeViewModel.setTheme(AppTheme.BRAND) },
+                    onClick = { themeViewModel.setTheme(AppTheme.DARK_2) },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Magenta)
-                ) { Text("Pink Brand") }
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF303F9F),
+                        contentColor = Color.White
+                    )
+                ) { Text("Theme 2 — Dark (Indigo + Cyan)") }
+
+
+                // THEME 3 — Emerald + Graphite
+                Button(
+                    onClick = { themeViewModel.setTheme(AppTheme.LIGHT_3) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2E7D32),
+                        contentColor = Color.White
+                    )
+                ) { Text("Theme 3 — Light (Emerald + Graphite)") }
+
+                Button(
+                    onClick = { themeViewModel.setTheme(AppTheme.DARK_3) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1B5E20),
+                        contentColor = Color.White
+                    )
+                ) { Text("Theme 3 — Dark (Emerald + Graphite)") }
             }
+
         }
     }
 }
