@@ -10,9 +10,9 @@ import com.example.fairshare.core.data.models.User
 import com.example.fairshare.core.data.models.UserPreferences
 import com.example.fairshare.core.data.models.UserStats
 import com.example.fairshare.repository.UserRepository
+import com.example.fairshare.ui.components.DebtOperation
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.cancelChildren
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,17 +40,19 @@ class UserViewModel @Inject constructor(
 
     private val _userProfile = MutableStateFlow<User?>(null)
     val userProfile: StateFlow<User?> = _userProfile
+    // In UserViewModel
+
     val displayName: StateFlow<String> = _userProfile.map { it?.displayName ?: "" }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     val email: StateFlow<String> = _userProfile.map { it?.email ?: "" }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     val photoUrl: StateFlow<String> = _userProfile.map { it?.photoUrl ?: "" }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     val userGroups: StateFlow<List<String>> = _userProfile.map { it?.groups ?: emptyList() }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val bookmarkedGroupId: StateFlow<String?> = _userProfile
         .map { it?.bookMarkedGroup }
@@ -64,8 +66,74 @@ class UserViewModel @Inject constructor(
     private val _userStats = MutableStateFlow<UserStats?>(null)
     val userStats: StateFlow<UserStats?> = _userStats
 
+    private val _usernameCheckLoading = MutableStateFlow(false)
+    val usernameCheckLoading: StateFlow<Boolean> = _usernameCheckLoading
+
+    private val _usernameError = MutableStateFlow<String?>(null)
+    val usernameError: StateFlow<String?> = _usernameError
+
     init {
         Log.d(TAG, "UserViewModel created — waiting for login to initialize.")
+    }
+
+    fun setUsername(newUsername: String, onResult: (Boolean) -> Unit) {
+        val currentUser = _userProfile.value ?: return
+        val cleanedUsername = newUsername.trim().lowercase()
+
+        // 1. Local Validation
+        if (cleanedUsername.length < 3) {
+            _usernameError.value = "Username must be at least 3 characters"
+            onResult(false)
+            return
+        }
+        if (!cleanedUsername.matches(Regex("^[a-z0-9_.]+$"))) {
+            _usernameError.value = "Only letters, numbers, underscores, and dots allowed"
+            onResult(false)
+            return
+        }
+
+        viewModelScope.launch {
+            _usernameCheckLoading.value = true
+            _usernameError.value = null
+
+            // 2. Check Availability First
+            userRepository.checkUsernameAvailability(cleanedUsername)
+                .onSuccess { isAvailable ->
+                    if (isAvailable) {
+                        // 3. Claim the Username
+                        val currentUsername = currentUser.username
+
+                        userRepository.setUsername(currentUser.uid, cleanedUsername, currentUsername)
+                            .onSuccess {
+                                // Update local state manually so UI reflects instantly
+                                _userProfile.value = currentUser.copy(username = cleanedUsername)
+                                userPrefs.saveUser(
+                                    displayName = currentUser.displayName ?: "",
+                                    email = currentUser.email ?: "",
+                                    photoUrl = currentUser.photoUrl ?: "",
+                                    username = currentUser.username
+
+                                )
+                                Log.d(TAG, "✅ Username set to $cleanedUsername")
+                                onResult(true)
+                            }
+                            .onFailure { e ->
+                                _usernameError.value = "Failed to set username. It might have just been taken."
+                                Log.e(TAG, "Failed to set username", e)
+                                onResult(false)
+                            }
+                    } else {
+                        _usernameError.value = "Username is already taken"
+                        onResult(false)
+                    }
+                }
+                .onFailure {
+                    _usernameError.value = "Network error checking username"
+                    onResult(false)
+                }
+
+            _usernameCheckLoading.value = false
+        }
     }
 
     fun initializeUser() {
@@ -99,7 +167,8 @@ class UserViewModel @Inject constructor(
                     userPrefs.saveUser(
                         displayName = user.displayName,
                         email = user.email ?: "",
-                        photoUrl = user.photoUrl ?: ""
+                        photoUrl = user.photoUrl ?: "",
+                        username = user.username
                     )
                     Log.d(TAG, "✅ User loaded from Firestore: ${user.displayName}")
                 }
@@ -119,6 +188,7 @@ class UserViewModel @Inject constructor(
             displayName = firebaseUser.displayName ?: "",
             email = firebaseUser.email ?: "",
             photoUrl = firebaseUser.photoUrl?.toString(),
+            username = "",
             groups = emptyList(),
             bookMarkedGroup = ""
         )
@@ -129,7 +199,8 @@ class UserViewModel @Inject constructor(
                 userPrefs.saveUser(
                     displayName = newUser.displayName ?: "",
                     email = newUser.email ?: "",
-                    photoUrl = newUser.photoUrl ?: ""
+                    photoUrl = newUser.photoUrl ?: "",
+                    username = newUser.username
                 )
             }
             .onFailure { Log.e(TAG, "❌ Failed to create Firestore user", it) }
@@ -148,6 +219,7 @@ class UserViewModel @Inject constructor(
                     localData["displayName"],
                     localData["email"],
                     localData["photoUrl"],
+                    "",
                     emptyList(),
 
                 )
@@ -163,6 +235,7 @@ class UserViewModel @Inject constructor(
                     displayName = localData["displayName"],
                     email = localData["email"],
                     photoUrl = localData["photoUrl"],
+                    username = "",
                     groups = _userProfile.value?.groups ?: emptyList()
                 )
                 _userProfile.value = cachedUser
@@ -176,9 +249,6 @@ class UserViewModel @Inject constructor(
         }
         _userProfile.value = null
         _userStats.value = null
-
-        // ✅ cancel all running jobs that might reload old user data
-        viewModelScope.coroutineContext.cancelChildren()
 
         Log.d(TAG, "User cache and collectors cleared")
     }
@@ -353,50 +423,79 @@ class UserViewModel @Inject constructor(
     }
 
     fun updateStatsForDebt(debt: DebtData, operation: DebtOperation) {
-        val uid = auth.currentUser?.uid ?: return
+        val uid = auth.currentUser?.uid ?: run {
+            Log.e(TAG, "❌ Cannot update stats: No current user")
+            return
+        }
+
         val currentStats = _userStats.value ?: UserStats()
+
+        Log.d(TAG, "📊 Updating stats for user $uid")
+        Log.d(TAG, "   Operation: $operation")
+        Log.d(TAG, "   Debt: from=${debt.fromUserId}, to=${debt.toUserId}, amount=${debt.amount}")
+        Log.d(TAG, "   Current stats: debt=${currentStats.debt}, receivables=${currentStats.receivables}")
 
         val updatedStats = when (operation) {
             // When user owes money (debt added)
             DebtOperation.DEBT_ADDED -> {
                 if (debt.fromUserId == uid) {
+                    Log.d(TAG, "   → User is DEBTOR: Adding ${debt.amount} to debt")
                     currentStats.copy(
                         debt = (currentStats.debt + debt.amount).coerceAtLeast(0.0)
                     )
                 } else if (debt.toUserId == uid) {
+                    Log.d(TAG, "   → User is CREDITOR: Adding ${debt.amount} to receivables")
                     currentStats.copy(
                         receivables = (currentStats.receivables + debt.amount).coerceAtLeast(0.0)
                     )
-                } else currentStats
+                } else {
+                    Log.w(TAG, "   ⚠️ User not involved in this debt")
+                    currentStats
+                }
             }
+
             // When debt is settled
             DebtOperation.DEBT_SETTLED -> {
                 if (debt.fromUserId == uid) {
+                    Log.d(TAG, "   → User is DEBTOR: Subtracting ${debt.amount} from debt")
                     currentStats.copy(
                         debt = (currentStats.debt - debt.amount).coerceAtLeast(0.0)
                     )
                 } else if (debt.toUserId == uid) {
+                    Log.d(TAG, "   → User is CREDITOR: Subtracting ${debt.amount} from receivables")
                     currentStats.copy(
                         receivables = (currentStats.receivables - debt.amount).coerceAtLeast(0.0)
                     )
-                } else currentStats
+                } else {
+                    Log.w(TAG, "   ⚠️ User not involved in this debt")
+                    currentStats
+                }
             }
+
             // When debt is cancelled/deleted
             DebtOperation.DEBT_CANCELLED -> {
                 if (debt.fromUserId == uid) {
+                    Log.d(TAG, "   → User is DEBTOR: Cancelling - Subtracting ${debt.amount} from debt")
                     currentStats.copy(
                         debt = (currentStats.debt - debt.amount).coerceAtLeast(0.0)
                     )
                 } else if (debt.toUserId == uid) {
+                    Log.d(TAG, "   → User is CREDITOR: Cancelling - Subtracting ${debt.amount} from receivables")
                     currentStats.copy(
                         receivables = (currentStats.receivables - debt.amount).coerceAtLeast(0.0)
                     )
-                } else currentStats
+                } else {
+                    Log.w(TAG, "   ⚠️ User not involved in this debt")
+                    currentStats
+                }
             }
         }
 
         if (updatedStats != currentStats) {
+            Log.d(TAG, "   New stats: debt=${updatedStats.debt}, receivables=${updatedStats.receivables}")
             saveUserStats(updatedStats)
+        } else {
+            Log.w(TAG, "   ⚠️ No stats change detected - nothing to save")
         }
     }
 
@@ -417,6 +516,67 @@ class UserViewModel @Inject constructor(
                 .onFailure { exception ->
                     Log.e(TAG, "❌ Failed to update stats", exception)
                 }
+        }
+    }
+
+    // 1. Call this to update the OTHER person involved in the debt
+    fun updatePeerStats(targetUserId: String, debt: DebtData, operation: DebtOperation) {
+        val currentUid = auth.currentUser?.uid
+        // Stop if we are trying to update ourselves (already handled by UI logic)
+        if (targetUserId == currentUid) return
+
+        viewModelScope.launch {
+            // Fetch OTHER user's stats
+            userRepository.getUserSubCollectionDocument(
+                userId = targetUserId,
+                subCollectionName = STATS_SUBCOLLECTION,
+                documentId = STATS_DOCUMENT_ID,
+                clazz = UserStats::class.java
+            ).onSuccess { currentStats ->
+                val statsToUpdate = currentStats
+                // Calculate new values
+                val newStats = calculatePeerNewStats(statsToUpdate, debt, operation, targetUserId)
+                // Save back to Firestore
+                savePeerStats(targetUserId, newStats)
+            }.onFailure {
+                // If they don't have stats, create new ones
+                val newStats = calculatePeerNewStats(UserStats(), debt, operation, targetUserId)
+                savePeerStats(targetUserId, newStats)
+            }
+        }
+    }
+
+    // 2. Helper to do the math for the OTHER person
+    private fun calculatePeerNewStats(stats: UserStats, debt: DebtData, op: DebtOperation, targetId: String): UserStats {
+        return when (op) {
+            DebtOperation.DEBT_ADDED -> {
+                if (debt.fromUserId == targetId) {
+                    // Target OWES money (Increase Debt)
+                    stats.copy(debt = (stats.debt + debt.amount).coerceAtLeast(0.0))
+                } else {
+                    // Target is OWED money (Increase Receivables)
+                    stats.copy(receivables = (stats.receivables + debt.amount).coerceAtLeast(0.0))
+                }
+            }
+            DebtOperation.DEBT_SETTLED, DebtOperation.DEBT_CANCELLED -> {
+                if (debt.fromUserId == targetId) {
+                    stats.copy(debt = (stats.debt - debt.amount).coerceAtLeast(0.0))
+                } else {
+                    stats.copy(receivables = (stats.receivables - debt.amount).coerceAtLeast(0.0))
+                }
+            }
+        }
+    }
+
+    // 3. Helper to save the data
+    private suspend fun savePeerStats(userId: String, stats: UserStats) {
+        userRepository.addToUserSubCollection(
+            userId = userId,
+            subCollectionName = STATS_SUBCOLLECTION,
+            documentId = STATS_DOCUMENT_ID,
+            data = stats
+        ).onFailure { e ->
+            Log.e(TAG, "❌ Failed to update peer stats for $userId", e)
         }
     }
 
@@ -444,8 +604,4 @@ class UserViewModel @Inject constructor(
 
 }
 
-enum class DebtOperation {
-    DEBT_ADDED,      // When a new debt is created
-    DEBT_SETTLED,    // When a debt is marked as settled
-    DEBT_CANCELLED   // When a debt is cancelled/deleted
-}
+

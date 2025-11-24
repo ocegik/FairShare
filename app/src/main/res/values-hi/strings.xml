@@ -1,4 +1,8 @@
 <resources>
+    <!-- ============================= -->
+    <!--           Categories          -->
+    <!-- ============================= -->
+
     <string name="select_category">श्रेणी चुनें</string>
 
     <string name="exp_food_dining">फूड &amp; डाइनिंग</string>
@@ -40,27 +44,23 @@
 
     <string name="select_date">तारीख चुनें</string>
     <string name="select_time">समय चुनें</string>
-    <string name="cancel">कैंसिल</string>
-    <string name="ok">ओके</string>
 
     <!-- ============================= -->
     <!--            Debts              -->
     <!-- ============================= -->
 
+    <string name="debts_and_receivables">डेब्ट्स &amp; रिसीवेबल्स</string>
     <string name="you_owe">आप देते हैं</string>
-    <string name="owes_you">आपको दिया जाना है</string>
+    <string name="you_are_owed">आपको मिलना है</string>
+    <string name="you_owe_label">आप देते हैं</string>
+    <string name="owed_to_you">आपको देता है</string>
+    <string name="no_debts_owed">आप किसी के भी नहीं देते</string>
+    <string name="no_debts_to_collect">कोई भी आप पर नहीं देता</string>
     <string name="pending">पेंडिंग</string>
     <string name="settle">सेटल</string>
     <string name="settled">सेटल्ड</string>
-
-    <!-- Unified labels -->
-    <string name="you_owe_label">आप देते हैं</string>
-    <string name="you_owe_label_short">आप देते हैं</string>
-    <string name="youre_owed">आपको मिलना है</string>
-    <string name="owed_to_you">आपको दिया जाना है</string>
-
-    <string name="you_owe_none">आप किसी के भी नहीं देते</string>
-    <string name="none_owes_you">कोई भी आप पर नहीं देता</string>
+    <string name="confirm_settlement">सेटलमेंट कन्फ़र्म करें</string>
+    <string name="confirm_settlement_message">क्या आप निश्चित रूप से ₹%s की इस डेब्ट को सेटल करना चाहते हैं? यह एक्शन वापस नहीं किया जा सकता।</string>
 
     <!-- ============================= -->
     <!--           Summary             -->
@@ -68,6 +68,8 @@
 
     <string name="income">इनकम</string>
     <string name="expense">खर्च</string>
+    <string name="income_label">इनकम</string>
+    <string name="expenses_label">खर्चे</string>
 
     <!-- ============================= -->
     <!--        Expense Form           -->
@@ -86,13 +88,6 @@
     <string name="amount">राशि (₹)</string>
     <string name="title">टाइटल</string>
     <string name="selected">सेलेक्टेड</string>
-
-    <!-- ============================= -->
-    <!--         Debts Screen          -->
-    <!-- ============================= -->
-
-    <string name="debts_receivables">डेब्ट्स &amp; रिसीवेबल्स</string>
-    <string name="all">सभी</string>
 
     <!-- ============================= -->
     <!--      Errors & Warnings        -->
@@ -139,8 +134,6 @@
     <!-- ============================= -->
 
     <string name="welcome_back">वेलकम बैक,</string>
-    <string name="income_label">इनकम</string>
-    <string name="expenses_label">खर्चे</string>
     <string name="track_daily_expenses">अपने दैनिक खर्च आसानी से ट्रैक करें।</string>
     <string name="view_detailed_stats">विस्तृत आँकड़े देखें</string>
 
@@ -168,7 +161,7 @@
     <string name="stats">स्टैट्स</string>
 
     <!-- ============================= -->
-    <!--      Common Future-Proof      -->
+    <!--      Common Actions           -->
     <!-- ============================= -->
 
     <string name="delete">डिलीट</string>
@@ -176,10 +169,18 @@
     <string name="search">सर्च</string>
     <string name="filter">फिल्टर</string>
     <string name="confirm">कन्फ़र्म</string>
+    <string name="cancel">कैंसिल</string>
+    <string name="ok">ओके</string>
     <string name="loading">लोड हो रहा है…</string>
     <string name="retry">रीट्राई</string>
     <string name="continue_label">कन्टिन्यू</string>
     <string name="close">क्लोज़</string>
+    <string name="all">सभी</string>
+
+    <!-- ============================= -->
+    <!--       Authentication          -->
+    <!-- ============================= -->
+
     <string name="password">पासवर्ड</string>
     <string name="show_password">पासवर्ड दिखाएँ</string>
     <string name="hide_password">पासवर्ड छुपाएँ</string>

@@ -23,6 +23,7 @@ class AuthRepository @Inject constructor(
             displayName = firebaseUser.displayName,
             email = firebaseUser.email,
             photoUrl = firebaseUser.photoUrl?.toString(),
+            username = "",
             groups = emptyList()
         )
     }
@@ -37,6 +38,7 @@ class AuthRepository @Inject constructor(
             email = firebaseUser.email ?: "",
             photoUrl = firebaseUser.photoUrl?.toString() ?: "",
             groups = emptyList(),
+            username = "",
             bookMarkedGroup = ""
         )
 

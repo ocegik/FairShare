@@ -18,13 +18,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -48,11 +48,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.fairshare.navigation.Screen
-import com.example.fairshare.ui.components.FloatingActionButtonMenuSample
 import com.example.fairshare.ui.components.StatCard
 import com.example.fairshare.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 import com.example.fairshare.R
+import com.example.fairshare.core.data.models.FabMenuItem
+import com.example.fairshare.ui.components.FabMenu
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
@@ -102,7 +103,7 @@ fun HomeScreen(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
-                        .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape)
+                        .border(2.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape)
                         .clickable {
                             navController.navigate(Screen.Profile.route)
                         },
@@ -126,8 +127,22 @@ fun HomeScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButtonMenuSample(navController)
+            FabMenu(
+                items = listOf(
+                    FabMenuItem(
+                        icon = Icons.AutoMirrored.Filled.Message,
+                        label = "Personal Entry",
+                        onClick = { navController.navigate(Screen.PersonalExpense.route) }
+                    ),
+                    FabMenuItem(
+                        icon = Icons.AutoMirrored.Filled.Label,
+                        label = "Group Entry",
+                        onClick = { navController.navigate(Screen.GroupExpense.route) }
+                    )
+                )
+            )
         }
+
     ) { padding ->
         Box(
             modifier = Modifier

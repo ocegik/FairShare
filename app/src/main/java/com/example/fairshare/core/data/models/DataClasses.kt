@@ -1,10 +1,13 @@
 package com.example.fairshare.core.data.models
 
+import androidx.compose.ui.graphics.vector.ImageVector
+
 data class User(
     val uid: String,
     val displayName: String?,
     val email: String?,
     val photoUrl: String?,
+    val username: String,
     val groups: List<String> = emptyList(),
     val bookMarkedGroup: String? = null
 )
@@ -68,5 +71,17 @@ data class DebtSummary(
     val fromUserId: String,
     val toUserId: String,
     val totalAmount: Double
+)
+
+data class FabMenuItem(
+    val icon: ImageVector,
+    val label: String,
+    val onClick: () -> Unit
+)
+
+data class SettingsCategory(
+    val title: String,
+    val description: String? = null,
+    val onClick: () -> Unit
 )
 

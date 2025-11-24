@@ -1,5 +1,6 @@
 package com.example.fairshare.navigation
 
+import android.content.Context
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -21,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.fairshare.ui.screens.BalancesScreen
+import com.example.fairshare.ui.screens.CreateDebtScreen
 import com.example.fairshare.ui.screens.CreateGroupScreen
 import com.example.fairshare.ui.screens.GroupDetailsScreen
 import com.example.fairshare.ui.screens.GroupExpenseScreen
@@ -29,13 +32,20 @@ import com.example.fairshare.ui.screens.HistoryScreen
 import com.example.fairshare.ui.screens.PersonalExpenseScreen
 import com.example.fairshare.ui.screens.HomeScreen
 import com.example.fairshare.ui.screens.JoinGroupScreen
+import com.example.fairshare.ui.screens.OnboardingScreen
 import com.example.fairshare.ui.screens.ProfileScreen
+import com.example.fairshare.ui.screens.ProfileSetupScreen
 import com.example.fairshare.ui.screens.StatsScreen
 import com.example.fairshare.viewmodel.DebtViewModel
 import com.example.fairshare.viewmodel.ExpenseViewModel
 import com.example.fairshare.viewmodel.GroupViewModel
 import com.example.fairshare.viewmodel.HistoryViewModel
 import com.example.fairshare.viewmodel.UserViewModel
+import androidx.core.content.edit
+import com.example.fairshare.ui.screens.AboutAppScreen
+import com.example.fairshare.ui.screens.AccountSettingsScreen
+import com.example.fairshare.ui.screens.AppSettingsScreen
+import com.example.fairshare.viewmodel.ThemeViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -46,36 +56,38 @@ fun AppNavigation(
     expenseViewModel: ExpenseViewModel,
     groupViewModel: GroupViewModel,
     historyViewModel: HistoryViewModel,
-    debtViewModel: DebtViewModel
+    debtViewModel: DebtViewModel,
+    themeViewModel: ThemeViewModel,
+    onboardingDone: Boolean,
+    profileSetupDone: Boolean
 ) {
     val authState by authViewModel.authState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val showBottomBar = currentRoute in bottomNavDestinations.map { it.screen.route }
 
     LaunchedEffect(authState) {
-        when (authState) {
-            is AuthState.Success -> {
-
-                if (navController.currentDestination?.route == Screen.Login.route) {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                }
-            }
-            is AuthState.Error -> {
-
-                if (navController.currentDestination?.route != Screen.Login.route) {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            }
-            AuthState.Idle, AuthState.Loading -> {
-                // Don't navigate during these states
+        if (authState !is AuthState.Success && currentRoute != Screen.Login.route) {
+            navController.navigate(Screen.Login.route) {
+                popUpTo(0) { inclusive = true }
             }
         }
     }
 
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    val showBottomBar = currentRoute in bottomNavDestinations.map { it.screen.route }
+
+    val startDestination = when (authState) {
+        is AuthState.Success -> {
+            when {
+                !onboardingDone -> Screen.Onboarding.route
+                !profileSetupDone -> Screen.ProfileSetup.route
+                else -> Screen.Home.route
+            }
+        }
+        else -> Screen.Login.route
+    }
+
+
 
     Scaffold(
         bottomBar = {
@@ -86,11 +98,7 @@ fun AppNavigation(
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = if (authState is AuthState.Success) {
-                Screen.Home.route
-            } else {
-                Screen.Login.route
-            },
+            startDestination = startDestination,
             modifier = Modifier.padding(paddingValues),
 
             enterTransition = { fadeIn(animationSpec = tween(0)) },
@@ -103,7 +111,12 @@ fun AppNavigation(
                     authViewModel,
                     userViewModel,
                     onLoginSuccess = {
-                        navController.navigate(Screen.Home.route) {
+                        val destination = when {
+                            !onboardingDone -> Screen.Onboarding.route
+                            !profileSetupDone -> Screen.ProfileSetup.route
+                            else -> Screen.Home.route
+                        }
+                        navController.navigate(destination) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     }
@@ -136,14 +149,8 @@ fun AppNavigation(
 
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    authViewModel,
-                    onSignOut = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    },
                     userViewModel,
-                    navController
+                    navController,
                 )
             }
 
@@ -162,7 +169,65 @@ fun AppNavigation(
                 GroupDetailsScreen(groupId, groupViewModel, userViewModel)
             }
             composable(Screen.Balances.route) {
-                BalancesScreen(navController, debtViewModel, authViewModel,  groupViewModel)
+                BalancesScreen(navController, debtViewModel, authViewModel,  groupViewModel, userViewModel)
+            }
+
+            composable(Screen.CreateDebt.route){
+                CreateDebtScreen(navController, debtViewModel, userViewModel, authViewModel)
+            }
+
+            composable(Screen.Onboarding.route) {
+                OnboardingScreen(
+                    onOnboardingComplete = {
+                        // Save to SharedPreferences
+                        context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                            .edit {
+                                putBoolean("onboarding_done", true)
+                            }
+
+                        navController.navigate(Screen.ProfileSetup.route) {
+                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.ProfileSetup.route) {
+                ProfileSetupScreen(
+                    onSetupComplete = { name, handle, imageUri ->
+                        // Save to Firestore
+                        // userViewModel.createUserProfile(name, handle, imageUri)
+
+                        // Save to SharedPreferences
+                        context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                            .edit {
+                                putBoolean("profile_setup_done", true)
+                            }
+
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.ProfileSetup.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.AccountSettings.route) {
+                AccountSettingsScreen(
+                    navController = navController,
+                    authViewModel = authViewModel,
+                    userViewModel = userViewModel
+                )
+            }
+
+            composable(Screen.AppSettings.route) {
+                AppSettingsScreen(
+                    navController = navController,
+                    themeViewModel = themeViewModel
+                )
+            }
+
+            composable(Screen.AboutApp.route) {
+                AboutAppScreen(navController = navController)
             }
 
         }
