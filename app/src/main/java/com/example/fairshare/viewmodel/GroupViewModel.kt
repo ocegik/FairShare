@@ -280,6 +280,30 @@ class GroupViewModel @Inject constructor(
         }
     }
 
+    fun leaveGroup(groupId: String, userId: String) {
+        viewModelScope.launch {
+            runCatching {
+                _uiState.value = GroupUiState.Loading
+
+                val group = groupRepository.getGroup(groupId).getOrThrow()
+
+                if (group.owner == userId)
+                    throw Exception("Owner cannot leave. Transfer ownership first.")
+
+                val updatedMembers = group.members.filter { it != userId }
+                groupRepository.updateGroup(groupId, group.copy(members = updatedMembers)).getOrThrow()
+                userRepository.removeGroupFromUser(userId, groupId).getOrThrow()
+
+                loadUserGroupsInternal(userId)
+
+                _uiState.value = GroupUiState.Success("Left group")
+            }.onFailure {
+                _uiState.value = GroupUiState.Error(it.message ?: "Failed to leave group")
+            }
+        }
+    }
+
+
     companion object {
         private const val TAG = "GroupViewModel"
     }
