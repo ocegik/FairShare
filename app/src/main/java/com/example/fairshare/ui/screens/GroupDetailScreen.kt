@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.fairshare.core.data.models.GroupUiData
 import com.example.fairshare.core.utils.formatDateTime
+import com.example.fairshare.viewmodel.AuthViewModel
 import com.example.fairshare.viewmodel.GroupViewModel
 import com.example.fairshare.viewmodel.UserViewModel
 
@@ -46,8 +47,10 @@ import com.example.fairshare.viewmodel.UserViewModel
 fun GroupDetailsScreen(
     groupId: String,
     groupViewModel: GroupViewModel,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    authViewModel: AuthViewModel
 ) {
+    val currentUserId by authViewModel.currentUserId.collectAsState()
     val context = LocalContext.current
     var uiData by remember { mutableStateOf<GroupUiData?>(null) }
     val bookmarkedGroupId by userViewModel.bookmarkedGroupId.collectAsState()
@@ -152,6 +155,26 @@ fun GroupDetailsScreen(
                     Text("Owner", color = MaterialTheme.colorScheme.primary)
                 }
             }
+
         }
+        Spacer(Modifier.height(24.dp))
+
+        Text("Actions", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+
+        if (group.owner == currentUserId) {
+            OwnerActions(
+                groupId = groupId,
+                currentUserId = currentUserId ?: "",
+                groupViewModel = groupViewModel
+            )
+        } else {
+            MemberActions(
+                groupId = groupId,
+                currentUserId = currentUserId ?: "",
+                groupViewModel = groupViewModel
+            )
+        }
+
     }
 }
