@@ -166,7 +166,7 @@ fun AppNavigation(
                 arguments = listOf(navArgument("groupId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val groupId = backStackEntry.arguments?.getString("groupId")!!
-                GroupDetailsScreen(groupId, groupViewModel, userViewModel)
+                GroupDetailsScreen(groupId, groupViewModel, userViewModel, authViewModel)
             }
             composable(Screen.Balances.route) {
                 BalancesScreen(navController, debtViewModel, authViewModel,  groupViewModel, userViewModel)
